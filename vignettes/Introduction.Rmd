@@ -1,0 +1,48 @@
+---
+title: "Introduction"
+author: "Wolfgang Peter"
+date: "27 April 2017"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to stp25plot}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Plots
+
+ 
+```{r, results='asis'}
+
+# results='asis' fuer htmlTable
+#library(stp25)
+plot(1)
+ 
+
+
+```
+
+ 
+
+```
+plot(1)
+
+```
+
+ 
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(1)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
