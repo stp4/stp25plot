@@ -40,10 +40,13 @@
 #' 
 #' 
 bwplot2 <-function(...,
-                   xlab=NULL, ylab=NULL,
+                   xlab=NULL, 
+                   ylab=NULL,
                    auto.key=list(), # pch=15, lwd=2.5, points=FALSE,  columns=3, rectangles =TRUE
                    box.width = 1/4,
-                   space_between=1.2, nlevels=2 ,
+                   space_between=1.2, 
+                   nlevels=2 ,
+                   par.settings = list(superpose.symbol=list(fill=trellis.par.get()$superpose.symbol$col)),
                    panel=function(...){
                          panel.superpose(...)
                         # panel.abline(v=3)
@@ -55,7 +58,7 @@ bwplot2 <-function(...,
           xlab=xlab, ylab=ylab,
           box.width = box.width,
           auto.key=auto.key,
-          par.settings = list(superpose.symbol=list(fill=trellis.par.get()$superpose.symbol$col)),
+          par.settings=par.settings,
           panel = panel,
           space_between=space_between, nlevels=nlevels,
           panel.groups = function(x, y, 
