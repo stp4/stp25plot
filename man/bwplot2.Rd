@@ -6,7 +6,9 @@
 \usage{
 bwplot2(..., xlab = NULL, ylab = NULL, auto.key = list(),
   box.width = 1/4, space_between = 1.2, nlevels = 2,
-  panel = function(...) {     panel.superpose(...) })
+  par.settings = list(superpose.symbol = list(fill =
+  trellis.par.get()$superpose.symbol$col)), panel = function(...) {    
+  panel.superpose(...) })
 }
 \arguments{
 \item{...}{alles an lattice}

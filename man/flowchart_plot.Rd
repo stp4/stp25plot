@@ -5,7 +5,7 @@
 \title{flowchart_plot}
 \usage{
 flowchart_plot(txt, txt_length = 30, cex = 0.9, arr.pos = 0.55,
-  box.size = c(0.1, 0.15), ...)
+  box.size = c(0.1, 0.15), use_str_wrap = TRUE, ...)
 }
 \arguments{
 \item{txt}{ist liste mit den Inhalten}
@@ -17,6 +17,8 @@ flowchart_plot(txt, txt_length = 30, cex = 0.9, arr.pos = 0.55,
 \item{arr.pos}{Pfeilspitze}
 
 \item{box.size}{vektor der Box und zwar für links und rechts}
+
+\item{use_str_wrap}{workaround fuer new-lines = TRUE,}
 
 \item{...}{alles fuer reorder}
 }

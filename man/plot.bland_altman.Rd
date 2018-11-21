@@ -8,9 +8,9 @@
   main1 = "regression", main2 = "differences", main3 = "precentages",
   ylab1 = x$met_B, ylab2 = "Differences",
   ylab3 = "Differences/Average [\%]", xlab1 = x$met_A,
-  xlab2 = paste0("Means (", x$name, ")"), xlab3 = paste0("Means (", x$name,
-  ")"), type = 2, pch = 19, col = if (is.null(x$groups)) 1 else 3 +
-  as.numeric(x$groups[[1]]), x.var = x$met_A, y.var = x$met_B,
+  xlab2 = paste0("Means (", x$name, ")"), xlab3 = paste0("Means (",
+  x$name, ")"), type = 2, pch = 19, col = if (is.null(x$groups)) 1
+  else 3 + as.numeric(x$groups[[1]]), x.var = x$met_A, y.var = x$met_B,
   pos = "topleft", legend = levels(x$groups[[1]]), fil = 3 +
   (1:nlevels(x$groups[[1]])), abline.col = c("black", "black", "black"),
   abline.lty = c(3, 1, 3), abline.lwd = c(1, 1, 1), ...)

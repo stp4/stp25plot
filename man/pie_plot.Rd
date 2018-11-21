@@ -6,9 +6,9 @@
 \alias{piechart}
 \title{pie_plot}
 \usage{
-panel.piechart(x, y, labels = as.character(y), edges = 200, radius = 0.8,
-  clockwise = FALSE, init.angle = if (clockwise) 90 else 0,
-  density = NULL, angle = 45, col = superpose.polygon$col,
+panel.piechart(x, y, labels = as.character(y), edges = 200,
+  radius = 0.8, clockwise = FALSE, init.angle = if (clockwise) 90
+  else 0, density = NULL, angle = 45, col = superpose.polygon$col,
   border = superpose.polygon$border, mar = c(2, 2, 2, 2) - 0.2,
   digits = 0, lty = superpose.polygon$lty, ...)
 
