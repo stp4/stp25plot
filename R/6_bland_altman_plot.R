@@ -185,12 +185,14 @@ plot.bland_altman <- function(x,
 
   if (par)
     par(mfrow = c(1, 3), oma = c(0.4, 1, 1.6, 1))
-
-  plot(
+  xy_plot_range<- range( c(x$data[, x.var],  x$data[, y.var]), na.rm=TRUE) 
+ 
+   plot(
     x$data[, x.var],
     x$data[, y.var],
     xlab = xlab1,
     ylab = ylab1,
+    xlim=xy_plot_range, ylim=xy_plot_range,
     main = main1,
     pch = pch,
     col = col,
