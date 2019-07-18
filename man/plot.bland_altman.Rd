@@ -18,6 +18,8 @@
 \arguments{
 \item{x}{bland_altman-Objekt , par=TRUE}
 
+\item{par}{par}
+
 \item{main}{default =  name.diff}
 
 \item{main1}{default regression}
@@ -59,6 +61,8 @@
 \item{abline.lty}{Lineie abline.lty=c(3,1,3),}
 
 \item{abline.lwd}{Strischstaerke abline.lwd=c(1,1,1)}
+
+\item{...}{nicht Benutzt}
 }
 \value{
 Ein bland_altman-Objekt mit den Daten (data) und der Statistik (stat).
@@ -69,11 +73,14 @@ die Zuverlässigkeit und Reproduzierbarkeit ein einer Diagnose.
 Die Beurteikung kann dabei durch einen Bewerter (Messverfahren) in wiederholter Form erfolgen
 und wird dan als Intra-Raterbezeichnet oder die Beurteilung eines Merkmals erfolgt durch mehere Bewerter (Messverfahren).
 und hier spricht man von Inter-Rater.
-
+}
+\details{
 Die Methode der Burteilung der Uebereinstimmung haengt vom jeweiligen Datentype ab.
 }
 \examples{
-#library(stp25)
+
+library(stp25plot)
+library(stpvers)
 #library(tidyr)
 #graphics.off()
 #setwd("C:/Users/wpete/Dropbox/1_Projekte/000 Temp")
@@ -90,7 +97,7 @@ DF<- data.frame(
   group= sample(gl(2, 15, labels = c("Control", "Treat")))
 )
 
-MetComp2(~A+B, DF, caption = "Giavarina")
+MetComp(~A+B, DF, caption = "Giavarina")
 
 #Sachs Angewandte Statistik Seite 627
 
@@ -101,7 +108,7 @@ DF2<- data.frame(A= factor(c(rep(1, 14), rep(1, 3),
 
 
 APA2(xtabs(~A+B, DF2), test=T)
-MetComp2(~A+B, DF2)
+MetComp(~A+B, DF2)
 
 
 DF <- transform(DF, C = round( A + rnorm(30,0,20)),
@@ -109,17 +116,16 @@ DF <- transform(DF, C = round( A + rnorm(30,0,20)),
                 E = round( A + rnorm(30,5,10) + (100-A/10) ))
 
 head(DF)
- xt <-xtabs(~A+B, DF2)
- Klassifikation2(xt)
+xt <-xtabs(~A+B, DF2)
+Klassifikation2(xt)
 
-x<- BlandAltman(~A+E , DF)
-x$groups
-x \%>\% Output( )
+x<- MetComp_BAP(~A+E , DF)
+
 ICC2(~A+E , DF)
 windows(8,3)
 plot(x)
 SaveData()
-x<- BlandAltman(A+E+B~group, DF)
+x<- MetComp_BAP(A+E+B~group, DF)
 
 windows(8,3.2)
 plot(x)
@@ -135,7 +141,7 @@ DF <- transform(DF, C = round( A + rnorm(n,0,20)),
                 D = round( A + rnorm(n,0,10) + A/10 ),
                 E = round( A + rnorm(n,5,10) + (100-A/10) ))
 
-x<- BlandAltman(A+E~group, DF)
+x<- MetComp_BAP(A+E~group, DF)
 
 windows(8,3.2)
 plot(x)
@@ -169,23 +175,23 @@ DF <- transform(DF, C = round( A + rnorm(n, -5, 20)),
 )
 
 
-x<- BlandAltman(~A+C, DF)
+x<- MetComp_BAP(~A+C, DF)
 windows(8,3.2)
 plot(x)
 SaveData(caption="A und C Messen das gleiche mit SD=20")
 
-x<- BlandAltman(~A+B, DF)
+x<- MetComp_BAP(~A+B, DF)
 windows(8,3.2)
 plot(x)
 SaveData(caption="A und B Messen unterschiedliche Parameter")
 
 
-x<- BlandAltman(~A+D, DF)
+x<- MetComp_BAP(~A+D, DF)
 windows(8,3.2)
 plot(x)
 SaveData(caption="A und D Messen das unterschiedlich D hat im unteren
          Wertevereich deutlich geringere Werte")
-x<- BlandAltman(~A+E, DF)
+x<- MetComp_BAP(~A+E, DF)
 windows(8,3.2)
 plot(x)
 SaveData(caption="A und E Messen das unterschiedlich es esistiert ein knik im Wertebereich 100")

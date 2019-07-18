@@ -1,0 +1,219 @@
+---
+title: "Grafik"
+author: "Wolfgang Peter"
+date: "27 January 2019"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(stpvers)
+require(stp25plot)    # meine Funktionen
+require(lattice)      # Lattice-Plots
+require(RColorBrewer) # Farben
+require(latticeExtra)
+require(effects)      # Effekte
+require(gridExtra)    # Plots agregieren
+set.seed(2)
+n <- 20 * 3 * 2
+DF <- data.frame(
+  n = runif(n, min = 1, max = 5),
+  e = runif(n, min = 1, max = 5),
+  o = runif(n, min = 1, max = 5),
+  g = runif(n, min = 1, max = 5),
+  a = cut(runif(n, min = 1, max = 5), 3, 1:3),
+  treatment = gl(3, n / 3, labels = c("UG1", "UG2", "KG"))[sample.int(n)],
+  sex = gl(2, n / 2, labels = c("male", "female"))
+) 
+```
+
+
+## Theme for lattice-plots
+
+
+### set_lattice()
+
+Initialisieren der Lattice - Optionen mit  set_lattice(). 
+Im Hintergrund werden die  latticeExtra::ggplot2like.opts()
+aufgerufen und die default Werte in 
+   opar und oopt gespeichert um sie mit reset_lattice() zurück seten zu können.
+      
+
+```{r}
+set_lattice()
+```
+
+
+
+  
+```{r, results='asis', fig.cap='Einfacher Boxplot mit GGplot-Theme'}
+set_lattice_ggplot()
+
+bwplot2(e ~ treatment,
+DF,
+groups = sex,
+auto.key = list(columns = 2))
+
+```
+
+
+ 
+```{r, results='asis', fig.cap='Einfacher Boxplot mit SW-Them und eigenen Farben'}
+
+set_lattice_bw(col=c("gray80", "gray90"),
+               strip.background.col="red") 
+
+bwplot2(e ~ treatment,
+          DF,
+          groups = sex,
+          auto.key = list(columns = 2)
+          #, par.settings=set_lattice_bw()
+          )
+
+# barchart(xtabs(~ treatment + sex + a,  DF), 
+#              auto.key=list(space="top",
+#                            columns=3, 
+#                            cex=.7,
+#                            between=.7 ) ) 
+# 
+# set_lattice_bw(pch=2:3, lty=2:3) 
+# xyplot(o~g, DF, groups=sex, 
+#        type=c("p", "r"),
+#        auto.key=list(space="top",
+#                            columns=2, 
+#                            cex=.7,
+#                            between=.7 ) )
+
+
+```
+
+
+ 
+
+## grid.arrange
+
+You can also embed plots, for example:
+
+```{r pressure,  fig.height=3, fig.width=10, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
+reset_lattice()
+
+p1<-barchart(xtabs(~treatment + sex + a,  DF), 
+             auto.key=list(space="top", columns=3, 
+                           cex=.7,
+                           between=.7 ),
+             par.settings= set_lattice()) 
+p2<-barchart(xtabs(~ treatment + sex + a,  DF), 
+             auto.key=list(space="top", columns=3, 
+                           cex=.7,
+                           between=.7 ),
+             par.settings=set_lattice_bw()) 
+p3<-barchart(xtabs(~ treatment + sex + a,  DF), 
+             auto.key=list(space="top", columns=3, 
+                           cex=.7,
+                           between=.7 ),
+             par.settings=set_lattice_ggplot()) 
+
+grid.arrange(p1, p2, p3,   ncol=3)
+```
+
+
+
+
+
+
+
+
+```{r,  fig.height=5, fig.width=10, fig.cap='Plot mit grid.arrange und update'}
+obj <-
+  xyplot(
+    Sepal.Length + Sepal.Width ~ Petal.Length + Petal.Width,
+    iris,
+    type = c("p", "r"),
+    jitter.x = TRUE,
+    jitter.y = TRUE,
+    factor = 5,
+    auto.key = list(
+      cex.title = 1.2,
+      title = "Expected Tau",
+      text = c("30 ms", "80 ms", "130 ms", "180 ms"),
+      space = "top"
+      
+      #lines = TRUE
+      #, rectangles = TRUE
+    )
+  )
+
+obj <- update(obj, legend = list(right =
+                                   list(fun = "draw.colorkey",
+                                        args = list(list(
+                                          at = 0:100
+                                        )))))
+
+
+
+## draw with custom.theme()
+p1 <- update(obj, par.settings = custom.theme())
+p2 <- update(obj,
+             par.settings = set_lattice(theEconomist.theme()))
+p3 <- update(obj, par.settings = set_lattice_bw(), axis = axis.grid)
+
+grid.arrange(p1, p2, p3,   ncol = 3)
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+raw_data <-
+  data.frame(
+    subject_id = rep(1:6, 4),
+    time = as.factor(rep(c("t0", "t1"), each = 12)),
+    group = rep(rep(c("Control", "Treat"), each = 6), 2),
+    value = c(2:7, 6:11, 3:8, 7:12)
+  )
+
+
+head(raw_data)
+
+stripplot(
+  value ~ time | group,
+  groups = subject_id,
+  data = raw_data,
+  panel = function(x, y, ...) {
+    panel.stripplot(x, y, 
+                    type =  "b", 
+                    col="blue",
+                    lty = 2, ...)
+       panel.average(x, y, fun = mean, lwd = 2, col = "gray80", ...)    # plot line connecting means
+       mm<-mean(y) 
+       panel.abline(h=mm, v=1.5, col="gray80")
+       panel.text(x=1.5,y=mm, APA(wilcox.test(y~x)) )
+       
+   
+   
+  }
+)
+
+```
+
+
+
+http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/
+
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
