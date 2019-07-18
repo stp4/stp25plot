@@ -283,13 +283,13 @@ ref_grid(pigs.lm2)
 plot(emmeans(pigs.lm1,  ~percent |source))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 emmip(pigs.lm1, source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ``` r
 plot(emmeans(pigs.lm2,  
@@ -298,37 +298,50 @@ plot(emmeans(pigs.lm2,
              ) )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, cov.reduce = FALSE), source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, at= list(percent = c(10, 15, 20))), source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-5.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
+set_lattice_ggplot()
 plot(Effect(c("source", "percent"), pigs.lm2,
             transformation=list(link=log, inverse=exp)
             ),multiline=TRUE,
+     key.args = list(space="right" ),
      main="", ylab="conc") 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, 
                cov.reduce = FALSE, 
                transform = "response"), 
-      source ~ percent)
+      source ~ percent  #,  CIs=TRUE
+      ) + ggplot2::theme_bw()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+emmip(ref_grid(pigs.lm2, 
+               cov.reduce = FALSE, 
+               transform = "response"), 
+      source ~ percent,
+      engine="lattice")
+```
+
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 pigs.lm3 <- lm(log(conc) ~ source*percent, data = pigs)
@@ -338,13 +351,13 @@ plot(allEffects(pigs.lm3), main="", multiline=TRUE,
           )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm3, cov.reduce = FALSE), source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-12-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-2.png)<!-- -->
 
 ## Interessante Grafik Beispiele
 
@@ -366,7 +379,7 @@ library(effects) John Fox URL <http://www.jstatsoft.org/v32/i01/>
 plot(effects::allEffects(fit)) 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 APA2(~log(prestige)+income+type + education, data=Prestige)
@@ -394,7 +407,7 @@ plot(Effect(c("income", "type"), mod,
      main="", ylab="prestige") 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 set_lattice_bw()
@@ -408,7 +421,7 @@ plot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 library(jtools, interactions) Jacob A. Long
 
@@ -422,13 +435,13 @@ require(jtools)
 effect_plot(fit, pred = time, interval = TRUE, plot.points = TRUE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 jtools::plot_summs(fit)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 require(interactions)
@@ -448,7 +461,7 @@ library(car)
 car::residualPlots(fit) 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
     ##            Test stat Pr(>|Test stat|)
     ## group                                
@@ -462,13 +475,13 @@ car::marginalModelPlots(fit)
 
     ## Warning in mmps(...): Interactions and/or factors skipped
 
-![](README_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
 car::avPlots(fit) 
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 library(visreg) Patrick Breheny and Woodrow Burchett URL
 <https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html>
@@ -490,7 +503,7 @@ visreg::visreg(fit)
     ## group: Ctl_gt
     ## time: 1
 
-![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 library(stats)
 
@@ -502,7 +515,7 @@ stats::termplot(fit,
                 plot=TRUE, ask=FALSE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 library(rockchalk) Paul E. Johnson URL
 <https://github.com/pauljohn32/rockchalk>
@@ -517,7 +530,7 @@ rockchalk::plotSlopes(fit,
     ##   method       from     
     ##   print.likert stp25stat
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 rockchalk::plotSlopes(fit, 
@@ -526,7 +539,7 @@ rockchalk::plotSlopes(fit,
                       interval = "confidence")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 `{ stripp-data, fig.height=5, fig.width= 5} raw_data <- data.frame(
 subject_id = rep(1:6, 4)`
@@ -557,6 +570,6 @@ APA(wilcox.test(y\~x)) )
         0, xlab = "Average GCSE Score")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 <http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/>

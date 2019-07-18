@@ -336,27 +336,51 @@ pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
 pigs.lm2 <- lm(log(conc) ~ source + percent, data = pigs)
 ref_grid(pigs.lm2)
 
-plot(emmeans(pigs.lm1,  ~percent |source))
+
  
+
+
+
+
+
+
+
+```
+
+
+```{r, fig.height=3, fig.width=4}
+plot(emmeans(pigs.lm1,  ~percent |source))
+```
+
+
+
+```{r, fig.height=2.5, fig.width=4}
 emmip(pigs.lm1, source ~ percent)
+```
 
-
-
+```{r, fig.height=3, fig.width=4}
 plot(emmeans(pigs.lm2,  
              ~ percent | source, 
              at = list(percent = c(10, 15, 20))
              ) )
+```
 
+```{r, fig.height=2.5, fig.width=4}
 emmip(ref_grid(pigs.lm2, cov.reduce = FALSE), source ~ percent)
+```
+
+```{r, fig.height=2.5, fig.width=4}
+
 emmip(ref_grid(pigs.lm2, at= list(percent = c(10, 15, 20))), source ~ percent)
 ```
 
-```{r, fig.height=3, fig.width=4}
 
-
+```{r, fig.height=2.5, fig.width=5}
+set_lattice_ggplot()
 plot(Effect(c("source", "percent"), pigs.lm2,
             transformation=list(link=log, inverse=exp)
             ),multiline=TRUE,
+     key.args = list(space="right" ),
      main="", ylab="conc") 
 
 ```
@@ -365,12 +389,30 @@ plot(Effect(c("source", "percent"), pigs.lm2,
 
 ```{r, fig.height=2.5, fig.width=5}
  
+
 emmip(ref_grid(pigs.lm2, 
                cov.reduce = FALSE, 
                transform = "response"), 
-      source ~ percent)
+      source ~ percent  #,  CIs=TRUE
+      ) + ggplot2::theme_classic()
 
 ```
+
+```{r, fig.height=2.5, fig.width=5}
+
+
+set_lattice_bw(col=c("coral3", "cyan4", "dodgerblue3"))
+emmip(ref_grid(pigs.lm2, 
+               cov.reduce = FALSE, 
+               transform = "response"), 
+      source ~ percent,
+      engine="lattice")
+```
+
+
+
+
+
 
 
 ```{r, fig.height=2.5, fig.width=5}
