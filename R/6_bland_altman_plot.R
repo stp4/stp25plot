@@ -1,13 +1,13 @@
-#' @rdname plot.bland_altman
-#' @title Uebereinstimmung und Praezision von Messwerten
-#' @name plot.bland_altman
-#' @description Tukey Mean Difference oder auch Bland Altman Metode. Oft iteressiert
+#' Uebereinstimmung und Praezision von Messwerten
+#' 
+#' Tukey Mean Difference oder auch Bland Altman Metode. Oft iteressiert
 #' die Zuverlässigkeit und Reproduzierbarkeit ein einer Diagnose.
 #' Die Beurteikung kann dabei durch einen Bewerter (Messverfahren) in wiederholter Form erfolgen
 #' und wird dan als Intra-Raterbezeichnet oder die Beurteilung eines Merkmals erfolgt durch mehere Bewerter (Messverfahren).
 #' und hier spricht man von Inter-Rater.
 #'
 #' Die Methode der Burteilung der Uebereinstimmung haengt vom jeweiligen Datentype ab.
+#'
 #' @param x  bland_altman-Objekt , par=TRUE
 #' @param main   default =  name.diff
 #' @param main1  default regression
@@ -29,11 +29,16 @@
 #' @param fil weiss nicht
 #' @param abline.col Farbe c("black","black","black"),
 #' @param abline.lty  Lineie abline.lty=c(3,1,3),
+#' @param par par
+#' @param ...  nicht Benutzt
 #' @param abline.lwd  Strischstaerke abline.lwd=c(1,1,1)
+#'
 #' @return Ein bland_altman-Objekt mit den Daten (data) und der Statistik (stat).
 #' @export
 #' @examples
-#' #library(stp25)
+#' 
+#' library(stp25plot)
+#' library(stpvers)
 #' #library(tidyr)
 #' #graphics.off()
 #' #setwd("C:/Users/wpete/Dropbox/1_Projekte/000 Temp")
@@ -42,48 +47,47 @@
 #' #Davide Giavarina
 #' #Biochemia medica 2015;25(2) 141-51
 #' #http://dx.doi.org/10.11613/BM.2015.015
-#'
+#' 
 #' set.seed(0815)
 #' DF<- data.frame(
 #'   A=c(1, 5,10,20,50,40,50,60,70,80, 90,100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900, 950,1000),
 #'   B=c(8,16,30,14,39,54,40,68,72,62,122, 80,181,259,275,380,320,434,479,587,626,648,738,766,793,851,871,957,1001, 980),
 #'   group= sample(gl(2, 15, labels = c("Control", "Treat")))
 #' )
-#'
-#' MetComp2(~A+B, DF, caption = "Giavarina")
-#'
+#' 
+#' MetComp(~A+B, DF, caption = "Giavarina")
+#' 
 #' #Sachs Angewandte Statistik Seite 627
-#'
+#' 
 #' DF2<- data.frame(A= factor(c(rep(1, 14), rep(1, 3),
 #'                              rep(0, 5),rep(0, 18)),1:0, c("+", "-")),
 #'                  B= factor(c(rep(1, 14), rep(0, 3),
 #'                              rep(1, 5),rep(0, 18)),1:0, c("+", "-")) )
-#'
-#'
+#' 
+#' 
 #' APA2(xtabs(~A+B, DF2), test=T)
-#' MetComp2(~A+B, DF2)
-#'
-#'
+#' MetComp(~A+B, DF2)
+#' 
+#' 
 #' DF <- transform(DF, C = round( A + rnorm(30,0,20)),
 #'                 D = round( A + rnorm(30,0,10) + A/10 ),
 #'                 E = round( A + rnorm(30,5,10) + (100-A/10) ))
-#'
+#' 
 #' head(DF)
-#'  xt <-xtabs(~A+B, DF2)
-#'  Klassifikation2(xt)
-#'
-#' x<- BlandAltman(~A+E , DF)
-#' x$groups
-#' x %>% Output( )
+#' xt <-xtabs(~A+B, DF2)
+#' Klassifikation2(xt)
+#' 
+#' x<- MetComp_BAP(~A+E , DF)
+#' 
 #' ICC2(~A+E , DF)
 #' windows(8,3)
 #' plot(x)
 #' SaveData()
-#' x<- BlandAltman(A+E+B~group, DF)
-#'
+#' x<- MetComp_BAP(A+E+B~group, DF)
+#' 
 #' windows(8,3.2)
 #' plot(x)
-#'
+#' 
 #' n<-1000
 #' DF<- data.frame(
 #'   A=rnorm(n, 100,50),
@@ -94,13 +98,13 @@
 #' DF <- transform(DF, C = round( A + rnorm(n,0,20)),
 #'                 D = round( A + rnorm(n,0,10) + A/10 ),
 #'                 E = round( A + rnorm(n,5,10) + (100-A/10) ))
-#'
-#' x<- BlandAltman(A+E~group, DF)
-#'
+#' 
+#' x<- MetComp_BAP(A+E~group, DF)
+#' 
 #' windows(8,3.2)
 #' plot(x)
-#'
-#'
+#' 
+#' 
 #' #library(stp25)
 #' #library(tidyr)
 #' #graphics.off()
@@ -110,9 +114,9 @@
 #' #Davide Giavarina
 #' #Biochemia medica 2015;25(2) 141-51
 #' #http://dx.doi.org/10.11613/BM.2015.015
-#'
+#' 
 #' set.seed(0815)
-#'
+#' 
 #' n<-100
 #' DF<- data.frame(
 #'   A=rnorm(n, 100,50),
@@ -120,36 +124,36 @@
 #'   C=NA,  D=NA,  E=NA,
 #'   group= sample(gl(2, n/2, labels = c("Control", "Treat")))
 #' )
-#'
+#' 
 #' cutA<-mean(DF$A)
 #' DF <- transform(DF, C = round( A + rnorm(n, -5, 20)),
 #'                 D = round( A + rnorm(n,0,10) + A/10 ),
 #'                 #E = round( A + rnorm(n,5,10) + (100-A/10) )
 #'                 E = A + ifelse(A<cutA, A/5, -A/5 )+ rnorm(n, 0, 10)
 #' )
-#'
-#'
-#' x<- BlandAltman(~A+C, DF)
+#' 
+#' 
+#' x<- MetComp_BAP(~A+C, DF)
 #' windows(8,3.2)
 #' plot(x)
 #' SaveData(caption="A und C Messen das gleiche mit SD=20")
-#'
-#' x<- BlandAltman(~A+B, DF)
+#' 
+#' x<- MetComp_BAP(~A+B, DF)
 #' windows(8,3.2)
 #' plot(x)
 #' SaveData(caption="A und B Messen unterschiedliche Parameter")
-#'
-#'
-#' x<- BlandAltman(~A+D, DF)
+#' 
+#' 
+#' x<- MetComp_BAP(~A+D, DF)
 #' windows(8,3.2)
 #' plot(x)
 #' SaveData(caption="A und D Messen das unterschiedlich D hat im unteren
 #'          Wertevereich deutlich geringere Werte")
-#' x<- BlandAltman(~A+E, DF)
+#' x<- MetComp_BAP(~A+E, DF)
 #' windows(8,3.2)
 #' plot(x)
 #' SaveData(caption="A und E Messen das unterschiedlich es esistiert ein knik im Wertebereich 100")
-#'
+#' 
 #' End()
 plot.bland_altman <- function(x,
                               par = TRUE,
