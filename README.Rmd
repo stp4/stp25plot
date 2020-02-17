@@ -24,6 +24,18 @@ DF <- data.frame(
   treatment = gl(3, n / 3, labels = c("UG1", "UG2", "KG"))[sample.int(n)],
   sex = gl(2, n / 2, labels = c("male", "female"))
 ) 
+
+
+DF <-
+  Label(
+    DF,
+    sex="Geschlecht",
+    n = "Neuroticism",
+    e =  "Extraversion",
+    o = "Openness",
+    g = "Conscientiousness",
+    a ="Agreeableness"
+  )
 ```
  
 ## Funktionen
@@ -35,6 +47,15 @@ DF <- data.frame(
 + plot.bland_altman()
 + Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
 
+```
+
+my_color <- function(n = 8)  RColorBrewer::brewer.pal(n, "Set2")
+
+my_color_sex <-  function()   RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
+
+my_color_dark <- function(n = 8)   RColorBrewer::brewer.pal(n, "Dark2")
+
+```
 
 
 ### set_lattice()
@@ -95,8 +116,17 @@ obj <- update(obj,
                        args = list(
                          list(at = 0:100)))))
 
+
+
+my_color <- function(n = 8)
+  RColorBrewer::brewer.pal(n, "Set2")
+my_color_sex <-  function()
+    RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
+my_color_dark <- function(n = 8)
+  RColorBrewer::brewer.pal(n, "Dark2")
+
 ## draw with custom.theme()
-p1 <- update(obj, par.settings = custom.theme())
+p1 <- update(obj, par.settings = custom.theme( ))
 p2 <- update(obj, par.settings = set_lattice(theEconomist.theme()))
 p3 <- update(obj, par.settings = set_lattice_bw(), axis = axis.grid)
 
@@ -152,14 +182,6 @@ p2 <-
 grid.arrange(p1, p2)
 
 ```
-
-
-
-
-
-
-
-
 
 
 
@@ -226,9 +248,67 @@ panel.grid(h = -1, v = 0)
 
 
 
+### Auto-Plot (lattice-matrix)
+
+```{r lattice-matrix-1, fig.height=5, fig.width=8}
+
+DF %>% auto_plot(
+  n,
+  e[box],
+  o[hist],
+  g,
+  a,
+  treatment,
+  by =  ~ sex,
+  par.settings = set_lattice_bw(col = grey.colors(4, start = 0.4, end = 0.9))
+)
+```
+
+
+```{r lattice-matrix-2, fig.height=3, fig.width=8}
+# 
+reset_lattice()
+auto_plot(treatment ~ n + e + sex, DF)
+
+```
+
+### Forest
+
+ forest_plot() gestohlen von survminer::ggforest()
 
 
 
+```{r, include=FALSE}
+require(survival)
+colon<- Label(colon, sex="Geschlecht")
+
+```
+
+```{r forest-1, fig.height=5, fig.width=7}
+fit1 <- lm(status ~ sex + rx + adhere,
+           data = colon)
+forest_plot(fit1)
+ 
+```
+
+
+```{r forest-2, fig.height=4.5, fig.width=7}
+
+
+fit2 <- glm(status ~ sex + rx + adhere,
+            data = colon, family = binomial())
+
+forest_plot(fit2)
+
+```
+
+```{r forest-3, fig.height=4, fig.width=7}
+
+fit3 <- coxph(Surv(time, status) ~ sex + rx + adhere,
+              data = colon)
+
+forest_plot(fit3, colon)
+```
 
 ### profile_plot
 
@@ -266,6 +346,30 @@ profile_plot(x,
              legend.n.col = 5)
 ```
 
+### Tortendiagramme
+
+
+ 
+```{r, fig.height=4, fig.width=7}
+print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
+ 
+```
+
+
+```{r, fig.height=4, fig.width=7}
+ gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
+
+```
+
+
+```{r, fig.height=4, fig.width=7}
+#  Geht nicht in Markdown
+ 
+
+ tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+# par(new = TRUE)
+   piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+```
 
 
 ### MetComp_BAP
@@ -274,7 +378,7 @@ Tukey Mean Difference oder auch Bland Altman Metode
 
 ```{r, include=FALSE}
  
-DF<- data.frame(
+DF2<- data.frame(
   A=c(1, 5,10,20,50,40,50,60,70,80, 90,100,
       150,200,250,300,350,400,450,500,550,
       600,650,700,750,800,850,900, 950,1000),
@@ -292,7 +396,7 @@ DF<- data.frame(
 
 ```{r ba-plot, fig.height=3, fig.width=7}
 
-x<- MetComp_BAP(~A+B, DF)
+x<- MetComp_BAP(~A+B, DF2)
 plot(x)
 
 ```
@@ -331,57 +435,85 @@ plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
 
 ```{r}
 library(emmeans)
+head(pigs)
 pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
- ref_grid(pigs.lm1)
+ref_grid(pigs.lm1)
+
 pigs.lm2 <- lm(log(conc) ~ source + percent, data = pigs)
 ref_grid(pigs.lm2)
 
 
+```
+
  
 
+### emmeans default
 
 
+```{r fit1-emean, fig.height=3, fig.width=4}
+plot(emmeans(pigs.lm1,  
+             ~ percent | source))
+```
 
+### emmeans ruecktransformiert
 
-
-
+```{r fit1-emean-trans, fig.height=3, fig.width=4}
+plot(emmeans(pigs.lm1,  
+             ~ percent | source),
+             xlab= "plasma leucine [mcg/ml]" , 
+             type = "response")
 ```
 
 
-```{r, fig.height=3, fig.width=4}
-plot(emmeans(pigs.lm1,  ~percent |source))
-```
+
+
 
 
 
 ```{r, fig.height=2.5, fig.width=4}
-emmip(pigs.lm1, source ~ percent)
+emmip(pigs.lm1, 
+      source ~ percent)
 ```
 
 ```{r, fig.height=3, fig.width=4}
 plot(emmeans(pigs.lm2,  
              ~ percent | source, 
              at = list(percent = c(10, 15, 20))
-             ) )
+             )
+     )
+```
+
+
+
+
+
+```{r, fig.height=2.5, fig.width=4}
+emmip(
+  ref_grid(pigs.lm2, cov.reduce = FALSE), 
+  source ~ percent)
 ```
 
 ```{r, fig.height=2.5, fig.width=4}
-emmip(ref_grid(pigs.lm2, cov.reduce = FALSE), source ~ percent)
+
+emmip(ref_grid(pigs.lm2, 
+               at= list(percent = c(10, 15, 20))), 
+      source ~ percent,
+      ylab= "plasma leucine [mcg/ml]" , 
+      type = "response"
+      )
 ```
 
-```{r, fig.height=2.5, fig.width=4}
-
-emmip(ref_grid(pigs.lm2, at= list(percent = c(10, 15, 20))), source ~ percent)
-```
-
+### Jetzt ueber Effect()
 
 ```{r, fig.height=2.5, fig.width=5}
 set_lattice_ggplot()
-plot(Effect(c("source", "percent"), pigs.lm2,
-            transformation=list(link=log, inverse=exp)
-            ),multiline=TRUE,
+plot(Effect(c("source", "percent"), 
+            pigs.lm2,
+            transformation=list(link=log, inverse=exp)),
+     multiline=TRUE,
      key.args = list(space="right" ),
-     main="", ylab="conc") 
+     main="", 
+     ylab="plasma leucine [mcg/ml]") 
 
 ```
 
@@ -389,7 +521,6 @@ plot(Effect(c("source", "percent"), pigs.lm2,
 
 ```{r, fig.height=2.5, fig.width=5}
  
-
 emmip(ref_grid(pigs.lm2, 
                cov.reduce = FALSE, 
                transform = "response"), 
@@ -400,13 +531,14 @@ emmip(ref_grid(pigs.lm2,
 
 ```{r, fig.height=2.5, fig.width=5}
 
-
-set_lattice_bw(col=c("coral3", "cyan4", "dodgerblue3"))
-emmip(ref_grid(pigs.lm2, 
-               cov.reduce = FALSE, 
-               transform = "response"), 
-      source ~ percent,
-      engine="lattice")
+set_lattice_bw(col = c("coral3", "cyan4", "dodgerblue3"))
+emmip(
+  ref_grid(pigs.lm2,
+           cov.reduce = FALSE,
+           transform = "response"),
+  source ~ percent,
+  engine = "lattice"
+)
 ```
 
 
@@ -417,14 +549,31 @@ emmip(ref_grid(pigs.lm2,
 
 ```{r, fig.height=2.5, fig.width=5}
 
-pigs.lm3 <- lm(log(conc) ~ source*percent, data = pigs)
+pigs.lm3 <- lm(log(conc) ~ source * percent, data = pigs)
 
-plot(allEffects(pigs.lm3), main="", multiline=TRUE,
-          key.args = list(space="right", columns=1, border=FALSE, fontfamily="serif", cex.title=.80, cex=0.75)
-          )
-emmip(ref_grid(pigs.lm3, cov.reduce = FALSE), source ~ percent)
+plot(
+  allEffects(pigs.lm3),
+  main = "",
+  multiline = TRUE,
+  key.args = list(
+    space = "right", columns = 1,
+    border = FALSE,
+    fontfamily = "serif",
+    cex.title = .80,  cex = 0.75
+  )
+)
+
+emmip(
+  ref_grid(pigs.lm3, cov.reduce = TRUE), 
+  source ~ percent)
+
+emmip(
+  ref_grid(pigs.lm3, cov.reduce = FALSE), 
+  source ~ percent)
 
 ```
+
+
 
 
 ## Interessante Grafik Beispiele
@@ -520,8 +669,10 @@ plot(effects::allEffects(fit))
  
 
 ```{r}
-APA2(~log(prestige)+income+type + education, data=Prestige)
-mod <- lm(log(prestige) ~ income:type + education, data=Prestige)
+APA2( ~ log(prestige) + income + type + education,
+      data = Prestige,
+      output = "text")
+mod <- lm(log(prestige) ~ income:type + education, data = Prestige)
 
 # does not work: effect("income:type", mod, transformation=list(link=log, inverse=exp))
 
@@ -545,6 +696,9 @@ plot(
                            col = gray.colors(nrow(DF))[order(DF$serum)])
 )
 ```
+ 
+
+ 
  
  library(jtools, interactions)
  Jacob A. Long
@@ -570,7 +724,7 @@ require(interactions)
 
 
 
-
+## GOF-Plots
 
 library(car)
 
@@ -625,7 +779,7 @@ Paul E. Johnson
 URL https://github.com/pauljohn32/rockchalk
 
 
-```{r, fig.height=3, fig.width= 3}
+```
 rockchalk::plotSlopes(fit, 
                       plotx = "group", 
                       interval = "confidence")
@@ -633,7 +787,7 @@ rockchalk::plotSlopes(fit,
 
 
 
-```{r, fig.height=5, fig.width= 4}
+```
 rockchalk::plotSlopes(fit, 
                       plotx = "group", 
                       modx = "time", 
@@ -644,20 +798,14 @@ rockchalk::plotSlopes(fit,
 
 
 
-```{ stripp-data, fig.height=5, fig.width= 5}
+```{r}
 raw_data <-
   data.frame(
-    subject_id = rep(1:6, 4)
-```
-
-
-```{ stripp2, fig.height=5, fig.width= 5}
-time = as.factor(rep(c("t0", "t1"), each = 12)),
+    subject_id = rep(1:6, 4),
+    time = as.factor(rep(c("t0", "t1"), each = 12)),
     group = rep(rep(c("Control", "Treat"), each = 6), 2),
     value = c(2:7, 6:11, 3:8, 7:12)
   )
-
-
 head(raw_data)
 
 stripplot(
@@ -665,17 +813,24 @@ stripplot(
   groups = subject_id,
   data = raw_data,
   panel = function(x, y, ...) {
-    panel.stripplot(x, y, 
-                    type =  "b", 
-                    col="blue",
-                    lty = 2, ...)
-       panel.average(x, y, fun = mean, lwd = 2, col = "gray80", ...)    # plot line connecting means
-       mm<-mean(y) 
-       panel.abline(h=mm, v=1.5, col="gray80")
-       panel.text(x=1.5,y=mm, APA(wilcox.test(y~x)) )
-       
-   
-   
+    panel.stripplot(x,
+                    y,
+                    type =  "b",
+                    col = "blue",
+                    lty = 2,
+                    ...)
+    panel.average(x,
+                  y,
+                  fun = mean,
+                  lwd = 2,
+                  col = "gray80",
+                  ...)    # plot line connecting means
+    mm <- mean(y)
+    panel.abline(h = mm, v = 1.5, col = "gray80")
+    panel.text(x = 1.5, y = mm, APA(wilcox.test(y ~ x)))
+    
+    
+    
   }
 )
 
