@@ -4,12 +4,20 @@
 \alias{panel.mean}
 \title{panel.mean}
 \usage{
-panel.mean(x, y, fun = mean, horizontal = TRUE,
-  lwd = reference.line$lwd, lty = reference.line$lty,
+panel.mean(
+  x,
+  y,
+  fun = mean,
+  horizontal = TRUE,
+  lwd = reference.line$lwd,
+  lty = reference.line$lty,
   col = trellis.par.get("superpose.symbol")$col,
-  col.line = reference.line$col, type = "p",
-  pch = trellis.par.get("superpose.symbol")$pch, ...,
-  identifier = "linejoin")
+  col.line = reference.line$col,
+  type = "p",
+  pch = trellis.par.get("superpose.symbol")$pch,
+  ...,
+  identifier = "linejoin"
+)
 }
 \description{
 Erstellt Mittelwertdiagramm Mittelwerte in bwplots copie von panel.average()

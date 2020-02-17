@@ -4,8 +4,15 @@
 \alias{panel.conf.int}
 \title{panel.conf.int}
 \usage{
-panel.conf.int(x, y, ..., pch = 16, conf.level = 0.95, length = 0.05,
-  method = "mean")
+panel.conf.int(
+  x,
+  y,
+  ...,
+  pch = 16,
+  conf.level = 0.95,
+  length = 0.05,
+  method = "mean"
+)
 }
 \arguments{
 \item{pch}{= 16,}

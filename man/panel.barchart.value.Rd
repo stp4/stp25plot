@@ -4,9 +4,19 @@
 \alias{panel.barchart.value}
 \title{panel.barchart.value}
 \usage{
-panel.barchart.value(..., cex = 0.7, col = 1, adj = c(0.5, 0.5),
-  pos = NULL, offset = 0.5, digits = "\%.02f", labels = NULL,
-  prefix = NULL, suffix = NULL, fun = NULL)
+panel.barchart.value(
+  ...,
+  cex = 0.7,
+  col = 1,
+  adj = c(0.5, 0.5),
+  pos = NULL,
+  offset = 0.5,
+  digits = "\%.02f",
+  labels = NULL,
+  prefix = NULL,
+  suffix = NULL,
+  fun = NULL
+)
 }
 \arguments{
 \item{...}{alles von lattice}
@@ -25,12 +35,12 @@ panel.barchart.value(..., cex = 0.7, col = 1, adj = c(0.5, 0.5),
 
 \item{labels}{Sortierung der Variablen beachten}
 
-\item{prefix}{}
+\item{prefix, suffix}{Formatierung}
 
 \item{fun}{Funktion zum Formatiren}
 }
 \value{
-nix
+lattice
 }
 \description{
 Zahlen in Barplots

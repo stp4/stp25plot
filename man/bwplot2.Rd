@@ -4,10 +4,17 @@
 \alias{bwplot2}
 \title{bwplot2}
 \usage{
-bwplot2(..., xlab = NULL, ylab = NULL, auto.key = list(),
-  box.width = 1/4, space_between = 1.2,
+bwplot2(
+  ...,
+  xlab = NULL,
+  ylab = NULL,
+  auto.key = list(),
+  box.width = 1/4,
+  space_between = 1.2,
   par.settings = list(superpose.symbol = list(fill =
-  lattice::trellis.par.get()$superpose.symbol$col)), panel = NULL)
+    lattice::trellis.par.get()$superpose.symbol$col)),
+  panel = NULL
+)
 }
 \arguments{
 \item{...}{alles an lattice}

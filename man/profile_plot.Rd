@@ -4,10 +4,20 @@
 \alias{profile_plot}
 \title{Create a profile plot.}
 \usage{
-profile_plot(x, text.left = NULL, text.right = NULL,
-  highlight.col = -1, text.width.adjust = 35, colors = NULL,
-  draw.segments = TRUE, draw.mid = TRUE, plot.legend = TRUE,
-  legend.n.col = 4, sep = " - ", ...)
+profile_plot(
+  x,
+  text.left = NULL,
+  text.right = NULL,
+  highlight.col = -1,
+  text.width.adjust = 35,
+  colors = NULL,
+  draw.segments = TRUE,
+  draw.mid = TRUE,
+  plot.legend = TRUE,
+  legend.n.col = 4,
+  sep = " - ",
+  ...
+)
 }
 \arguments{
 \item{x}{The matrix of data to plot. Each profile item is in a column with an appropriate column name.The column names will be used as the names for the profiles in the legend.}
@@ -56,14 +66,14 @@ text.right = paste(1:nrow(x), "Right Text")
 labels<-c(
   "Aufregend - Langweilig",
   "Gut gemacht - Schlecht gemacht",
-  "Glaubwürdig - Unglaubwürdig",
-  "Spannend - Eintönig",
-  "Verständlich - Unverständlich",
+  "GlaubwÃ¼rdig - UnglaubwÃ¼rdig",
+  "Spannend - EintÃ¶nig",
+  "VerstÃ¤ndlich - UnverstÃ¤ndlich",
   "Guter Action-Schauspieler - schlechter Action Schauspieler",
   "sympathisch - unsympathisch",
   "talentiert - untalentiert",
   "modisch - unmodisch",
-  "positive persönliche Einstellung - negative Einstellung gegenüber"
+  "positive persÃ¶nliche Einstellung - negative Einstellung gegenÃ¼ber"
 )
 
 

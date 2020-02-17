@@ -4,8 +4,15 @@
 \alias{flowchart_plot}
 \title{flowchart_plot}
 \usage{
-flowchart_plot(txt, txt_length = 30, cex = 0.9, arr.pos = 0.55,
-  box.size = c(0.1, 0.15), use_str_wrap = TRUE, ...)
+flowchart_plot(
+  txt,
+  txt_length = 30,
+  cex = 0.9,
+  arr.pos = 0.55,
+  box.size = c(0.1, 0.15),
+  use_str_wrap = TRUE,
+  ...
+)
 }
 \arguments{
 \item{txt}{ist liste mit den Inhalten}

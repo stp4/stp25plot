@@ -4,8 +4,17 @@
 \alias{plot.efflist}
 \title{Modifiziert effect-Plot}
 \usage{
-\method{plot}{efflist}(x, selection, rows, cols, ask = FALSE,
-  graphics = TRUE, lattice, xlab, ...)
+\method{plot}{efflist}(
+  x,
+  selection,
+  rows,
+  cols,
+  ask = FALSE,
+  graphics = TRUE,
+  lattice,
+  xlab,
+  ...
+)
 }
 \arguments{
 \item{x}{Model fit}
