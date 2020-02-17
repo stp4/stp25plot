@@ -1,5 +1,7 @@
 #' panel.barchart.value
-#' @description Zahlen in Barplots
+#' 
+#'
+#' Zahlen in Barplots
 #' @param ... alles von lattice 
 #' @param digits   siehe auch \link{sprintf}  
 #' @param cex die groesse
@@ -8,11 +10,11 @@
 #' @param pos = NULL  pos = 4 ist hozizoltal rechts vom Balken, pos = 3 ist horizontal oben vom Balken 
 #' @param offset   default ist ofoset= 0.5,
 #' @param labels  Sortierung der Variablen beachten
-#' @param prefix 
-#' @param suffix
+#' @param prefix,suffix Formatierung
 #' @param  fun Funktion zum Formatiren
-#' @return  nix
+#' @return  lattice
 #' @export
+#' 
 #' @examples
 #' #graphics.off()
 #'  

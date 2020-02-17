@@ -31,12 +31,12 @@ bwplot2 <- function(...,
                     auto.key = list(),
                     box.width = 1 / 4,
                     space_between = 1.2,
-                    par.settings = list(superpose.symbol = list(fill = lattice::trellis.par.get()$superpose.symbol$col)),
+                    par.settings = list(
+                      superpose.symbol = list(
+                        fill = lattice::trellis.par.get()$superpose.symbol$col)),
                     panel = NULL) {
   panel_default <-  function(...) {
     dots <- list(...)
-    # message("In panel")
-    #  print(dots)
     lattice::panel.superpose(...,
                              space_between = space_between,
                              nlevels = nlevels(dots$groups))
@@ -62,10 +62,10 @@ bwplot2 <- function(...,
       auto.key = auto.key,
       par.settings = par.settings,
       panel = panel
-      
     )
   
 }
+
 panel.groups.bwplot <- function(x,
                                 y,
                                 ...,
@@ -90,47 +90,4 @@ panel.groups.bwplot <- function(x,
 
 
 
-# bwplot2 <-function(...,
-#                    xlab=NULL,
-#                    ylab=NULL,
-#                    auto.key=list(), # pch=15, lwd=2.5, points=FALSE,  columns=3, rectangles =TRUE
-#                    box.width = 1/4,
-#                    space_between=1.2,
-#                    nlevels=2 ,
-#                    par.settings = list(
-#                        superpose.symbol=list(
-#                          fill=lattice::trellis.par.get()$superpose.symbol$col)
-#                        ),
-#                    panel=function(...){
-#                      lattice::panel.superpose(...)
-#                         # panel.abline(v=3)
-#                    }
-#
-# ){
-#
-#   lattice::bwplot( ...,
-#                    xlab = xlab,
-#                    ylab = ylab,
-#                    box.width = box.width,
-#                    auto.key = auto.key,
-#                    par.settings = par.settings,
-#                    panel = panel,
-#                    space_between = space_between,
-#                    nlevels = nlevels,
-#                    panel.groups = function(x,
-#                                            y,
-#                                            ...,
-#                                            group.number,
-#                                            nlevels = nlevels,
-#                                            space_between = space_between) {
-#                      dots <- list(...)
-#                      nshift <- (nlevels - 1) / 2 + 1
-#                      box_wd <- dots$box.width * space_between
-#                      if (dots$horizontal)
-#                        lattice::panel.bwplot(x, y + (group.number - nshift) * box_wd, ...)
-#                      else
-#                        lattice::panel.bwplot(x + (group.number - nshift) * box_wd, y, ...)
-#                    })
-#
-#
-# }
+

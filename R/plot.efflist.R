@@ -15,34 +15,12 @@
 #' B = rnorm(100)
 #' C = factor(rep(c("This", "That"), 50))
 #'
-#' model = lm(A ~ B * C)
-#'
-#' p1 <- plot(ef <- effect("B:C", model), x.var = "C")
-#'
-#' ef$variables$C$levels <- c("foo", "bar")
-#' levels(ef$x$C) <- c("foo", "bar")
-#' p2 <- plot(ef, x.var = "C")
-#'
-#' grid.arrange(p1, p2)
-#'
-#'
-#' #ef$variables
-#' #
-#' ef[[1]]$variables$C$levels <- c("foo", "bar")
-#' levels(ef[[1]]$x$C) <- c("foo", "bar")
-#' windows(8, 8)
-#' plot(ef, x.var = "C")
-#'
-#'
 #' #-- Modifiziert wegen xlab
 #'
 #' plot.efflist <- stp25:::plot.efflist
 #'
 #' ef <- allEffects(lm(A ~ B + C))
 #' plot(ef, xlab = c("Foo", "Bar"))
-
-
-
 plot.efflist <- function(x, selection,
                                  rows, cols,
                                  ask=FALSE, # nicht vom mir benutzt
