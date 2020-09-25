@@ -26,6 +26,9 @@ forest_plot <- function(x, data = NULL, main=NULL, transform=TRUE, ...) {
   model <- stp25stat::model_info(x)
   terms <- attr(x$terms, "dataClasses")[-1]
   coef <-  as.data.frame(broom::tidy(x))
+  
+  # print(coef)
+  
   gof<- APA(x)
   if (is.null(data) ) {  data <- x$model  }
   else{
@@ -95,11 +98,20 @@ forest_plot <- function(x, data = NULL, main=NULL, transform=TRUE, ...) {
           var = "(Intercept)",  level = "",  N = NA,  pos = 1, stringsAsFactors = FALSE),
         allTermsDF)
     } else{
+      
+      ci <- confint(x)
+      colnames(ci) <- c("conf.low", "conf.high")
+      coef <- cbind(coef, ci)
+      
       if (is.null(main))
         main <- "Hazard Ratio"
     }
  
+    
+
     gparam <- cbind(allTermsDF,  coef[inds,])
+    
+    #print(gparam)
     ggplot_table(gparam, gof, model, main, transform = transform, ...)
     
     

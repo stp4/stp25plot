@@ -4,12 +4,14 @@
 \alias{wrap_sentence}
 \title{wrap_sentence}
 \usage{
-wrap_sentence(x, width = 25)
+wrap_sentence(x, width = 25, sep = NULL)
 }
 \arguments{
 \item{x}{data.frame oder String}
 
 \item{width}{default width= 25}
+
+\item{sep}{default new line}
 }
 \value{
 Character String
@@ -17,4 +19,16 @@ Character String
 \description{
 Kopie von \link{str_wrap} wobei die Labels mit
 upData2 ergaenzt werden wenn ein Data.Frame-Objekt uebergeben wird
+}
+\examples{
+
+wrap_sentence(
+"R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+"
+)
+wrap_sentence(
+  "R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.", sep="<br>"
+)
 }

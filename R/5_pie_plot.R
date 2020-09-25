@@ -11,7 +11,9 @@
 #' @export
 #'
 #' @examples
-#'  set.seed(2)
+#' # require(stpvers)
+#' 
+#' set.seed(2)
 #' n<-20*3*2
 #' require(stpvers)
 #' require(lattice)
@@ -27,7 +29,7 @@
 #' e="Extraversion",
 #' o="Offenheit fuer Erfahrungen",
 #' g= "Gewissenhaftigkeit",
-#' a="Vertraeglichkeit")  
+#' a="Vertraeglichkeit")
 #' DF[1,1:3] <-5;DF[1,4:5] <-1; DF[2:10,1] <-4.5
 #' DF[n,4:5] <-5;DF[n,1:5] <-1
 #' 
@@ -38,8 +40,8 @@
 #' gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
 #' #  to_table(~treatment|sex, DF)
 #' 
-
- 
+#' 
+#' 
 #' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
 #' 
 #' par(new = TRUE)
@@ -52,7 +54,8 @@
 #' )
 #' 
 #' par(new = TRUE)
-#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
 #' 
 #' par(new = TRUE)
 #' barchart(
@@ -65,7 +68,7 @@
 #' 
 #' par(new = TRUE)
 #' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
-#' 
+
 torte <- function(x,
                   data,
                   main="",

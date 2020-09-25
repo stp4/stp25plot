@@ -30,7 +30,7 @@ ggplot_table  <- function(gparam,
                           
 ) {
   require(ggplot2)
-  
+
   rangeb <- range(gparam$conf.low, gparam$conf.high, na.rm = TRUE)
   breaks <- grDevices::axisTicks(rangeb / 2, log = TRUE, nint = 7)
   rangeplot <- rangeb
@@ -50,7 +50,7 @@ ggplot_table  <- function(gparam,
     
     gparam$var<- useLabels(gparam$var, model$labels)
     
-    print( gparam$var )
+    #print( gparam$var )
   }
   
   if (transform) {
@@ -105,7 +105,7 @@ ggplot_table  <- function(gparam,
     gparam <- gparam[nrow(gparam):1,]
   }
   
-  
+ # cat("\n ggplot_table -> transform\n")
   
   # return(gparam)
   #
@@ -236,6 +236,8 @@ ggplot_table  <- function(gparam,
       vjust = 1.2,
       fontface = "italic"
     )
+  
+#  cat("\n ggplot_table -> nach ggplot \n")
   
   gt <- ggplot_gtable(ggplot_build(p))
   gt$layout$clip[gt$layout$name == "panel"] <- "off"

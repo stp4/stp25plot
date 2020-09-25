@@ -1,6 +1,8 @@
 ---
-title: "Untitled"
-output: github_document
+title: "Grafiken"
+output:
+  pdf_document: default
+  github_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -42,96 +44,110 @@ DF <-
 
 
 + Theme for lattice-plots (Im Paket stp25output) set_lattice(), set_lattice_ggplot(), set_lattice_bw(), reset_lattice()
++ auto_plot Einzelne lattice plots analog wie die Funktion Tabelle()
 + Boxplot bwplot2()
 + profile_plot()
 + plot.bland_altman()
 + Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
 
+
+## Auto-Plot auto_plot()
+
+Die Funktion klebt lattice- plots zu einer matrix zusammen.
+
+Verwendung: auto_plot(formula, data) oder data %>% auto_plot(var_x, var_y, var_z) Die Funktion kann dabei Formel wie z.B.
+$a+b+c\sim g$ 
+
+$a[box]+b[bar]+c[dot]\sim g$
+
+$log(a) +b +c \sim g$
+
+$y \sim a+b+c$
+
+
+https://www.zahlen-kern.de/editor/
+
+```{r lattice-matrix-1, fig.height=5, fig.width=8}
+
+DF %>% auto_plot(
+  n,
+  e[box],
+  o[hist],
+  g,
+  a,
+  treatment,
+  by =  ~ sex,
+  par.settings = set_lattice_bw(col = grey.colors(4, start = 0.4, end = 0.9))
+)
 ```
 
-my_color <- function(n = 8)  RColorBrewer::brewer.pal(n, "Set2")
 
-my_color_sex <-  function()   RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
-
-my_color_dark <- function(n = 8)   RColorBrewer::brewer.pal(n, "Dark2")
+```{r lattice-matrix-2, fig.height=2.5, fig.width=7}
+reset_lattice()
+auto_plot(treatment ~ n + e + sex, DF)
 
 ```
-
 
 ### set_lattice()
 
 Initialisieren der Lattice - Optionen mit  set_lattice(). 
 Im Hintergrund werden die  latticeExtra::ggplot2like.opts()
 aufgerufen und die default Werte in opar und oopt gespeichert um sie mit reset_lattice() zurück seten zu können.
-   
+
+```
+my_color <- function(n = 8)  RColorBrewer::brewer.pal(n, "Set2")
+my_color_sex <-  function()   RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
+my_color_dark <- function(n = 8)   RColorBrewer::brewer.pal(n, "Dark2")
+
+```   
  
-```{r pressure,  fig.height=3, fig.width=10, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
+```{r pressure,  fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
 reset_lattice()
 
 p1<-barchart(xtabs(~treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
-                           cex=.7,
-                           between=.7 ),
+                           cex=.7, between=.7 ),
              par.settings= set_lattice()) 
 p2<-barchart(xtabs(~ treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
-                           cex=.7,
-                           between=.7 ),
+                           cex=.7, between=.7 ),
              par.settings=set_lattice_bw()) 
 p3<-barchart(xtabs(~ treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
-                           cex=.7,
-                           between=.7 ),
+                           cex=.7, between=.7 ),
              par.settings=set_lattice_ggplot()) 
 
-grid.arrange(p1, p2, p3,   
-             ncol=3)
+grid.arrange(p1, p2, p3, ncol=3)
 ```
   
  
 
 Einbetten von set_lattice() über update()
 
-```{r,  fig.height=5, fig.width=10, fig.cap='Plot mit grid.arrange und update'}
+```{r,  fig.height=4.5, fig.width=8, fig.cap='Plot mit grid.arrange und update'}
 obj <-
   xyplot(
     Sepal.Length + Sepal.Width ~ Petal.Length + Petal.Width,
-    iris,
-    type = c("p", "r"),
-    jitter.x = TRUE, jitter.y = TRUE,
-    factor = 5,
+    iris, type = c("p", "r"),
+    jitter.x = TRUE, jitter.y = TRUE, factor = 5,
     auto.key = list(
       cex.title = 1.2,
       title = "Expected Tau",
       text = c("30 ms", "80 ms", "130 ms", "180 ms"),
-      space = "top"
-      # lines = TRUE, rectangles = TRUE
-    )
-  )
+      space = "top" # lines = TRUE, rectangles = TRUE
+    ))
 
 obj <- update(obj, 
               legend = list(
                 right =
                   list(fun = "draw.colorkey",
-                       args = list(
-                         list(at = 0:100)))))
+                       args = list(list(at = 0:100)))))
 
-
-
-my_color <- function(n = 8)
-  RColorBrewer::brewer.pal(n, "Set2")
-my_color_sex <-  function()
-    RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
-my_color_dark <- function(n = 8)
-  RColorBrewer::brewer.pal(n, "Dark2")
-
-## draw with custom.theme()
 p1 <- update(obj, par.settings = custom.theme( ))
 p2 <- update(obj, par.settings = set_lattice(theEconomist.theme()))
 p3 <- update(obj, par.settings = set_lattice_bw(), axis = axis.grid)
 
-grid.arrange(p1, p2, p3,
-             ncol = 3)
+grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
       
@@ -140,35 +156,24 @@ grid.arrange(p1, p2, p3,
 Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die Funktion arbeitet mit panel.superpose.
   
  
-```{r, results='asis', fig.cap='Einfacher Boxplot mit SW-Them', fig.height=7, fig.width=7}
+```{r, results='asis', fig.cap='Boxplot mit bwplot2() und panel.superpose()', fig.height=5, fig.width=7}
 
 p1 <- bwplot2(
   yield ~ site,
-  data = barley,
-  groups = year,
-  auto.key = list(
-    points = FALSE,
-    rectangles = TRUE,
-    space = "right"
-  ),
-  par.settings = set_lattice_bw(), main="bwplot2",
+  data = barley, groups = year, main="bwplot2()", par.settings = set_lattice_bw(),
+  auto.key = list(points = FALSE, rectangles = TRUE, space = "right")
+
 )
 
 p2 <-
   bwplot(
     yield ~ site,
-    barley,
-    groups = year,
-    auto.key = list(
-      points = FALSE,
-      rectangles = TRUE,
-      space = "right"
-    ),
+    barley,groups = year, main="panel.superpose", par.settings = set_lattice_bw(),
+    auto.key = list(points = FALSE, rectangles = TRUE, space = "right"),
     box.width = 1 / 4,
-    par.settings = set_lattice_bw(), main="panel.superpose",
     panel = function(x, y, groups, subscripts, ...) {
-      xx <- as.numeric(x) + scale(as.numeric(groups), scale = FALSE) / (nlevels(groups)+1)
-      
+      xx <- 
+        as.numeric(x) + scale(as.numeric(groups), scale = FALSE)/(nlevels(groups)+1)
       panel.superpose(
         xx,  y,  ...,
         panel.groups = panel.bwplot,
@@ -185,7 +190,7 @@ grid.arrange(p1, p2)
 
 
 
-```{r, fig.height=3, fig.width=7}
+```{r, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7}
 
 set_lattice_bw(col=c("gray80", "gray90")) 
 
@@ -205,39 +210,28 @@ bwplot(yield ~ site, data = barley, groups=year,
 
 
 
-```{r, results='asis', fig.cap='Einfacher Boxplot mit SW-Them', fig.height=3, fig.width=7}
+```{r, results='asis', fig.cap='Mittelwerte mit einer Variante von panel.superpose()', fig.height=2.5, fig.width=7}
 
- 
- 
   bwplot(
     yield ~ site,
-    barley,
-    groups = year,
-    auto.key = list(
-      points = FALSE,
-      rectangles = TRUE,
-      space = "right"
-    ),
+    barley, groups = year, main="panel.superpose", par.settings = set_lattice_bw(), 
+    auto.key = list( points = FALSE, rectangles = TRUE, space = "right"),
     box.width = 1 / 4,
-    par.settings = set_lattice_bw(), main="panel.superpose",
     panel = function(x, y, groups, subscripts, ...) {
-      xx <- as.numeric(x) + scale(as.numeric(groups), scale = FALSE) / (nlevels(groups)+1)
-
+      xx <- 
+        as.numeric(x) + scale(as.numeric(groups), scale = FALSE) / 
+        (nlevels(groups)+1)
       panel.superpose(
-        xx,  y,  ...,
-        panel.groups = panel.mean,
-        groups = groups,
-        subscripts = subscripts
+        xx,  y,  ..., panel.groups = panel.mean,
+        groups = groups, subscripts = subscripts
       )
-panel.grid(h = -1, v = 0)
+     panel.grid(h = -1, v = 0)
       # panel.stripplot(x, y, ..., jitter.data = TRUE,
       #                 groups = groups, subscripts = subscripts)
       # panel.superpose(x, y, ..., panel.groups = panel.average,
       #                 groups = groups, subscripts = subscripts)
-      
       # panel.points(x, y, ..., panel.groups = panel.average,
       #              groups = groups, subscripts = subscripts)
-     
     }
   )
 
@@ -248,29 +242,7 @@ panel.grid(h = -1, v = 0)
 
 
 
-### Auto-Plot (lattice-matrix)
 
-```{r lattice-matrix-1, fig.height=5, fig.width=8}
-
-DF %>% auto_plot(
-  n,
-  e[box],
-  o[hist],
-  g,
-  a,
-  treatment,
-  by =  ~ sex,
-  par.settings = set_lattice_bw(col = grey.colors(4, start = 0.4, end = 0.9))
-)
-```
-
-
-```{r lattice-matrix-2, fig.height=3, fig.width=8}
-# 
-reset_lattice()
-auto_plot(treatment ~ n + e + sex, DF)
-
-```
 
 ### Forest
 
@@ -284,7 +256,7 @@ colon<- Label(colon, sex="Geschlecht")
 
 ```
 
-```{r forest-1, fig.height=5, fig.width=7}
+```{r forest-1, fig.height=4, fig.width=7}
 fit1 <- lm(status ~ sex + rx + adhere,
            data = colon)
 forest_plot(fit1)
@@ -292,8 +264,7 @@ forest_plot(fit1)
 ```
 
 
-```{r forest-2, fig.height=4.5, fig.width=7}
-
+```{r forest-2, fig.height=4, fig.width=7}
 
 fit2 <- glm(status ~ sex + rx + adhere,
             data = colon, family = binomial())
@@ -308,6 +279,8 @@ fit3 <- coxph(Surv(time, status) ~ sex + rx + adhere,
               data = colon)
 
 forest_plot(fit3, colon)
+
+
 ```
 
 ### profile_plot
@@ -350,25 +323,23 @@ profile_plot(x,
 
 
  
-```{r, fig.height=4, fig.width=7}
+```{r, fig.height=3, fig.width=5}
 print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
- 
+
 ```
 
 
-```{r, fig.height=4, fig.width=7}
+```{r, fig.height=3, fig.width=5}
  gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
 
 ```
 
 
-```{r, fig.height=4, fig.width=7}
-#  Geht nicht in Markdown
- 
-
+```{r, fig.height=3, fig.width=5}
+#  Geht nicht problemlos in Markdown
  tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
 # par(new = TRUE)
-   piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+  stp25plot::piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
 ```
 
 
@@ -401,26 +372,99 @@ plot(x)
 
 ```
 
- 
+## cowplot
 
-## effect-plot
+Zusammen mixen von unterschiedlichen Grafik-Typen.
 
-### Modifizier plot.efflist
+The cowplot package is a simple add-on to ggplot.
+https://wilkelab.org/cowplot/articles/index.html
 
+```{r cowplot, fig.height=5, fig.width= 7}
+library(ggplot2)
+library(cowplot)
+require(lattice)
+p1<- ggplot(iris, aes(Sepal.Length, fill = Species)) +
+  geom_density(alpha = 0.5) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
+  theme_minimal_hgrid(10)
+p2<- densityplot(~Sepal.Length|Species , iris)
 
-```{r, fig.height=2.5, fig.width=4}
-A = rnorm(100)
-B = rnorm(100)
-C = factor(rep(c("This", "That"), 50))
-
-ef <- allEffects(lm(A ~ B + C))
-plot(ef, xlab = c("Foo", "Bar"), main="allEffects")
-
+plot_grid(p1, p2,  rel_widths = c(1, 1.5)
+           , labels = c('A', 'B'))
 ```
 
 
 
-```{r, fig.height=2.5, fig.width=4}
+
+## Effectplot
+
+### predictorEffect()
+Von mir lang ignorierte Variante von Effect mit Formeln!
+
+```{r, fig.height=3, fig.width=7}
+mod <- lm(prestige ~ type*(education + income) + women, Prestige)
+plot(predictorEffect("income", mod), main="", rug=FALSE)
+plot(predictorEffects(mod, ~ education + women), main="", rug=FALSE)
+plot(predictorEffects(mod, ~ women+ education),
+     axes= list(x=list( women=list(lab="Anteil Frauen"),
+                        education=list(lab="Bildung"))), main="", rug=FALSE)
+```
+
+### Modifizier plot.efflist
+
+
+```{r, include=FALSE}
+require(stpvers)
+A = rnorm(100)
+B = rnorm(100, 53, 10)
+C = factor(rep(c("This", "That"), 50))
+A <- A + log(B / 50) + as.numeric(C)
+#log(B)
+Logit <- function(x)
+  car::logit(x, adjust = 0)
+
+invLogit <- function(x)
+  exp(x) / (1 + exp(x))
+
+
+
+prop <- function(odds)
+  odds / c(1 + odds)
+odds <- function(p)
+  p / (1 - p)
+
+```
+
+### allEffects ()
+
+```{r, fig.height=2.5, fig.width=5}
+
+ef <- allEffects(lm(A ~ B + C))
+plot(ef,
+     axes = list(
+       x = list(
+        B = list(
+         transform = list(trans = log, inverse = exp),
+         ticks = list(at = c(30, 50, 70)),
+         lab = "Age, log-scale"),
+       C = list(lab = "Treatment")
+      ),
+     y = list(lim= c(.0, 2.5),
+              lab = "Vitamins"
+              #  transform = list(link = Logit, inverse = invLogit),
+              #  transform=list(trans=log, inverse=exp),
+              #  type="rescale",
+              #  ticks = list(at = c(.05, .25, .50, .75)),
+              #   
+       )),
+     main = "")
+
+```
+
+
+Das ist hingegen obsolet!
+ 
+``` 
 plot.efflist <- stp25plot:::plot.efflist
 ef <- allEffects(lm(A ~ B + C))
 plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
@@ -430,7 +474,7 @@ plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
 
 
 
-## Effectplot mit emmeans
+### Effectplot mit emmeans
 
 
 ```{r}
@@ -465,11 +509,6 @@ plot(emmeans(pigs.lm1,
 ```
 
 
-
-
-
-
-
 ```{r, fig.height=2.5, fig.width=4}
 emmip(pigs.lm1, 
       source ~ percent)
@@ -482,9 +521,6 @@ plot(emmeans(pigs.lm2,
              )
      )
 ```
-
-
-
 
 
 ```{r, fig.height=2.5, fig.width=4}
@@ -503,7 +539,9 @@ emmip(ref_grid(pigs.lm2,
       )
 ```
 
-### Jetzt ueber Effect()
+
+
+### Klassiker mit Effect()
 
 ```{r, fig.height=2.5, fig.width=5}
 set_lattice_ggplot()
@@ -576,10 +614,6 @@ emmip(
 
 
 
-## Interessante Grafik Beispiele
-
-
-https://ggobi.github.io/ggally/index.html
 
 
 
@@ -617,12 +651,13 @@ stripplot(
 
 ```
 
-### ggpubr
-
-http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/
 
 
-### Effect plots
+
+### transformation
+
+library(effects)
+ John Fox URL http://www.jstatsoft.org/v32/i01/
 
 ```{r, include=FALSE}
 set.seed(2)
@@ -651,15 +686,9 @@ DF<- data.frame(id= factor(c(1:20, 1:20)),
 
 
 ```{r}
-
 fit <- lm(y ~ group * time * serum, DF)
 ```
 
-
-
-
-library(effects)
- John Fox URL http://www.jstatsoft.org/v32/i01/
 
 
 ```{r, fig.height=5, fig.width= 5}
@@ -668,7 +697,7 @@ plot(effects::allEffects(fit))
  
  
 
-```{r}
+```{r, fig.height=3, fig.width= 5}
 APA2( ~ log(prestige) + income + type + education,
       data = Prestige,
       output = "text")
@@ -685,7 +714,7 @@ plot(Effect(c("income", "type"), mod,
  
  
  
-```{r, fig.height=3, fig.width= 5}
+```{r, fig.cap='Effect patial.residuals',fig.height=3, fig.width= 5}
 set_lattice_bw()
 plot(
   Effect(c("time", "group"), fit,
@@ -699,44 +728,23 @@ plot(
  
 
  
- 
- library(jtools, interactions)
- Jacob A. Long
- 
-```{r}
-require(jtools)
-effect_plot(fit, pred = time, interval = TRUE, plot.points = TRUE)
-```
- 
- 
-```{r, fig.height=3, fig.width= 4}
-jtools::plot_summs(fit)
-```
+
+
  
 
-
-```{r}
-require(interactions)
-#teract_plot(fit, pred = time, modx = group, plot.points = TRUE)
-
-#plot(allEffects(fit), multiline=TRUE)
-```
-
-
-
-## GOF-Plots
+### GOF-Plots
 
 library(car)
 
-```{r, fig.height=5, fig.width= 5}
+```{r, fig.cap='residualPlots', fig.height=5, fig.width= 5}
 car::residualPlots(fit) 
 ```
  
-```{r, fig.height=3, fig.width= 5}
+```{r, fig.cap='marginalModelPlots',  fig.height=3, fig.width= 5}
 car::marginalModelPlots(fit) 
 ```
   
-```{r, fig.height=6, fig.width= 5}
+```{r, fig.cap='avPlots',  fig.height=5, fig.width= 5}
 car::avPlots(fit) 
 ```
  
@@ -747,24 +755,22 @@ car::avPlots(fit)
 
 
  
- 
- 
-library(visreg)
+### library(visreg)
+
  Patrick Breheny and Woodrow Burchett 
- URL
-https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html
+ URL: https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html
 
 
-```{r, fig.height=3, fig.width= 7, warning=FALSE}
+```{r, fig.cap='visreg', fig.height=3, fig.width= 7, warning=FALSE }
 par(mfrow=c(1,3))
 visreg::visreg(fit)
 
 ```
  
-library(stats)
+### library(stats) termplot
 
 
-```{r, fig.height=3, fig.width= 7, warning=FALSE}
+```{r, fig.cap='termplot',fig.height=3, fig.width= 7, warning=FALSE}
 par(mfrow=c(1,3))
 stats::termplot(fit, 
                 se = TRUE, 
@@ -778,6 +784,7 @@ library(rockchalk)
 Paul E. Johnson
 URL https://github.com/pauljohn32/rockchalk
 
+Hier gibt es keine Updates mehr???
 
 ```
 rockchalk::plotSlopes(fit, 
@@ -828,24 +835,79 @@ stripplot(
     mm <- mean(y)
     panel.abline(h = mm, v = 1.5, col = "gray80")
     panel.text(x = 1.5, y = mm, APA(wilcox.test(y ~ x)))
-    
-    
-    
+  
   }
 )
 
 ```
 
 
-
+### ECDF-Plot
 
 ```{r}
  data(Chem97, package = "mlmRev")
 
  ecdfplot(~gcsescore | factor(score), data = Chem97,
-     groups = gender, auto.key = list(columns = 2), subset = gcsescore >
-        0, xlab = "Average GCSE Score")
+     groups = gender, 
+     auto.key = list(columns = 2), 
+     subset = gcsescore > 0, 
+     xlab = "Average GCSE Score")
 ```
 
+
+
+data(singer, package = "lattice")
+ 
+
+## Interessante Grafik Beispiele
+
+
+```{r, fig.height=4, fig.width= 7}
+ require(latticeExtra)
+ segplot(factor(1:10) ~ rnorm(10) + rnorm(10), level = runif(10))
+ 
+ data(USCancerRates)
+ 
+ segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
+         data = subset(USCancerRates, state == "Washington"))
+ 
+ segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
+         data = subset(USCancerRates, state == "Washington"),
+         draw.bands = FALSE, 
+         centers = rate.male)
+ 
+ segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
+         data = subset(USCancerRates, state == "Washington"),
+         level = rate.female,
+         col.regions = terrain.colors)
+ 
+ segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
+         data = subset(USCancerRates, state == "Washington"),
+         draw.bands = FALSE, 
+         centers = rate.male, 
+         segments.fun = panel.arrows, 
+         ends = "both", 
+         angle = 90, 
+         length = 1, 
+         unit = "mm")
+ 
+ segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male, 
+         data = subset(USCancerRates, state ==  "Washington"), 
+         draw.bands = FALSE, centers = rate.male)
+```
+
+
+
+
+
+## Links
+
+
+https://ggobi.github.io/ggally/index.html
+
+
+http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/
+
+ ggpubr
 
 http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/

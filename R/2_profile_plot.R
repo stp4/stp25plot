@@ -71,12 +71,12 @@ profile_plot <- function(x,
                          legend.n.col = 4,
                          sep = " - ",
                          ...) {
-  if (!stp25stat::all_identical2(x)) {
-    labels <- as.character(x[, 1])
-    x <- as.matrix(x[, -1])
-    rownames(x) <- labels
-  }
-  print(x)
+  # if (!stp25stat::all_identical2(x)) {
+  #   labels <- as.character(x[, 1])
+  #   x <- as.matrix(x[, -1])
+  #   rownames(x) <- labels
+  # }
+  # print(x)
   if (is.null(text.left) & is.null(text.right)) {
     if (!is.null(rownames(x)))
       labels <- strsplit(rownames(x), sep)
