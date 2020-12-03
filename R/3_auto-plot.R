@@ -6,6 +6,8 @@
 #' @param type c("histogram", "boxplot")
 #' @param par.settings sefault ist  par.settings = stp25output::set_lattice()
 #' @param include.n noch nicht implemeniert
+#' @param cex.main,cex.scales Ueberschrift und Scales
+#' @param ncol an grid.arrange
 #'
 #' @return nichts
 #' @export
@@ -46,32 +48,30 @@
 #' auto_plot(enviro, ozone, radiation, is.windy, wind, by=~smell )
 #'
 auto_plot <- function(...,
-                    #   reorder = FALSE,
-                    #   plot.points = FALSE,
-                    #   ref = TRUE,
-                    #   cut = 0,
-                       origin = 0,
-                       xlab = NULL,
-                       ylab = NULL,
-                       type = c("p", "r"),
-                      # subset = TRUE,
-                      # as.table = TRUE,
-                      # subscripts = TRUE,
-                       default.scales = list(abbreviate = TRUE,minlength = 5,cex = 0.75),
-                       #   relation = "free",rot = 30,tick.number = 3, y = list(draw = FALSE)
-                       layout = NULL,
-                       lattice.options = list(layout.heights = list(
-                                              axis.xlab.padding = list(x = 0),
-                                              xlab.key.padding = list(x = 0))),
-                       par.settings = stp25output::set_lattice(),
-                       include.n = TRUE) {
-  
+                      origin = 0,
+                      xlab = NULL,
+                      ylab = NULL,
+                      type = c("p", "r"),
+                      cex.main = 1,
+                      cex.scales = 0.75,
+                      ncol = NULL,
+                      
+                      default.scales = list(abbreviate = TRUE,
+                                            minlength = 5,
+                                            cex = cex.scales),
+                      #   relation = "free",rot = 30,tick.number = 3, y = list(draw = FALSE)
+                      layout = NULL,
+                      lattice.options = list(layout.heights = list(
+                        axis.xlab.padding = list(x = 0),
+                        xlab.key.padding = list(x = 0)
+                      )),
+                      par.settings = stp25output::set_lattice(),
+                      include.n = TRUE) {
   X <- stp25formula::prepare_data2(...)
-
+  
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
       (length(X$measure.vars) > length(X$group.vars))) {
-    
     res <- multi_av_plot(
       X$data,
       X$measure.vars,
@@ -89,7 +89,8 @@ auto_plot <- function(...,
       default.scales,
       lattice.options,
       par.settings,
-      include.n 
+      include.n,
+      cex.main
     )
   }
   else{
@@ -101,24 +102,31 @@ auto_plot <- function(...,
       X$row_name,
       X$measure,
       X$group.class,
-
+      
       origin,
       xlab,
       ylab,
       type,
-
+      
       default.scales,
       lattice.options,
       par.settings,
-      include.n
+      include.n,
+      cex.main
     )
   }
   
-  if(length(res)>0)
-    gridExtra::grid.arrange(grobs = res,
-                            ncol = ifelse(length(res) < 4, length(res),
-                                          ifelse(length(res) < 10, 3, 4)))
-  else plot(1)
+  
+  
+  if (length(res) > 0) {
+    if (is.null(ncol))
+      ncol <- ifelse(length(res) < 4, length(res),
+                     ifelse(length(res) < 10, 3, 4))
+    gridExtra::grid.arrange(grobs = res, ncol = ncol)
+  }
+  else {
+    plot(1)
+  }
 }
 
 multi_av_plot <- function(data,
@@ -136,7 +144,7 @@ multi_av_plot <- function(data,
                           lattice.options,
                           
                           par.settings,
-                          include.n) {
+                          include.n, cex.main) {
   z <-  group.vars[1]
   res <- list()
   
@@ -150,7 +158,7 @@ multi_av_plot <- function(data,
             formula(paste("~", y)),
             data,
             type = "count",
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
@@ -167,7 +175,7 @@ multi_av_plot <- function(data,
             formula(paste("Freq~", y)),
             data = tab,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             stack = FALSE,
             origin = origin,
             horizontal = FALSE,
@@ -184,7 +192,7 @@ multi_av_plot <- function(data,
             formula(paste("~", y)),
             data,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
@@ -200,7 +208,7 @@ multi_av_plot <- function(data,
             ~Freq,
             data = tab,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             
             par.settings = par.settings,
             default.scales = default.scales,
@@ -217,7 +225,7 @@ multi_av_plot <- function(data,
             formula(paste("Freq~", y)),
             data = tab,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             stack = FALSE,
             origin = origin,
             horizontal = FALSE,
@@ -240,7 +248,7 @@ multi_av_plot <- function(data,
               formula(paste(y, "~", z)),
               data,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
@@ -255,7 +263,7 @@ multi_av_plot <- function(data,
               data,
               ylab = ylab,
               xlab = xlab,
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings
             )
         }
@@ -271,7 +279,7 @@ multi_av_plot <- function(data,
               formula(paste("Freq~", y, "|", z)),
               data = tab,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               stack = FALSE,
               origin = origin,
               horizontal = FALSE,
@@ -292,7 +300,7 @@ multi_av_plot <- function(data,
               formula(paste("~Freq|" , z)),
               data = tab,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               
               par.settings = par.settings,
               default.scales = default.scales,
@@ -308,7 +316,7 @@ multi_av_plot <- function(data,
               formula(paste(y, "~", z)),
               data,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               panel = function(x, y, ...) {
                 panel.stripplot(x, y, ..., jitter.data = TRUE)
@@ -334,7 +342,7 @@ multi_av_plot <- function(data,
             cut = 0,
             as.table = TRUE,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
@@ -355,7 +363,7 @@ multi_av_plot <- function(data,
               data,
               type = type,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
@@ -369,7 +377,7 @@ multi_av_plot <- function(data,
               formula(paste(y, "~", z)),
               data,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
@@ -383,7 +391,7 @@ multi_av_plot <- function(data,
               formula(paste("~", y, "|", z)),
               data,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
@@ -401,7 +409,7 @@ multi_av_plot <- function(data,
               formula(paste("Freq~", y, "|", z)),
               data = tab,
               
-              main = row_name[i],
+              main = list(label=row_name[i], cex=cex.main),
               stack = FALSE,
               origin = origin,
               horizontal = FALSE,
@@ -415,7 +423,8 @@ multi_av_plot <- function(data,
         else if ( measure[i] =="pie"){
           res[[i]] <- lattice::xyplot(y~x, 
                                       data.frame(x=1:10, y=1:10),
-                                      main="pie")
+                                      main=list(label="pie", cex=cex.main),
+                                      )
         }
         else {}
         
@@ -426,9 +435,12 @@ multi_av_plot <- function(data,
 }
 
 
-#' @noRd
+#' Hilfsfunktion
+#' 
 #' Im wesentlichen ist das eine Kopie von oben nur die Formeln sind vertauscht 
 #' und die auswahl an verschiede Plots ist nicht möglich.
+#'  @noRd
+#' 
 multi_uv_plot <- function(data,
                           measure.vars,
                           group.vars,
@@ -444,7 +456,7 @@ multi_uv_plot <- function(data,
                           lattice.options,
       
                           par.settings,
-                          include.n) {
+                          include.n, cex.main) {
   z <-  group.vars[1]
   res <- list()
   
@@ -460,7 +472,7 @@ multi_uv_plot <- function(data,
             formula(paste(z, "~", y)),
             data,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
@@ -480,7 +492,7 @@ multi_uv_plot <- function(data,
             formula(paste("Freq~", z, "|", y)),
             data = tab,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             stack = FALSE,
             origin = origin,
             horizontal = FALSE,
@@ -500,7 +512,7 @@ multi_uv_plot <- function(data,
             data,
             type = type,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
@@ -514,7 +526,7 @@ multi_uv_plot <- function(data,
             formula(paste(z, "~", y)),
             data,
             
-            main = row_name[i],
+            main = list(label=row_name[i], cex=cex.main),
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,

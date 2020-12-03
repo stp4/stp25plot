@@ -32,10 +32,11 @@ replaceLabel<- function(x, lbl){
 
 
 
-
-#' @noRd
+#' Hilfsfunktion Tabelle
+#' 
 #' in pieplot verwendet
 #' 
+#' @noRd
 to_table <- function(x, data, drop.unused.levels = FALSE, ...) {
   n <- length(all.vars(x))
   if (any(grepl("\\|", x)))
@@ -50,16 +51,3 @@ to_table <- function(x, data, drop.unused.levels = FALSE, ...) {
 }
 
 
-#' @noRd
-#' The palette in pieplot verwendet
-# 
-cbPalette <- c(
-  orange = "#E69F00",
-  skyblue = "#56B4E9",
-  green = "#009E73",
-  yellow = "#F0E442",
-  blue = "#0072B2",
-  vermillion = "#D55E00",
-  purple = "#CC79A7"
-  
-)

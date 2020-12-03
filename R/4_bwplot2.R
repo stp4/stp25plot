@@ -35,11 +35,12 @@ bwplot2 <- function(...,
                       superpose.symbol = list(
                         fill = lattice::trellis.par.get()$superpose.symbol$col)),
                     panel = NULL) {
-  panel_default <-  function(...) {
+  panel_default <- function(...) {
     dots <- list(...)
     lattice::panel.superpose(...,
-                             space_between = space_between,
-                             nlevels = nlevels(dots$groups))
+                             space_between = space_between, 
+                             nlevels = nlevels(dots$groups)
+                             )
   }
   
   if (is.null(panel))
@@ -76,6 +77,10 @@ panel.groups.bwplot <- function(x,
   nshift <- (nlevels - 1) / 2 + 1
   box_wd <- dots$box.width * space_between
   
+  if (class(x) == class(y))
+    warning(
+      "\n\nEine eine Variable muss ein Factor sein die Ander muss Numeric sein!\nx= ",
+      class(x), " und y = ", class(y), "\n")
   if (dots$horizontal) {
     xx <- x
     yy <- y + (group.number - nshift) * box_wd
@@ -83,11 +88,8 @@ panel.groups.bwplot <- function(x,
   else{
     xx <- x + (group.number - nshift) * box_wd
     yy <- y
-    }
+  }
   
   lattice::panel.bwplot(xx, yy, ...)
 }
-
-
-
 

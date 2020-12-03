@@ -14,7 +14,9 @@ require(RColorBrewer) # Farben
 require(latticeExtra)
 require(effects)      # Effekte
 require(gridExtra)    # Plots agregieren
-
+require(ggplot2)
+require(cowplot)
+ 
 set.seed(2)
 n <- 20 * 3 * 2
 DF <- data.frame(
@@ -49,6 +51,93 @@ DF <-
 + profile_plot()
 + plot.bland_altman()
 + Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
+
+
+
+
+
+## Signifikanz-Plot
+
+Der Fliegen-Schiss-Plot mein absoluter lieblings Plot!!
+
+```{r, include=FALSE}
+require(stpvers)
+#require(lmerTest)
+require(emmeans)
+
+#dummy
+
+
+dat<-   data.frame(
+  nmp=factor(c(
+    'nmp01', 'nmp02', 'nmp03', 'nmp04', 'nmp05', 'nmp05', 'nmp05', 'nmp05', 
+    'nmp06', 'nmp06', 'nmp06', 'nmp12', 'nmp12', 'nmp12', 'nmp12', 'nmp12', 
+    'nmp13', 'nmp13', 'nmp13', 'nmp13', 'nmp14', 'nmp14', 'nmp14', 'nmp14', 
+    'nmp14', 'nmp15', 'nmp15', 'nmp15', 'nmp15', 'nmp15', 'nmp16', 'nmp16', 
+    'nmp16', 'nmp16', 'nmp17', 'nmp17', 'nmp17', 'nmp17', 'nmp17', 'nmp18', 
+    'nmp18', 'nmp18', 'nmp18', 'nmp18', 'nmp19', 'nmp20', 'nmp20', 'nmp20', 
+    'nmp20', 'nmp20', 'nmp21', 'nmp21', 'nmp21', 'nmp21', 'nmp21', 'nmp22', 
+    'nmp22', 'nmp22', 'nmp22', 'nmp23', 'nmp23', 'nmp23', 'nmp23', 'nmp23', 
+    'nmp24', 'nmp24', 'nmp24', 'nmp24', 'nmp24', 'nmp26', 'nmp26', 'nmp26', 
+    'nmp26', 'nmp27', 'nmp27', 'nmp27', 'nmp28', 'nmp28', 'nmp28', 'nmp28', 
+    'nmp28', 'nmp29', 'nmp29', 'nmp29', 'nmp29', 'nmp29', 'nmp30', 'nmp30', 
+    'nmp30', 'nmp31', 'nmp31', 'nmp31', 'nmp31', 'nmp36', 'nmp36', 'nmp36', 'nmp36')),
+  time= c(NA, NA, NA, NA, 1, 4, 6, 7.9, 1, 4, 8.1, 1, 4, 6, 12, 19, 1, 4, 
+          6, 10.3, 1, 4, 6, 12, 24, 1, 4, 6, 12, 23.4, 1, 4, 6, 10.9, 1, 4, 
+          6, 12, 19.6, 1, 4, 6, 12, 20.3, NA, 1, 4, 6, 12, 21.6, 1, 4, 6, 
+          12, 21, 1, 4, 6, 10.5, 1, 4, 6, 12, 20.5, 1, 4, 6, 12, 21.5, 4, 
+          6, 12, 22.2, 1, 4, 5, 1, 4, 6, 12, 27.8, 1, 4, 6, 12, 18.1, 1, 
+          4, 9.1, 1, 4, 6, 20.3, 1, 4, 6, 11.4),
+  t.cell=c(NA, NA, NA, NA, 24.4, 35.5, 32.8, 33, 19.6, 21.1, 19.1, 22.9,
+           22.6, 20.3, 22.4, 20.7, 30.9, 32.1, 36.5, 41.8, 18.8, 16.4, 
+           17.5, 18.4, 16.5, 31.6, 28.5, 30, 26.1, 23.6, 14.4, 24.8, 24.8, 
+           19.8, 21.8, 23.8, 24.8, 23.1, 17.7, 26.6, 25.1, 27.5, 25, 16.9, 
+           NA, 38.7, 44, 47.3, 42.9, 39.8, 11.7, 20.8, 26.7, 22, 15.2, 17.4, 
+           28, 30.5, 27.1, 6.21, 12.6, 12, 12.1, 9.2, 5.34, 6.69, 8.93, 8.63, 
+           4.15, 5.93, 6.47, 3.31, 6.95, 8.39, 9.31, 12.7, 2.99, 3.34, 4.35, 
+           3.45, 1.28, 10.1, 8.78, 9.25, 12.4, 11.6, 7.7, 12.6, 13, 2.18, 2.44, 
+           2.78, 5.31, 10.6, 12, 15.6, 15.9))
+
+dat<- transform(dat,
+                time2=cut(time, c(0, 2, 4, 9, 18, Inf), paste0(c(1, 4, 6, 12, 24), "h")),
+                DC4= t.cell+ time/1.3)
+dat<- na.omit(dat)
+#prism.plots(Sepal.Length ~ Species, data = iris, centerfunc=mean)
+#plotSigBars(Sepal.Length ~ Species, data = iris, type="tukey")
+
+
+
+```
+
+```{r , fig.height=5, fig.width=7}
+
+#dat1 <- Long(dat, DC4 ~ nmp + time2, value = "DC4")
+#fit2 <- lmer(DC4 ~ time2 + (1 | nmp), data = dat1) 
+
+fit1 <- lm(DC4 ~ time2, data = dat)
+em1 <- emmeans(fit1, list(pairwise ~ time2), adjust = "tukey")
+#em2 <- emmeans(fit2, list(pairwise ~ time2))
+prism.plots(
+  DC4 ~ time2,
+  data = dat,
+  centerfunc = mean,
+  ylim = c(-8, 60)
+)
+plotSigBars(fit1)
+
+
+
+```
+
+
+```{r, fig.height=5, fig.width=7}
+boxplot(  DC4 ~ time2,
+          data = dat,
+          ylim = c(-15, 70))
+
+plotSigBars(fit1, stars=FALSE)
+#plotSigBars(em1, stars=FALSE)
+```
 
 
 ## Auto-Plot auto_plot()
@@ -124,7 +213,7 @@ grid.arrange(p1, p2, p3, ncol=3)
 
 Einbetten von set_lattice() über update()
 
-```{r,  fig.height=4.5, fig.width=8, fig.cap='Plot mit grid.arrange und update'}
+```{r update-lattice, fig.height=4.5, fig.width=8, fig.cap='Plot mit grid.arrange und update'}
 obj <-
   xyplot(
     Sepal.Length + Sepal.Width ~ Petal.Length + Petal.Width,
@@ -156,7 +245,7 @@ grid.arrange(p1, p2, p3, ncol = 3)
 Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die Funktion arbeitet mit panel.superpose.
   
  
-```{r, results='asis', fig.cap='Boxplot mit bwplot2() und panel.superpose()', fig.height=5, fig.width=7}
+```{r bwplot-2, results='asis', fig.cap='Boxplot mit bwplot2() und panel.superpose()', fig.height=5, fig.width=7}
 
 p1 <- bwplot2(
   yield ~ site,
@@ -190,7 +279,7 @@ grid.arrange(p1, p2)
 
 
 
-```{r, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7}
+```{r bwplot, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7}
 
 set_lattice_bw(col=c("gray80", "gray90")) 
 
@@ -210,7 +299,7 @@ bwplot(yield ~ site, data = barley, groups=year,
 
 
 
-```{r, results='asis', fig.cap='Mittelwerte mit einer Variante von panel.superpose()', fig.height=2.5, fig.width=7}
+```{r bwplot-superposs, results='asis', fig.cap='Mittelwerte mit einer Variante von panel.superpose()', fig.height=2.5, fig.width=7}
 
   bwplot(
     yield ~ site,
@@ -241,16 +330,13 @@ bwplot(yield ~ site, data = barley, groups=year,
 ```
 
 
-
-
-
 ### Forest
 
  forest_plot() gestohlen von survminer::ggforest()
 
 
 
-```{r, include=FALSE}
+```{r prepare-forest, include=FALSE}
 require(survival)
 colon<- Label(colon, sex="Geschlecht")
 
@@ -286,7 +372,7 @@ forest_plot(fit3, colon)
 ### profile_plot
 
 
-```{r, include=FALSE}
+```{r profile-prepare, include=FALSE}
 set.seed(0815)
 x = matrix(rnorm(50), ncol = 5)
 colnames(x) = c("A", "B", "C", "D", "E")
@@ -323,19 +409,19 @@ profile_plot(x,
 
 
  
-```{r, fig.height=3, fig.width=5}
+```{r torte-1, fig.height=3, fig.width=5}
 print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
 
 ```
 
 
-```{r, fig.height=3, fig.width=5}
+```{r g-torte, fig.height=3, fig.width=5}
  gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
 
 ```
 
 
-```{r, fig.height=3, fig.width=5}
+```{r pie, fig.height=3, fig.width=5}
 #  Geht nicht problemlos in Markdown
  tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
 # par(new = TRUE)
@@ -347,7 +433,7 @@ print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
 
 Tukey Mean Difference oder auch Bland Altman Metode
 
-```{r, include=FALSE}
+```{r metcop_prepare, include=FALSE}
  
 DF2<- data.frame(
   A=c(1, 5,10,20,50,40,50,60,70,80, 90,100,
@@ -379,7 +465,7 @@ Zusammen mixen von unterschiedlichen Grafik-Typen.
 The cowplot package is a simple add-on to ggplot.
 https://wilkelab.org/cowplot/articles/index.html
 
-```{r cowplot, fig.height=5, fig.width= 7}
+```{r cowplot-1, fig.height=5, fig.width= 7}
 library(ggplot2)
 library(cowplot)
 require(lattice)
@@ -395,13 +481,39 @@ plot_grid(p1, p2,  rel_widths = c(1, 1.5)
 
 
 
+### Mixing different plotting frameworks
 
-## Effectplot
+
+```{r cowplot-2, fig.height=4, fig.width= 4 }
+# require(ggplot2)
+# require(cowplot)
+# require(lattice)
+ 
+p1 <- function() {
+  par(
+    mar = c(3, 3, 1, 1),
+    mgp = c(2, 1, 0)
+  )
+  boxplot(mpg ~ cyl, xlab = "cyl", ylab = "mpg", data = mtcars)
+}
+
+ggdraw(p1) +
+  theme(plot.background = element_rect(fill = "cornsilk"))
+
+
+```
+
+
+
+
+
+## Effectplot mit effect
 
 ### predictorEffect()
+
 Von mir lang ignorierte Variante von Effect mit Formeln!
 
-```{r, fig.height=3, fig.width=7}
+```{r effect-1, fig.height=3, fig.width=7}
 mod <- lm(prestige ~ type*(education + income) + women, Prestige)
 plot(predictorEffect("income", mod), main="", rug=FALSE)
 plot(predictorEffects(mod, ~ education + women), main="", rug=FALSE)
@@ -413,7 +525,7 @@ plot(predictorEffects(mod, ~ women+ education),
 ### Modifizier plot.efflist
 
 
-```{r, include=FALSE}
+```{r effect-2, include=FALSE}
 require(stpvers)
 A = rnorm(100)
 B = rnorm(100, 53, 10)
@@ -435,9 +547,10 @@ odds <- function(p)
 
 ```
 
-### allEffects ()
 
-```{r, fig.height=2.5, fig.width=5}
+### allEffects
+
+```{r effect-3, fig.height=2.5, fig.width=5}
 
 ef <- allEffects(lm(A ~ B + C))
 plot(ef,
@@ -474,10 +587,10 @@ plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
 
 
 
-### Effectplot mit emmeans
+## Effectplot mit emmeans
 
 
-```{r}
+```{r effect-4, fig.height=2.5, fig.width=5}
 library(emmeans)
 head(pigs)
 pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
@@ -543,7 +656,7 @@ emmip(ref_grid(pigs.lm2,
 
 ### Klassiker mit Effect()
 
-```{r, fig.height=2.5, fig.width=5}
+```{r effect-6, fig.height=2.5, fig.width=5}
 set_lattice_ggplot()
 plot(Effect(c("source", "percent"), 
             pigs.lm2,
@@ -557,7 +670,7 @@ plot(Effect(c("source", "percent"),
 
 
 
-```{r, fig.height=2.5, fig.width=5}
+```{r effect-7, fig.height=2.5, fig.width=5}
  
 emmip(ref_grid(pigs.lm2, 
                cov.reduce = FALSE, 
@@ -567,7 +680,8 @@ emmip(ref_grid(pigs.lm2,
 
 ```
 
-```{r, fig.height=2.5, fig.width=5}
+
+```{r effect-8, fig.height=2.5, fig.width=5}
 
 set_lattice_bw(col = c("coral3", "cyan4", "dodgerblue3"))
 emmip(
@@ -580,12 +694,7 @@ emmip(
 ```
 
 
-
-
-
-
-
-```{r, fig.height=2.5, fig.width=5}
+```{r effect-9, fig.height=2.5, fig.width=5}
 
 pigs.lm3 <- lm(log(conc) ~ source * percent, data = pigs)
 
@@ -612,12 +721,7 @@ emmip(
 ```
 
 
-
-
-
-
-
-```{r, include=FALSE}
+```{r effect-10, include=FALSE}
 
 raw_data <-
   data.frame(
@@ -659,7 +763,7 @@ stripplot(
 library(effects)
  John Fox URL http://www.jstatsoft.org/v32/i01/
 
-```{r, include=FALSE}
+```{r transfom-prepare, include=FALSE}
 set.seed(2)
 
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
@@ -691,13 +795,13 @@ fit <- lm(y ~ group * time * serum, DF)
 
 
 
-```{r, fig.height=5, fig.width= 5}
+```{r effect-default, fig.height=5, fig.width= 5}
 plot(effects::allEffects(fit)) 
 ```
  
  
 
-```{r, fig.height=3, fig.width= 5}
+```{r effect-log, fig.height=3, fig.width= 5}
 APA2( ~ log(prestige) + income + type + education,
       data = Prestige,
       output = "text")
@@ -714,7 +818,7 @@ plot(Effect(c("income", "type"), mod,
  
  
  
-```{r, fig.cap='Effect patial.residuals',fig.height=3, fig.width= 5}
+```{r effect-dots, fig.cap='Effect patial.residuals',fig.height=3, fig.width= 5}
 set_lattice_bw()
 plot(
   Effect(c("time", "group"), fit,
@@ -728,29 +832,39 @@ plot(
  
 
  
+## Effectplot mit ggplot
+
+```{reffect-ggplot, fig.cap='Effect ggplot',fig.height=3, fig.width= 5}
+ 
+Model <- lm(drat~hp*cyl, data=mtcars)
+ef <- effect(term = "hp:cyl", Model, default.levels = 9) # 9 because the breaks are nicer
+ef2 <- as.data.frame(ef)
+
+ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
+        geom_line() +
+        labs(y = 'drat') + #+  ylim(0, 10)
+        jtools::theme_apa()
+```
 
 
  
 
-### GOF-Plots
+## GOF-Plots
 
 library(car)
 
-```{r, fig.cap='residualPlots', fig.height=5, fig.width= 5}
+```{r gof-1, fig.cap='residualPlots', fig.height=5, fig.width= 5}
 car::residualPlots(fit) 
 ```
  
-```{r, fig.cap='marginalModelPlots',  fig.height=3, fig.width= 5}
+```{r gof-2, fig.cap='marginalModelPlots',  fig.height=3, fig.width= 5}
 car::marginalModelPlots(fit) 
 ```
   
-```{r, fig.cap='avPlots',  fig.height=5, fig.width= 5}
+```{r gof-3, fig.cap='avPlots',  fig.height=5, fig.width= 5}
 car::avPlots(fit) 
 ```
  
-
-
-
 
 
 
@@ -761,7 +875,7 @@ car::avPlots(fit)
  URL: https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html
 
 
-```{r, fig.cap='visreg', fig.height=3, fig.width= 7, warning=FALSE }
+```{r visreg-1, fig.cap='visreg', fig.height=3, fig.width= 7, warning=FALSE }
 par(mfrow=c(1,3))
 visreg::visreg(fit)
 
@@ -770,7 +884,7 @@ visreg::visreg(fit)
 ### library(stats) termplot
 
 
-```{r, fig.cap='termplot',fig.height=3, fig.width= 7, warning=FALSE}
+```{r visreg-2, fig.cap='termplot',fig.height=3, fig.width= 7, warning=FALSE}
 par(mfrow=c(1,3))
 stats::termplot(fit, 
                 se = TRUE, 
@@ -805,7 +919,7 @@ rockchalk::plotSlopes(fit,
 
 
 
-```{r}
+```{r stripplot, fig.height=4, fig.width= 7}
 raw_data <-
   data.frame(
     subject_id = rep(1:6, 4),
@@ -842,9 +956,9 @@ stripplot(
 ```
 
 
-### ECDF-Plot
+## ECDF-Plot
 
-```{r}
+```{r, ecdf, fig.height=4, fig.width= 5}
  data(Chem97, package = "mlmRev")
 
  ecdfplot(~gcsescore | factor(score), data = Chem97,
@@ -862,7 +976,25 @@ data(singer, package = "lattice")
 ## Interessante Grafik Beispiele
 
 
-```{r, fig.height=4, fig.width= 7}
+
+### Spine Plots and Spinograms 
+
+
+```{r , fig.height=4, fig.width= 5}
+library("colorspace")
+
+
+ttnc <- margin.table(Titanic, c(1, 4))
+ 
+spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
+```
+
+
+
+
+
+
+```{r segplot, fig.height=4, fig.width= 7}
  require(latticeExtra)
  segplot(factor(1:10) ~ rnorm(10) + rnorm(10), level = runif(10))
  
