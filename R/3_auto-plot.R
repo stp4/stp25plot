@@ -544,7 +544,8 @@ multi_uv_plot <- function(data,
 #' lattice marginal plot
 #'
 #' @param ... an prepare_data2
-#' @param par.settings,auto.key  an lattice sefault ist  par.settings = stp25output::set_lattice()
+#' @param par.settings,auto.key  an lattice sefault ist  
+#' par.settings = stp25output::set_lattice()
 #'
 #' @return
 #' @export

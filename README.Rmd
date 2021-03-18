@@ -48,7 +48,6 @@ DF <-
 + Theme for lattice-plots (Im Paket stp25output) set_lattice(), set_lattice_ggplot(), set_lattice_bw(), reset_lattice()
 + auto_plot Einzelne lattice plots analog wie die Funktion Tabelle()
 + Boxplot bwplot2()
-+ profile_plot()
 + plot.bland_altman()
 + Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
 
@@ -60,7 +59,7 @@ DF <-
 
 Der Fliegen-Schiss-Plot mein absoluter lieblings Plot!!
 
-```{r, include=FALSE}
+```{r data-nmp, include=FALSE}
 require(stpvers)
 #require(lmerTest)
 require(emmeans)
@@ -109,7 +108,7 @@ dat<- na.omit(dat)
 
 ```
 
-```{r , fig.height=5, fig.width=7}
+```{r sig-bar-1, fig.height=4, fig.width=5}
 
 #dat1 <- Long(dat, DC4 ~ nmp + time2, value = "DC4")
 #fit2 <- lmer(DC4 ~ time2 + (1 | nmp), data = dat1) 
@@ -120,7 +119,7 @@ em1 <- emmeans(fit1, list(pairwise ~ time2), adjust = "tukey")
 prism.plots(
   DC4 ~ time2,
   data = dat,
-  centerfunc = mean,
+  #fun = mean,
   ylim = c(-8, 60)
 )
 plotSigBars(fit1)
@@ -130,7 +129,7 @@ plotSigBars(fit1)
 ```
 
 
-```{r, fig.height=5, fig.width=7}
+```{r sig-bar-2, fig.height=4, fig.width=5}
 boxplot(  DC4 ~ time2,
           data = dat,
           ylim = c(-15, 70))
@@ -138,6 +137,67 @@ boxplot(  DC4 ~ time2,
 plotSigBars(fit1, stars=FALSE)
 #plotSigBars(em1, stars=FALSE)
 ```
+
+```{r sig-bar-3, fig.height=4, fig.width=5}
+#stripplot(  DC4 ~ time2,  data = dat, jitter.data=TRUE,pch=20, col="gray50")
+
+stripplot(
+  DC4 ~ time2,
+  data = dat, ylim=c(-10,70),
+  ylab = "Difference (Absolute Value) [mm]", jitter.data=TRUE,
+  panel = function(x, y, ...) {
+    # panel.conf.int(x, y, ...)
+    panel.stripplot(x,y, pch=19, col="gray50",...)
+    #panel.points(x,y, pch=19,...)
+    #panel.mean(x,y,  ...)
+    panel.median(x,y, ...)
+    panel.sig.bars(fit1, include.stars = FALSE, offset = .4)
+  }
+)
+
+
+```
+
+
+
+```{r sig-bar-4, fig.height=4, fig.width=5}
+#require(latticeExtra)
+require(effects)
+fit1 <- lm(DC4 ~ time2, data = dat)
+ 
+p2<- plot(effect("time2", fit1), ylim=c(0,60))
+p2 +  latticeExtra::layer( panel.sig.bars(fit1, include.stars = FALSE) )
+
+```
+
+
+```{r mean-diff, fig.height=4, fig.width=5}
+require(emmeans)
+plot_differenz <-
+  function (x, ...)
+  {
+    cis <- as.data.frame(confint(x))
+    x <- as.data.frame(x)
+    xx <-
+      cbind(
+        diff = cis$estimate,
+        lwr = cis$lower.CL,
+        upr = cis$upper.CL,
+        p.value = x$p.value
+      )
+    row.names(xx) <- cis$contrast
+    psig <- ifelse( x$p.value<.1, "black", "gray50")
+    stats:::plot.TukeyHSD(list(x = as.matrix(xx)), col=psig, ...)
+    xx
+  }
+op=par(mar=c(4.2, 5, 3.8, 2))
+fit1 %>%  
+  emmeans("time2") %>% 
+  pairs() %>%  
+  plot_differenz(las = 1, xlim =c(15, -25)) 
+par(op)
+```
+
 
 
 ## Auto-Plot auto_plot()
@@ -190,7 +250,7 @@ my_color_dark <- function(n = 8)   RColorBrewer::brewer.pal(n, "Dark2")
 
 ```   
  
-```{r pressure,  fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
+```{r pressure, fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
 reset_lattice()
 
 p1<-barchart(xtabs(~treatment + sex + a,  DF), 
@@ -368,43 +428,10 @@ forest_plot(fit3, colon)
 
 
 ```
-
-### profile_plot
-
-
-```{r profile-prepare, include=FALSE}
-set.seed(0815)
-x = matrix(rnorm(50), ncol = 5)
-colnames(x) = c("A", "B", "C", "D", "E")
-
-## Create the profile plot. See the details in profile.plot.R for
-## the details on the parameters
-labels <- c(
-  "aufregend - langweilig",
-  "gut gemacht - schlecht gemacht",
-  "glaubwürdig - unglaubwürdig",
-  "spannend - eintönig",
-  "verständlich - unverständlich",
-"guter Action - schlechter Action",
-  "sympathisch - unsympathisch",
-  "talentiert - untalentiert",
-  "modisch - unmodisch",
-  "positive  - negative"
-)
-
-
-rownames(x) <- labels
-
-```
-
-
-```{r profil, fig.height=6, fig.width=7}
  
-profile_plot(x,
-             highlight.col = 2,
-             legend.n.col = 5)
-```
 
+
+ 
 ### Tortendiagramme
 
 
@@ -465,7 +492,7 @@ Zusammen mixen von unterschiedlichen Grafik-Typen.
 The cowplot package is a simple add-on to ggplot.
 https://wilkelab.org/cowplot/articles/index.html
 
-```{r cowplot-1, fig.height=5, fig.width= 7}
+```{r cowplot-1, fig.height=4, fig.width= 7}
 library(ggplot2)
 library(cowplot)
 require(lattice)
@@ -484,7 +511,7 @@ plot_grid(p1, p2,  rel_widths = c(1, 1.5)
 ### Mixing different plotting frameworks
 
 
-```{r cowplot-2, fig.height=4, fig.width= 4 }
+```{r cowplot-2, fig.height=3, fig.width=3 }
 # require(ggplot2)
 # require(cowplot)
 # require(lattice)
@@ -956,6 +983,100 @@ stripplot(
 ```
 
 
+
+
+
+##  Altman and Bland (Tukey Mean-Difference Plot)
+
+
+```{r, include=FALSE}
+set.seed(0815)
+Giavarina <- data.frame(
+  A=c(1,5,10,20,50,
+      40,50,60,70,80,
+      90,100,150,200,250,
+      300,350,400,450,500,
+      550,600,650,700,750,
+      800,850,900,950,1000),
+  B=c(8,16,30,14,39,
+      54,40,68,72,62,
+      122,80,181,259,275,
+      380,320,434,479,587,
+      626,648,738,766,793,
+      851,871,957,1001,980),
+  group= sample(gl(2, 15, labels = c("Control", "Treat")))
+)
+
+Giavarina <- transform(Giavarina, C = round( A + rnorm(30,0,20)),
+                       D = round( A + rnorm(30,0,10) + A/10 ),
+                       E = round( A + rnorm(30,5,10) + (100-A/10) ))
+
+ 
+
+
+
+```
+
+```{r fig-BlandAltman3, fig.cap = "Bland Altman", fig.width=8, fig.height=3 }
+ # A - Goldstandart
+
+x <- MetComp_BAP(~A+B, Giavarina)
+#> Warning: Warning in bland.altman.stats:Mehr als 2 Methoden.
+# x %>% Output("BA-Analyse der Messwertreihe")
+plot(x)
+```
+
+```{r fig-BlandAltman-lattice, fig.cap = "Bland Altman", fig.width=3.1, fig.height=3}
+ 
+lattice::tmd( A ~ B, Giavarina)
+```
+
+## Survival Analysis
+
+Add number-at-risk annotations to a plot
+
+
+```{r}
+
+require("survival")
+
+s <- Surv(colon$time / 365, colon$status)
+
+## Need to increase margins a bit
+par(mar = c(10, 6, 2, 1),mfrow = c(1,2))
+
+## no stratification
+fit1 <- survfit(s ~ 1)
+plot(fit1)
+addNrisk(fit1)
+
+## with stratification
+at <- c(0, 2, 4)
+lty <- 1:3
+xlim <- c(0, 6)
+fit2 <- survfit(s ~ rx, data = colon)
+plot(fit2,
+     xlab = 'Time (years)',
+     ylab = 'Survival',
+     xaxt = "n",
+     xlim=xlim,
+     lty = lty)
+
+addNrisk(fit2, at)
+axis(1, at = at, gap.axis = 1 / 4)
+legend(
+  'bottomleft',
+  legend = names(fit2$strata),
+  lty = lty,
+  bty = 'n'
+)
+Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
+
+```
+
+
+
+
 ## ECDF-Plot
 
 ```{r, ecdf, fig.height=4, fig.width= 5}
@@ -974,6 +1095,105 @@ data(singer, package = "lattice")
  
 
 ## Interessante Grafik Beispiele
+
+
+Lattice xyplot mit Pfeilen und verlaufende Farben.
+
+```{r , fig.cap='Lattice xyplot mit Pfeilen und verlaufende Farben.',  fig.height=4, fig.width= 5}
+dat <- GetData("
+  variable        value change leverage
+     happiness   4.62  -0.42    0.01
+    motivation   3.6   -0.41    0.05
+      training   3.4   -0.33    0.14
+   performance   3.2    0.30    0.82
+           lmx   2.96   0.21    0.33
+ communication   2.9   -0.11    0.43
+      autonomy   2.7    0.11    0.22
+    insecurity   2.5    0.12    0.21
+        stress   1.6    0.14    0.12")
+
+#Create a function to generate a continuous color palette
+rbPal <- colorRampPalette(c('gray','blue'))
+
+xyplot(
+  reorder(variable, value) ~ value ,
+  xlab = "",  ylab = "",
+  data = dat,
+  xlim = c(0.85, 5.15),# drop.unused.levels = FALSE,
+  scales = list(x = list(
+     at = 1:5,
+     labels = c( "low",  "moderate", "considerable", "hig","very high")
+  )),
+  panel = function(x, y, ...) {
+    
+    col <- rbPal(8)[as.numeric(cut(dat$leverage,breaks = 8))]
+    
+    panel.dotplot(
+      x = x,  y = y,
+      col = col,
+      cex = 1.1 + 1 * dat$leverage,
+      pch = 19
+    )
+    
+    panel.arrows(
+      x0 = x, y0 = y,
+      x1 = x + x * dat$change, y1 = y,
+      col=col, lwd = 2,
+      angle = 30, code = 2, length = 0.1
+    )
+  }
+)
+```
+
+
+
+```{r , fig.height=4, fig.width= 5}
+
+# siehe panel.segplot
+panel.arrows2 <- function(x0, y0 , x1, y1,
+                          col, alpha, lty, lwd, ...) {
+  panel.dotplot(
+    x = x0,   y = y0,
+    col = col,
+    cex = 1.5,
+    pch = "|"
+  )
+  panel.arrows(
+    x0, y0, x1, y1,
+    col = col ,
+    alpha = alpha,
+    lty = lty,
+    lwd = lwd,
+    ...
+  )
+  
+  
+  
+}
+
+dat$change <- dat$value + dat$change * dat$value
+dat$centers <- (dat$value + dat$change) / 2
+require(latticeExtra)
+segplot(
+  reorder(variable, value) ~ value + change,
+  level = leverage,
+  data = dat,
+  draw.bands = FALSE,
+  centers = centers,
+  segments.fun = panel.arrows2,
+  lwd = 2,
+  angle = 30,
+  code = 2,
+  length = 0.1,
+  colorkey = TRUE,
+  col.regions = rbPal# hcl.colors #terrain.colors
+  
+)
+
+```
+
+
+
 
 
 

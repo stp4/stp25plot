@@ -2,17 +2,21 @@
 % Please edit documentation in R/panel.conf.int.R
 \name{panel.conf.int}
 \alias{panel.conf.int}
+\alias{panel.median}
 \title{panel.conf.int}
 \usage{
 panel.conf.int(
   x,
   y,
   ...,
-  pch = 16,
+  pch = 19,
+  lwd = 2,
   conf.level = 0.95,
   length = 0.05,
   method = "mean"
 )
+
+panel.median(x, y, ..., pch = 19, conf.level = 0.95, length = 0.05)
 }
 \arguments{
 \item{pch}{= 16,}

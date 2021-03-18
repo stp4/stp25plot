@@ -14,9 +14,7 @@ useLabels<- function(x,
   
   if(is.data.frame(x))  x[,1] <- replaceLabel(x[,1], lbl)
   else  x<- replaceLabel(x, lbl)
-  
-  
-  # print(class(data))
+
   x
 }
 
