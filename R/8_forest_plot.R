@@ -14,6 +14,7 @@
 #' 
 #' # require(surv)
 #' # require(survminer)
+#'  require(survival)
 #'  require(stpvers)
 #' 
 #' forest_plot(glm(status ~ sex + rx + adhere,

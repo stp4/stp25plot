@@ -2,6 +2,8 @@
 #'
 #'
 #' In forest_plot( verwendet)
+#' Gestohlen von survminer::ggforest()
+#' 
 #' @param gparam Parameter Tabele mit var, estimate, p.value usw
 #' @param gof Godnes of fit als Character
 #' @param model model-Info
