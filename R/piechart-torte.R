@@ -1,9 +1,12 @@
 #' Tortendiagramm
-#' @name torte
-#'
+#' 
+#' Quelle: https://r.789695.n4.nabble.com/Multi-panel-Pie-Charts-td1687026.html
+#' 
+#' 
+#' 
+#' 
 #' @param x Formula
 #' @param data daten
-#' @param main,mar Grafik Parameter
 #' @param drop.unused.levels an xtab
 #' @param ... an panel.piechart zb init.angle=45
 #'
@@ -33,133 +36,174 @@
 #' DF[1,1:3] <-5;DF[1,4:5] <-1; DF[2:10,1] <-4.5
 #' DF[n,4:5] <-5;DF[n,1:5] <-1
 #' 
+#' torte(~treatment, DF, init.angle=45, main="lattice")
+#' torte(~treatment+sex, DF, init.angle=45, main="lattice")
 #' 
 #' 
-#' # windows(8,8)
-#' torte(~treatment+sex, DF, init.angle=45, main="lattise")
-#' gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
-#' #  to_table(~treatment|sex, DF)
-#' 
-#' 
-#' 
-#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
-#' 
-#' par(new = TRUE)
-#' barchart(
-#'   ~ Freq | sex,
-#'   tab,
-#'   groups = treatment, scales=list(draw = FALSE), xlab="",
-#'   auto.key = list(columns = 3),
-#'   panel = panel.piechart
-#' )
-#' 
-#' par(new = TRUE)
-#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
-#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
-#' 
-#' par(new = TRUE)
-#' barchart(
-#'   ~ Freq | sex,
-#'   tab,
-#'   groups = treatment, scales=list(draw = FALSE), xlab="",
-#'   auto.key = list(columns = 3),
-#'   panel = panel.piechart
-#' )
-#' 
-#' par(new = TRUE)
-#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
-
+#' # https://www.r-bloggers.com/2021/08/ggplot-easy-as-pie-charts/
+#' #' library(ggplot2)
+#' ggplot(d, aes(x = 1, y = Time_relative, fill = Slices)) +
+#'   facet_grid(cols = vars(When)) + 
+#'   # Make pie
+#'   coord_polar(theta = "y") +
+#'   # Add the *stacked* columns
+#'   geom_col(position = position_stack(reverse = TRUE), 
+#'            color = "tan3", size = 3, show.legend = FALSE) + 
+#'   # Add labels to the *stacked* position,
+#'   # in the middle of the column (vjust = 0.5)
+#'   geom_text(aes(label = Slices), 
+#'             position = position_stack(vjust = 0.5, reverse = TRUE)) + 
+#'   # Make it a pizza pie!
+#'   see::scale_fill_pizza_d() + 
+#'   theme_void() + 
+#'   labs(title = "Relative time spent building piecharts with ggplot2")
 torte <- function(x,
                   data,
-                  main="",
-                  digits=0,
-                  percent=TRUE,
-                  mar=  c(3,3,3,3) + 0.1,
                   drop.unused.levels = FALSE,
-                  ...){
-  require(gridBase)
+                  ...) {
   
-  xtab<- xtabs(gsub("\\|", "+", x), data,
-               drop.unused.levels =  drop.unused.levels)
+     plot.new()
+  if (length(all.vars(x)) == 1) {
+    xdata <- data.frame(xtabs(x,
+                              data,
+                              drop.unused.levels =  drop.unused.levels))
+    piechart(
+      ~ Freq, 
+      xdata,
+      groups = xdata[[all.vars(x)]],
+      ...)
+    
+  } else{
+    x <-  formula(paste(gsub("\\|", "+", x), collapse = " "))
+    xdata <- data.frame(xtabs(x,
+                              data,
+                              drop.unused.levels =  drop.unused.levels))
+ 
+    piechart(
+      formula(
+        paste( "~Freq|", paste0(all.vars(x)[-1], collapse = "+"))), 
+      xdata, 
+      groups = xdata[[all.vars(x)[1]]],
+      ...)
+    
+  }
   
-  
-  xdata<- data.frame( xtab )
-  xnames<- names(xdata)[-ncol(xdata) ]
-  slices <- xdata$Freq
-  
-  # par(new = TRUE)
-  # plot(1)
-  # par(new = TRUE)
-  piechart(xtab, groups = FALSE,
-           main=main, xlab = "",
-           digits=digits,
-           #  labels=lbls,
-           percent=percent, mar=mar, ...)
 }
 
 
 
-# Quelle:
-# https://r.789695.n4.nabble.com/Multi-panel-Pie-Charts-td1687026.html
-
+ 
+#' @param x,y,groups kommt vom panel 
+#' @param labels ist entweder die levels von groups oder ein character string
+#' @param percent, digits Anzeigen der Prozent
+#' @param edges,radius,,clockwise,init.angle,density,angle,col,border,mar,lty an   graphics::pie
+#' @param ...  Fehler abfangen
+#'
 #' @rdname torte
 #' 
 #' @export
-panel.piechart <-
-  function(x,
-           y,
-           labels = as.character(y),
-           edges = 200,
-           radius = 0.8,
-           clockwise = FALSE,
-           init.angle = if (clockwise) 90 else 0,
-           density = NULL,
-           angle = 45,
-           col = superpose.polygon$col,
-           border = superpose.polygon$border,
-           mar = c(2, 2, 2, 2) - .2,
-           digits = 0,
-           lty = superpose.polygon$lty,
-           ...)
-  {
+#' 
+#' @examples 
+#' 
+#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+#' 
+#' # geht nur mit 
+#' plot.new()
+#' barchart(
+#'   ~ Freq | sex,
+#'   tab,
+#'   groups = treatment, scales=list(draw = FALSE), xlab="",
+#'   auto.key = list(columns = 3), 
+#'   par.settings = bw_theme(farbe()),
+#'   layout= c(2,1),
+#'   panel = panel.piechart
+#' )
+#' 
+panel.piechart<- function(
+         x,
+         y,
+         groups,
+         labels = levels(groups),
+         percent= TRUE,
+         edges = 200,
+         radius = 0.8,
+         clockwise = FALSE,
+         init.angle = if (clockwise) 90 else 0,
+         density = NULL,
+         angle = 45,
+         col = superpose.polygon$col,
+         border = superpose.polygon$border,
+         mar = c(2, 2, 2, 2) - .2,
+         digits = 0,
+         lty = superpose.polygon$lty,
+         ...)
+{
+  if(percent){
     pct <- round(x / sum(x) * 100, digits)
-    if (!is.na(labels[1])) {
-      labels <- paste(labels, pct) # add percents to labels
-      labels <- paste(labels, "%", sep = "") # ad % to labels
-    }  
-    # stopifnot(require("gridBase"))
-    
-    superpose.polygon <-
-      lattice::trellis.par.get("superpose.polygon")
-    
-    opar <- par(no.readonly = TRUE)
-    on.exit(par(opar))
-    
-    if (lattice::panel.number() > 1)
-      par(new = TRUE)
-    
-    par(fig = gridBase::gridFIG(),
-        omi = c(0, 0, 0, 0),
-        mar = mar)
-    
-    graphics::pie(
-      as.numeric(x),
-      labels = labels,
-      edges = edges,
-      radius = radius,
-      clockwise = clockwise,
-      init.angle = init.angle,
-      angle = angle,
-      density = density,
-      col = col,
-      border  = border,
-      lty = lty
-    )
+    labels <- paste(labels,  " ",  pct, "%", sep = "") # ad % to labels
   }
+  
+  # stopifnot(require("gridBase"))
+  superpose.polygon <-
+    lattice::trellis.par.get("superpose.polygon")
+  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
+  
+  # if (lattice::panel.number() > 1)
+  # par(fig = gridBase::gridFIG(),
+  #     omi = c(0, 0, 0, 0),
+  #     mar = mar)
+  
+  par(fig = gridBase::gridFIG(),
+      omi = c(0, 0, 0, 0),
+      mar = mar,
+      new = TRUE)
+
+  
+  graphics::pie(
+    as.numeric(x),
+    labels = labels,
+    edges = edges,
+    radius = radius,
+    clockwise = clockwise,
+    init.angle = init.angle,
+    angle = angle,
+    density = density,
+    col = col,
+    border  = border,
+    lty = lty
+  )
+}
+
 
 
 #' @rdname torte
+#' 
+#' @description Das ist eine Kopie aus lattice Seite 253 
+#' 
 #' @export
+#' 
+#' @examples 
+#' 
+#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+#' 
+#' barchart(
+#'   ~ Freq | sex,
+#'   tab,
+#'   groups = treatment, scales=list(draw = FALSE), xlab="",
+#'   auto.key = list(columns = 3),
+#'   panel = panel.piechart
+#' )
+#' 
+#' 
+#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+#' tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+#' 
+#' 
+#' 
+#' piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+#' 
 piechart <- function(x, 
                      data = NULL, 
                      panel = "panel.piechart", 
@@ -177,9 +221,9 @@ piechart <- function(x,
   ccall[[1]] <- quote(lattice::barchart)
   
   
-  # plot.new() wegen Fehler: cannot pop the top-level viewport ('grid' and 'graphics' output mixed?
-  plot.new()
-  par(new = TRUE)
+  # # plot.new() wegen Fehler: cannot pop the top-level viewport ('grid' and 'graphics' output mixed?
+    plot.new()
+  # par(new = TRUE)
   
   ans <- eval.parent(ccall)
   ans$call <- ocall
@@ -188,14 +232,6 @@ piechart <- function(x,
 
 
  
-
-
-
-
-
-
-
-
 
 
 
@@ -225,7 +261,12 @@ blank_theme_torte<- function(){
 #'
 #' @return ggplot
 #' @export
-
+#' 
+#' @examples 
+#' 
+#'  gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
+#' 
+#' 
 gtorte<- function(x,
                   data, 
                   main="", 

@@ -72,19 +72,16 @@ panel.sparkline <- function(x,
                             include.min=TRUE,
                             include.first=FALSE,
                             include.last=FALSE,
-                            include.box =TRUE) {
-  
-  #print(pch)
+                            include.box =TRUE
+                            ) {
 
+dots<- list(...)
   
   if(!is.logical(include.box)){
     box.x1 <-min(x)
     box.x2<- max(x)
     box.y1 <- include.box[[1]][lattice::panel.number()]
     box.y2 <- include.box[[2]][lattice::panel.number()]
-   # cat("\n", z.name[lattice::panel.number()],"\n")
-#print(box.y2)
-#print(quantile(y, 0.75))
     include.box<- TRUE
   }
   else{
@@ -102,12 +99,10 @@ panel.sparkline <- function(x,
   }
   
   lattice::panel.xyplot(x, y, ...)
-  #lattice::panel.xyplot(x, y,type="p", ...)
+
   if(!is.null(pch))
   lattice::panel.points(
     x, y, pch = pch, cex = cex.points, col=col.default)
-  
-
   
   grid::pushViewport(
     grid::viewport(
@@ -116,38 +111,43 @@ panel.sparkline <- function(x,
       clip = "off"
     ))
 
+  
   if (include.first | include.last) {
-    last <- c(x[1], y[1])
-    first <-  c(x[length(x)], y[length(x)])
- 
-    if (first[2] < last[2]) {
-      first <- c(x[1], y[1])
-      last  <-  c(x[length(x)], y[length(x)])
-    }
-    lattice::panel.points( x=c(first[1],last[1]),
-                  y=c(first[2],last[2]),
-                  pch = pch.default,
-                  cex = cex.points, col= col.default
-                  )
-
-    lattice::panel.text(
-      first[1], first[2],
-      labels = signif(first[2], digits),
-      cex = cex.numbers,
-      fontfamily = "serif",
-      adj = c(0.5, -.75)
+    y_range <- c(y[x == min(x)], y[x == max(x)])
+    x_range <-c(x[x == min(x)], x[x == max(x)])
+    xy_max <- which.max(y_range)
+    
+    y_range <-
+      c(y_range[xy_max], min(y_range[which(x_range != x_range[xy_max])]))
+    x_range <-
+      c(x_range[xy_max], x_range[x_range != x_range[xy_max]][1])
+    
+    lattice::panel.points(
+      x = x_range,
+      y = y_range,
+      pch = pch.default,
+      cex = cex.points,
+      col = col.default
     )
     
     lattice::panel.text(
-      last[1], last[2],
-      labels = signif(last[2], digits),
+      x_range[1],
+      y_range[1],
+      labels = signif(y_range[1], digits),
+      cex = cex.numbers,
+      fontfamily = "serif",
+      adj = c(0.5,-.75)
+    )
+    
+    lattice::panel.text(
+      x_range[2],
+      y_range[2],
+      labels = signif(y_range[2], digits),
       cex = cex.numbers,
       fontfamily = "serif",
       adj = c(0.5, 1.5)
     )
   }
-  
-  
   
   if (include.max|include.min) {
     lattice::panel.points(
@@ -192,7 +192,7 @@ panel.sparkline <- function(x,
     }
   
   if (include.arrows) {
-    draw_arrow(x, y, list(...), cex.arrows, lim.arrows)
+    draw_arrow(x, y, dots, cex.arrows, lim.arrows)
   }
   
 
@@ -214,6 +214,7 @@ panel.sparkline <- function(x,
 #' @export
 panel.sparkbar <- function(x,
                            y,
+              
                            ...,
                            z.name,
                            digits = 2,
@@ -228,6 +229,7 @@ panel.sparkbar <- function(x,
                            include.min=TRUE,
                            include.first=FALSE,
                            include.last=FALSE
+                          
                            ) {
   
   lattice::panel.barchart(x, y,  
@@ -283,7 +285,12 @@ panel.sparkbar <- function(x,
 }
 
 
-draw_arrow<- function(x, y, dots, cex.arrows, lim.arrows){
+draw_arrow<- function(x, y, 
+                      dots, cex.arrows, 
+                      lim.arrows,
+                      char.arrows= c(down= '\u2193', updown='\u2195', up= '\u2191' )
+                      
+                      ){
   
   x <- as.numeric(x)
   if (is.null(dots$subscripts)) {
@@ -309,9 +316,9 @@ draw_arrow<- function(x, y, dots, cex.arrows, lim.arrows){
     j <- j + 1
     pos_x <- pos_x + .06
     col <- superpose.line$col[j]
-    if (i < -lim.arrows)  sm1 <- '\u2193'
-    else if (i > lim.arrows) sm1 <- '\u2191'
-    else  sm1 <- '\u2195'
+    if (i < -lim.arrows)  sm1 <- char.arrows[1]
+    else if (i > lim.arrows) sm1 <- char.arrows[3]
+    else  sm1 <-char.arrows[2]
     
     if(is.null(cex.arrows)) fontsize <- round( abs(beta[j]) *10) + 10
     else fontsize <- cex.arrows*12
@@ -663,6 +670,22 @@ sparkplot2 <- function(x,
 
 
 # http://www.motioninsocial.com/tufte/#sparklines
-
-
-
+# 
+# trans$value[10]<-900
+# col<- c("purple", "darkgreen")
+# p3 <- sparkplot(
+#   value ~ time | souce,  trans,
+#   groups = variable,
+#   right.padding=10,
+#   lwd = lwd,
+#   col = col,
+#   key = list(
+#     corner =pos,  lines = list(col = col, lwd = lwd),
+#     between.columns=.4,  between=.4,
+#     cex = .75,  columns = 2,
+#     text = list(levels(trans$variable))
+#   ),
+#   include.first = TRUE,
+#   include.max = FALSE
+# )
+# p3

@@ -4,11 +4,11 @@
 #' upData2 ergaenzt werden wenn ein Data.Frame-Objekt uebergeben wird
 #' @param x data.frame oder String
 #' @param width default width= 25
-#' @param sep  default new line 
+#' @param sep  default new line
 #' @return Character String
 #' @export
-#' @examples 
-#' 
+#' @examples
+#'
 #' wrap_sentence(
 #' "R is free software and comes with ABSOLUTELY NO WARRANTY.
 #' You are welcome to redistribute it under certain conditions.
@@ -18,14 +18,12 @@
 #'   "R is free software and comes with ABSOLUTELY NO WARRANTY.
 #' You are welcome to redistribute it under certain conditions.", sep="<br>"
 #' )
-wrap_sentence<- function(x, width = 25, sep =NULL)
-{
-  if(is.data.frame(x)) x<- GetLabelOrName(x)
-  
-  x<- gsub("\r?\n|\r", " ", x)
-  if(is.null(sep)) stringr::str_wrap(x, width = width)
-  else gsub("\n", sep, stringr::str_wrap(x, width = width))
-  
- 
-}
 
+#Verschoben nach 
+wrap_sentence <- function(x, 
+                          ...) {
+  if (is.data.frame(x))
+    x <- stp25tools::get_label(x, include.units = TRUE)
+  stp25tools::wrap_string(x,  ...)
+}
+ 

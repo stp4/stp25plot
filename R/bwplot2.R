@@ -1,4 +1,6 @@
 #' bwplot2
+#' 
+#' 
 #' @description Lattice bwplot mit groups. Ist eine erweiterung von lattice \link{bwplot}. Die Funktion arbeitet mit \link{panel.superpose}.
 #' @param ... alles an lattice
 #' @param box.width Box breite

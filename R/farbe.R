@@ -34,8 +34,6 @@
 #' 
  
 farbe <- function(type = c(
-  
-  
                  "pirat", "ggplot", 
                   
                   "dark", "dunkel",
@@ -44,11 +42,13 @@ farbe <- function(type = c(
                   "bw",
                   "sex", "sex.mf",
                   
-                  "likert", "likert.red.green",  "likert.red.blue",
+                  "likert", 
+                  "likert.red.green",  "likert.red.blue",
                   "likert.green.red", "likert.blue.red",
-                  "likert.bw", "brewer"),
+                  "likert.bw", 
+                 "brewer"),
                   n = 5,
-                  middle = if (.is.odd(n))  NULL else (n %/% 2) + 1,
+                  middle =   mean(1:n), #    if (is.odd(n))  NULL else (n %/% 2) + 1,
                   trans= 0) {
   if(trans < 0 | trans > 1) trans=1
   type <-  match.arg(type, several.ok = FALSE)
@@ -101,12 +101,12 @@ farbe <- function(type = c(
     sex =  c( pink = "#EC579AFF", blue2 = "#149BEDFF"),
     sex.mf = c(blue2 = "#149BEDFF",  pink = "#EC579AFF"),
     
-    likert = .brewer_pal_likert(n = n),
-    likert.red.green =  .brewer_pal_likert(n = n, name = "RdYlGn", middle = middle),
-    likert.red.blue = .brewer_pal_likert(n = n, name = "RdBu", middle = middle),
-    likert.green.red = .brewer_pal_likert(n = n, name = "RdYlGn", middle = middle, rev = TRUE),
-    likert.blue.red = .brewer_pal_likert(n = n, name = "RdBu", middle = middle, rev = TRUE),
-    likert.bw = .brewer_pal_likert(n = n, name = "gray", middle = middle),
+    likert = likert_col(n = n),
+    likert.red.green =  likert_col(n = n, name = "RdYlGn", middle = middle),
+    likert.red.blue = likert_col(n = n, name = "RdBu", middle = middle),
+    likert.green.red = likert_col(n = n, name = "RdYlGn", middle = middle, rev = TRUE),
+    likert.blue.red = likert_col(n = n, name = "RdBu", middle = middle, rev = TRUE),
+    likert.bw = likert_col(n = n, name = "gray", middle = middle),
     
     RColorBrewer::brewer.pal(n, "Set1")
   )
@@ -114,65 +114,30 @@ farbe <- function(type = c(
 }
 
 
-.is.odd <- function(x)  x %% 2 == 1
+# is.odd(2)
+is.odd <- function(x)
+  x %% 2 == 0
 
 
-.brewer_pal_likert <- function(n = 5,
-                              name = "RdBu",
-                              middle = if (.is.odd(n))  NULL else  (n %/% 2) + 1,
-                              middle.color = "gray80",
-                              min_gray = 10,
-                              max_gray = 60,
-                              rev = FALSE) {
-  if (tolower(name) == "gray") {
-    min_gray <- 1 - min_gray / 100
-    max_gray <- 1 - max_gray / 100
-    
-    if (n %% 2 == 0) {
-      n <- (n) / 2
-      mycols <- gray(seq(min_gray,  max_gray, length.out = n))
-      c(rev(mycols), mycols)
-    }
-    else{
-      n <- (n - 1) / 2 + 1
-      mycols <- gray(seq(min_gray,  max_gray, length.out = n))
-      c(rev(mycols), mycols[-1])
-    }
-  } else {
-    # copy from HH::brewer.pal.likert
-    
-    is.odd <- function(x)
-      x %% 2 == 1
-    palette <- if (n <= 2) {
-      bp <- RColorBrewer::brewer.pal(n = 3, name = name)
-      if (n == 1)
-        bp[2]
-      else
-        bp[-2]
-    }
+
+
+# copy from HH::brewer.pal.likert
+my_brewer_palette <-   function(n, name = "RdBu")
+  if (n <= 2) {
+    bp <- RColorBrewer::brewer.pal(n = 3, name = name)
+    if (n == 1)   bp[2]
+    else    bp[-2]
+  }  else {
+    if (n <= 11)
+      RColorBrewer::brewer.pal(n = n, name = name)
     else {
-      if (n <= 11)
-        RColorBrewer::brewer.pal(n = n, name = name)
-      else {
-        if (is.odd(n))
-          colorRampPalette(RColorBrewer::brewer.pal(n = 11,
-                                                    name = name))(n)
-        else
-          colorRampPalette(RColorBrewer::brewer.pal(n = 10,
-                                                    name = name))(n)
-      }
+      if (is.odd(n))
+        colorRampPalette(RColorBrewer::brewer.pal(n = 11, name = name))(n)
+      else
+        colorRampPalette(RColorBrewer::brewer.pal(n = 10, name = name))(n)
     }
-    
-    if (rev)
-      palette <- rev(palette)
-    if (!is.null(middle)) {
-      palette[middle] <- middle.color
-    }
-    palette
   }
-  
-  
-}
+
 
 
 # The palette in pieplot verwendet
@@ -204,5 +169,61 @@ cbPalette <- c(
   
 )
 
+Grays   <- gray(seq(1, .6, length.out=9))
+Greens  <- c("#F7FCF5", "#EEF8EA", "#E5F5E0", "#D6EFD0", "#C7E9C0", "#B4E1AD", "#A1D99B", "#8ACE88", "#74C476")
+Blues   <- c("#F7FBFF", "#EAF3FB", "#DEEBF7", "#D2E3F3", "#C6DBEF", "#B2D2E8", "#9ECAE1", "#84BCDB", "#6BAED6")
+Browns  <- hsv(h=0.06, s=seq(from=0, to=.6, length.out=9), v=seq(from=1, to=.85, length.out=9))
+Oranges <- c("#FFF5EB", "#FEEDDC", "#FEE6CE", "#FDDBB8", "#FDD0A2", "#FDBF86", "#FDAE6B", "#FD9D53", "#FD8D3C")
+Reds    <- c("#FFF5F0", "#FEEAE1", "#FEE0D2", "#FDCDB9", "#FCBBA1", "#FCA689", "#FC9272", "#FB7E5E", "#FB6A4A")
+Purples <- c("#FFFBFF", "#FFF4FF", "#FFEDFF", "#FFE3FF", "#FFDAFF", "#FFCBFF", "#FFBDFF", "#FFABFF", "#FF9AFF")
 
 
+likert_col <- function(n = 5,
+                       name = "RdBu",
+                       middle = mean(1:n),   #if (is.odd(n))  NULL else (n %/% 2) + 1,
+                       middle.color =   "gray65",# "gray80",
+                       min_gray = 10,
+                       max_gray = 60,
+                       rev = FALSE) {
+  
+   #   cat("\n n = ", n, "\n middle = " ,middle, " middle.color = " , middle.color, "\n")
+   
+  if (tolower(name) == "gray") {
+    min_gray <- 1 - min_gray / 100
+    max_gray <- 1 - max_gray / 100
+    
+    if (n %% 2 == 0) {
+      n <- (n) / 2
+      palette <- gray(seq(min_gray,  max_gray, length.out = n))
+      palette <- c(rev(palette), palette)
+    }
+    else{
+      n <- (n - 1) / 2 + 1
+      palette <- gray(seq(min_gray,  max_gray, length.out = n))
+      palette <- c(rev(palette), palette[-1])
+    }
+  } else {
+    palette <- my_brewer_palette(n, name)
+    if (rev)      palette <- rev(palette)
+    if (!is.odd(n) |  is.odd(middle)){
+  
+      palette[middle] <- middle.color
+      
+      }
+    
+    
+  }
+  
+  
+  palette
+}
+
+# 
+# farbe("likert.red.blue", 4)
+# graphics.off()
+# windows(7, 3)
+# likertplot(Item  ~ . | Geschlecht,
+#            data = Res2,
+#            col = farbe("likert.red.blue", 5, 2))
+# 
+# 

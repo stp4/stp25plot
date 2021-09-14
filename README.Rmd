@@ -9,6 +9,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 require(stpvers)
 require(stp25plot)    # meine Funktionen
+ lattice::trellis.par.set(bw_theme)
+
 require(lattice)      # Lattice-Plots
 require(RColorBrewer) # Farben
 require(latticeExtra)
@@ -55,7 +57,7 @@ DF <-
 
 
 
-## Signifikanz-Plot
+### Signifikanz-Plot
 
 Der Fliegen-Schiss-Plot mein absoluter lieblings Plot!!
 
@@ -199,8 +201,82 @@ par(op)
 ```
 
 
+###  Sparkplot
 
-## Auto-Plot auto_plot()
+
+Stolen from http://www.motioninsocial.com/tufte/#sparklines
+
+```{r, echo=FALSE}
+set.seed(1)
+
+DF_sprk <- data.frame(
+  Laborwert = gl(7, 8,
+                 labels = c(
+                   "Albumin", "Amylase", "Lipase",
+                   "AST", "ALT","Bilirubin","C-Peptid")),
+  Treat = gl(2, 4, labels = c("Control", "Treat")),
+  Time = gl(4, 1, labels = c("t0", "t1", "t2", "t4")),
+  x = rnorm(7 * 8)
+)
+DF_sprk <- transform(DF_sprk,
+                x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
+DF_sprk1 <- stp25aggregate::Summarise(DF_sprk, x~ Laborwert+ Time, fun=mean )
+names(DF_sprk1)[4]<- "x"
+#DF_sprk<- DF_sprk[-3]
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+#head(DF_sprk)
+#: "p", "l", "h", "b", "o", "s", "S", "r", "a", "g"
+p1 <- sparkplot(x ~ Time | Laborwert, DF_sprk1, between=1.5
+                #,char.arrows= c(down= '-', updown='', up= "+" )
+  )
+ 
+col<- c("purple", "darkgreen")
+
+p2<- sparkplot(
+  x ~ Time | Laborwert,
+  DF_sprk,
+  groups = Treat,
+  between=1.5,
+  include.labels = FALSE,
+  left.padding=-5,  right.padding=3,
+  col = col ,
+  key = list(
+    corner = c(1, 1.1),
+    lines = list(col = col, lwd = 2),
+    cex = .75,
+    columns = 2,
+    text = list(levels(DF_sprk$Treat))
+  )
+  #,  char.arrows= c(down= '-', updown='', up= "+" )
+)
+
+p3 <- sparkplot(
+  x ~ Time | Laborwert,
+  DF_sprk,
+  groups = Treat,
+  type="barchart",
+  between=1.5,
+  include.labels = FALSE,
+  left.padding=-5,  right.padding=3,
+  col =  col
+  #,  char.arrows= c(down= '-', updown='', up= "+" )
+)
+#windows(8,4)
+require(cowplot)
+plot_grid(p1,  p2,  p3,
+          nrow=1,
+          rel_widths = c(.7, .5, .5)
+)
+
+
+```
+
+
+
+### Auto-Plot auto_plot()
 
 Die Funktion klebt lattice- plots zu einer matrix zusammen.
 
@@ -226,45 +302,52 @@ DF %>% auto_plot(
   a,
   treatment,
   by =  ~ sex,
-  par.settings = set_lattice_bw(col = grey.colors(4, start = 0.4, end = 0.9))
+  par.settings = bw_theme()
 )
 ```
 
 
-```{r lattice-matrix-2, fig.height=2.5, fig.width=7}
-reset_lattice()
+```{r lattice-matrix-2, fig.height=2.5, fig.width=8}
+ 
 auto_plot(treatment ~ n + e + sex, DF)
 
 ```
 
 ### set_lattice()
 
-Initialisieren der Lattice - Optionen mit  set_lattice(). 
+~Initialisieren der Lattice - Optionen mit  set_lattice(). 
 Im Hintergrund werden die  latticeExtra::ggplot2like.opts()
-aufgerufen und die default Werte in opar und oopt gespeichert um sie mit reset_lattice() zurück seten zu können.
+aufgerufen und die default Werte in opar und oopt gespeichert um sie mit reset_lattice() zurück seten zu können.~
 
 ```
 my_color <- function(n = 8)  RColorBrewer::brewer.pal(n, "Set2")
 my_color_sex <-  function()   RColorBrewer::brewer.pal(8, "Set2")[c(4:3)]
 my_color_dark <- function(n = 8)   RColorBrewer::brewer.pal(n, "Dark2")
 
+farbe("sex")
+farbe("ggplot")
+farbe("pirat")
+farbe("likert.green.red", 7, middle=3)
+farbe("likert", 5)
+
 ```   
  
-```{r pressure, fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden'}
+```{r pressure, fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden', warning=FALSE}
+ 
 reset_lattice()
 
 p1<-barchart(xtabs(~treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
                            cex=.7, between=.7 ),
-             par.settings= set_lattice()) 
+             par.settings= standard_theme()) 
 p2<-barchart(xtabs(~ treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
                            cex=.7, between=.7 ),
-             par.settings=set_lattice_bw()) 
+             par.settings=bw_theme()) 
 p3<-barchart(xtabs(~ treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
                            cex=.7, between=.7 ),
-             par.settings=set_lattice_ggplot()) 
+             par.settings=ggplot_theme()) 
 
 grid.arrange(p1, p2, p3, ncol=3)
 ```
@@ -293,8 +376,8 @@ obj <- update(obj,
                        args = list(list(at = 0:100)))))
 
 p1 <- update(obj, par.settings = custom.theme( ))
-p2 <- update(obj, par.settings = set_lattice(theEconomist.theme()))
-p3 <- update(obj, par.settings = set_lattice_bw(), axis = axis.grid)
+p2 <- update(obj, par.settings = ggplot_theme())
+p3 <- update(obj, par.settings = bw_theme(), axis = axis.grid)
 
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
@@ -309,7 +392,7 @@ Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die Funktio
 
 p1 <- bwplot2(
   yield ~ site,
-  data = barley, groups = year, main="bwplot2()", par.settings = set_lattice_bw(),
+  data = barley, groups = year, main="bwplot2()", par.settings = bw_theme(),
   auto.key = list(points = FALSE, rectangles = TRUE, space = "right")
 
 )
@@ -317,7 +400,7 @@ p1 <- bwplot2(
 p2 <-
   bwplot(
     yield ~ site,
-    barley,groups = year, main="panel.superpose", par.settings = set_lattice_bw(),
+    barley,groups = year, main="panel.superpose", par.settings = bw_theme(),
     auto.key = list(points = FALSE, rectangles = TRUE, space = "right"),
     box.width = 1 / 4,
     panel = function(x, y, groups, subscripts, ...) {
@@ -339,7 +422,7 @@ grid.arrange(p1, p2)
 
 
 
-```{r bwplot, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7}
+```{r bwplot, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7, warning=FALSE}
 
 set_lattice_bw(col=c("gray80", "gray90")) 
 
@@ -363,7 +446,7 @@ bwplot(yield ~ site, data = barley, groups=year,
 
   bwplot(
     yield ~ site,
-    barley, groups = year, main="panel.superpose", par.settings = set_lattice_bw(), 
+    barley, groups = year, main="panel.superpose", par.settings = bw_theme(), 
     auto.key = list( points = FALSE, rectangles = TRUE, space = "right"),
     box.width = 1 / 4,
     panel = function(x, y, groups, subscripts, ...) {
@@ -472,8 +555,6 @@ DF2<- data.frame(
   group= sample(gl(2, 15, labels = c("Control", "Treat")))
 )
 
- 
-
 ```
 
 
@@ -487,14 +568,19 @@ plot(x)
 
 ## cowplot
 
+gridExtra::grid.arrange( )
+
 Zusammen mixen von unterschiedlichen Grafik-Typen.
 
 The cowplot package is a simple add-on to ggplot.
 https://wilkelab.org/cowplot/articles/index.html
 
-```{r cowplot-1, fig.height=4, fig.width= 7}
-library(ggplot2)
-library(cowplot)
+
+
+
+```{r cowplot-1, fig.height=4, fig.width= 7,message=FALSE}
+require(ggplot2)
+require(cowplot)
 require(lattice)
 p1<- ggplot(iris, aes(Sepal.Length, fill = Species)) +
   geom_density(alpha = 0.5) +
@@ -515,7 +601,7 @@ plot_grid(p1, p2,  rel_widths = c(1, 1.5)
 # require(ggplot2)
 # require(cowplot)
 # require(lattice)
- 
+ require(gridGraphics)
 p1 <- function() {
   par(
     mar = c(3, 3, 1, 1),
@@ -531,6 +617,83 @@ ggdraw(p1) +
 ```
 
 
+
+## ggformula
+
+Quelle https://rpruim.github.io/Statistical-Rethinking/Examples/ggformula.html
+
+*gf_point()* for scatter plots
+
+*gf_line()* for line plots (connecting dots in a scatter plot)
+
+*gf_density()* or *gf_dens()* or *gf_histogram()* or *gf_freqpoly()* to display distributions of a quantitative variable
+
+*gf_boxplot()* or *gf_violin()* for comparing distributions side-by-side
+
+*gf_counts()* for bar-graph style depictions of counts.
+
+*gf_bar()* for more general bar-graph style graphics
+
+
+
+```{r ggformula-1, fig.height=7, fig.width=7.5}
+require(ggplot2)
+require(ggformula)
+require(lattice)
+ 
+
+theme_set(theme_bw())
+
+mtcars2 <- within(mtcars, {
+  vs <- factor(vs, labels = c("V-shaped", "Straight"))
+  am <- factor(am, labels = c("Automatic", "Manual"))
+  cyl  <- factor(cyl)
+  gear <- factor(gear)
+})
+#' ggplot
+p1 <- 
+  ggplot(mtcars2) +
+  geom_point(aes(x = wt, y = mpg, colour = gear)) +
+  labs(
+    title = "Fuel economy declines as weight increases",
+    subtitle = "(1973-74)",
+    caption = "Data from the 1974 Motor Trend US magazine.",
+    tag = "ggplot",
+    x = "Weight (1000 lbs)",
+    y = "Fuel economy (mpg)",
+    colour = "Gears"
+  )
+#' ggformula
+p2 <-  
+  gf_point(mpg ~ wt , data = mtcars2, color = ~ gear) +
+  labs(
+    title = "Fuel economy declines as weight increases",
+    subtitle = "(1973-74)",
+    caption = "Data from the 1974 Motor Trend US magazine.",
+    tag = "gf_point",
+    x = "Weight (1000 lbs)",
+    y = "Fuel economy (mpg)",
+    colour = "Gears"
+  )
+#' lattice 
+p3 <- 
+  xyplot(
+    mpg ~ wt,
+    mtcars2,
+    groups = gear,
+    par.settings = bw_theme(farbe(), cex.main = .8, cex.add = .8),
+    grid=TRUE,
+    main = "Fuel economy declines as weight increases\n(1973-74)",
+    sub =  "Data from the 1974 Motor Trend US magazine.",
+    xlab = "Weight (1000 lbs)",
+    ylab = "Fuel economy (mpg)",
+    auto.key = list(space = "right", title = "Gears")
+    
+  )
+
+cowplot::plot_grid(p1, p2, p3, ncol=2)
+
+```
 
 
 
@@ -618,7 +781,7 @@ plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
 
 
 ```{r effect-4, fig.height=2.5, fig.width=5}
-library(emmeans)
+require(emmeans)
 head(pigs)
 pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
 ref_grid(pigs.lm1)
@@ -708,7 +871,7 @@ emmip(ref_grid(pigs.lm2,
 ```
 
 
-```{r effect-8, fig.height=2.5, fig.width=5}
+```{r effect-8, fig.height=2.5, fig.width=5, warning=FALSE}
 
 set_lattice_bw(col = c("coral3", "cyan4", "dodgerblue3"))
 emmip(
@@ -748,7 +911,7 @@ emmip(
 ```
 
 
-```{r effect-10, include=FALSE}
+```{r effect-10, , fig.height=5, fig.width=5}
 
 raw_data <-
   data.frame(
@@ -787,7 +950,7 @@ stripplot(
 
 ### transformation
 
-library(effects)
+require(effects)
  John Fox URL http://www.jstatsoft.org/v32/i01/
 
 ```{r transfom-prepare, include=FALSE}
@@ -878,7 +1041,7 @@ ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
 
 ## GOF-Plots
 
-library(car)
+require(car)
 
 ```{r gof-1, fig.cap='residualPlots', fig.height=5, fig.width= 5}
 car::residualPlots(fit) 
@@ -900,6 +1063,9 @@ car::avPlots(fit)
 
  Patrick Breheny and Woodrow Burchett 
  URL: https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html
+ 
+ 
+ Limitation: plot kann nicht einfach in cowplot::plot_grid integriert werdrn.
 
 
 ```{r visreg-1, fig.cap='visreg', fig.height=3, fig.width= 7, warning=FALSE }
@@ -1079,14 +1245,20 @@ Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
 
 ## ECDF-Plot
 
-```{r, ecdf, fig.height=4, fig.width= 5}
- data(Chem97, package = "mlmRev")
 
- ecdfplot(~gcsescore | factor(score), data = Chem97,
-     groups = gender, 
-     auto.key = list(columns = 2), 
-     subset = gcsescore > 0, 
-     xlab = "Average GCSE Score")
+ecdfplot {latticeExtra}
+
+```{r, ecdf, fig.height=4, fig.width= 5}
+ # data(Chem97, package = "mlmRev")
+ # 
+ # ecdfplot(~gcsescore | factor(score), data = Chem97,
+ #     groups = gender, 
+ #     auto.key = list(columns = 2), 
+ #     subset = gcsescore > 0, 
+ #     xlab = "Average GCSE Score")
+
+data(singer, package = "lattice")
+ecdfplot(~height | voice.part, data = singer)
 ```
 
 
@@ -1201,7 +1373,7 @@ segplot(
 
 
 ```{r , fig.height=4, fig.width= 5}
-library("colorspace")
+require("colorspace")
 
 
 ttnc <- margin.table(Titanic, c(1, 4))
@@ -1248,6 +1420,20 @@ spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
          draw.bands = FALSE, centers = rate.male)
 ```
 
+
+
+## Misc
+
+Speichern von Grafiken als PDF scheitert wen Unicode verwendet wird abhilfe bietet CairoPDF.
+
+```
+require(Cairo)
+
+CairoPDF( paste0(Abb()[3],"-cell-count.pdf"),  width = 7, height =  0.66*8 +.4)
+  plot_grid(p_all, p_cit, p_trns, p_dbd)
+  
+  invisible(dev.off())
+```
 
 
 

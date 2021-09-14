@@ -4,7 +4,7 @@
 #' @param ... Variablen und Daten
 #' @param ylab,xlab default ist ""
 #' @param type c("histogram", "boxplot")
-#' @param par.settings sefault ist  par.settings = stp25output::set_lattice()
+#' @param par.settings sefault ist  par.settings = bw_theme((farbe()))
 #' @param include.n noch nicht implemeniert
 #' @param cex.main,cex.scales Ueberschrift und Scales
 #' @param ncol an grid.arrange
@@ -47,7 +47,29 @@
 #' 
 #' auto_plot(enviro, ozone, radiation, is.windy, wind, by=~smell )
 #'
-auto_plot <- function(...,
+#'
+#'
+ 
+auto_plot<- function(...){
+  UseMethod("auto_plot")
+}
+
+
+#' @rdname auto_plot
+#' @export
+#' 
+#' 
+auto_plot.lm<- function(x, ...){
+ 
+  auto_plot(formula(terms(x)), x$model, ...)
+  
+}
+
+#' @rdname auto_plot
+#' @export
+#' 
+#'
+auto_plot.default <- function(...,
                       origin = 0,
                       xlab = NULL,
                       ylab = NULL,
@@ -65,13 +87,21 @@ auto_plot <- function(...,
                         axis.xlab.padding = list(x = 0),
                         xlab.key.padding = list(x = 0)
                       )),
-                      par.settings = stp25output::set_lattice(),
-                      include.n = TRUE) {
+                      par.settings =  bw_theme(farbe()),
+                      include.n = TRUE,
+                      par.strip.text = NULL,
+                      wrap.main=NULL
+                      
+                      
+                      ) {
   X <- stp25formula::prepare_data2(...)
-  
+     if(!is.null(wrap.main))  X$row_name<- stp25tools::wrap_string( X$row_name, wrap.main)
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
       (length(X$measure.vars) > length(X$group.vars))) {
+    
+ 
+    #cat("\n in multi_av_plot\n")
     res <- multi_av_plot(
       X$data,
       X$measure.vars,
@@ -90,7 +120,9 @@ auto_plot <- function(...,
       lattice.options,
       par.settings,
       include.n,
-      cex.main
+      cex.main,
+      layout,
+      par.strip.text
     )
   }
   else{
@@ -112,7 +144,8 @@ auto_plot <- function(...,
       lattice.options,
       par.settings,
       include.n,
-      cex.main
+      cex.main,
+      layout,par.strip.text
     )
   }
   
@@ -129,6 +162,11 @@ auto_plot <- function(...,
   }
 }
 
+
+
+
+
+
 multi_av_plot <- function(data,
                           measure.vars,
                           group.vars,
@@ -144,7 +182,8 @@ multi_av_plot <- function(data,
                           lattice.options,
                           
                           par.settings,
-                          include.n, cex.main) {
+                          include.n, cex.main,layout,
+                          par.strip.text) {
   z <-  group.vars[1]
   res <- list()
   
@@ -182,6 +221,8 @@ multi_av_plot <- function(data,
             par.settings = par.settings,
             default.scales = default.scales,
             lattice.options = lattice.options,
+            layout=layout, 
+            par.strip.text=par.strip.text,
             xlab = xlab,
             ylab = ylab
           )
@@ -286,6 +327,7 @@ multi_av_plot <- function(data,
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
+              layout=layout,   par.strip.text=par.strip.text,
               xlab = xlab,
               ylab = ylab
             )
@@ -416,6 +458,7 @@ multi_av_plot <- function(data,
               par.settings = par.settings,
               default.scales = default.scales,
               lattice.options = lattice.options,
+              layout=layout,
               xlab = xlab,
               ylab = ylab
             )
@@ -456,7 +499,7 @@ multi_uv_plot <- function(data,
                           lattice.options,
       
                           par.settings,
-                          include.n, cex.main) {
+                          include.n, cex.main,layout,par.strip.text) {
   z <-  group.vars[1]
   res <- list()
   
@@ -564,7 +607,7 @@ multi_uv_plot <- function(data,
 #' #               auto.key = list(lines = TRUE))
 #' marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
 marginal_plot <- function(...,
-                          par.settings = stp25output::set_lattice(),
+                          par.settings = bw_theme(farbe()),
                           auto.key = list(lines = TRUE)) {
   X <- stp25formula::prepare_data2(...)
   groups = X$data[[X$group.vars]]
