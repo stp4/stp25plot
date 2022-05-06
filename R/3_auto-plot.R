@@ -378,7 +378,7 @@ multi_av_plot <- function(data,
             outer = TRUE,
             subscripts = TRUE,
             groups = data[[ z ]],
-            ...,
+           
             plot.points = FALSE,
             ref = TRUE,
             cut = 0,
@@ -389,7 +389,8 @@ multi_av_plot <- function(data,
             default.scales = default.scales,
             lattice.options = lattice.options,
             xlab = xlab,
-            ylab = ylab
+            ylab = ylab, 
+            ...
           )
           
           
