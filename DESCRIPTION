@@ -3,11 +3,11 @@ Title: meine plots
 Authors@R: person("Wolfgang", "Peter", email = "w.peter@statistik-peter.at",  role = c("aut", "cre"))
 Description: Erweiterungen fuer einfache Grafiken. Die meisten sind sind lattice plots.
 License: GPL-3
-Date: 2020-02-17
+Date: 2022-03-30
 Type: Package
-Version: 0.1.3
+Version: 0.1.4
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr

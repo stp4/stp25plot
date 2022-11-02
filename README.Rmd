@@ -7,8 +7,10 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-require(stpvers)
+require(stp25tools)
 require(stp25plot)    # meine Funktionen
+require(stp25stat2)
+require(magrittr)
  lattice::trellis.par.set(bw_theme)
 
 require(lattice)      # Lattice-Plots
@@ -164,7 +166,7 @@ stripplot(
 
 ```{r sig-bar-4, fig.height=4, fig.width=5}
 #require(latticeExtra)
-require(effects)
+#require(effects)
 fit1 <- lm(DC4 ~ time2, data = dat)
  
 p2<- plot(effect("time2", fit1), ylim=c(0,60))
@@ -265,7 +267,7 @@ p3 <- sparkplot(
   #,  char.arrows= c(down= '-', updown='', up= "+" )
 )
 #windows(8,4)
-require(cowplot)
+#require(cowplot)
 plot_grid(p1,  p2,  p3,
           nrow=1,
           rel_widths = c(.7, .5, .5)
@@ -569,6 +571,48 @@ data.frame(
 
 ```
  
+### Balken mit Zahlen
+
+
+
+
+
+```{r balken-1, fig.height=4, fig.width=7}
+ 
+
+set.seed(2)
+
+DF_balk <-
+  data.frame(
+    value = runif(2 * 5, min = 20, max = 80),
+    sex = factor(rep(c("male", "female"), times = 5)),
+    variable = factor(rep(
+      c(
+        n = "Neurotizismus",
+        e = "Extraversion",
+        o = "Offenheit",
+        g = "Gewissenhaftigkeit",
+        a = "Vertraeglichkeit"
+      ),
+      times = 2
+    ))
+  )
+
+ 
+barchart(
+  reorder(variable, value) ~ value,
+  subset(DF_balk, sex == "male"),
+  box.ratio = 2,
+  xlim = c(-5, 100),
+  origin = 0,
+  #' par.settings=colorset,
+  panel = function(...)   {
+    panel.barchart(...)
+    panel.barchart.text(..., digits = 1, suffix = " %")
+  }
+)
+
+```
 
  
 ### Tortendiagramme
@@ -716,9 +760,9 @@ plot_grid(
 
 
 ```{r cowplot-1, fig.height=4, fig.width= 7,message=FALSE}
-require(ggplot2)
-require(cowplot)
-require(lattice)
+#require(ggplot2)
+#require(cowplot)
+#require(lattice)
 p1<- ggplot(iris, aes(Sepal.Length, fill = Species)) +
   geom_density(alpha = 0.5) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.05))) +
@@ -774,9 +818,9 @@ Quelle https://rpruim.github.io/Statistical-Rethinking/Examples/ggformula.html
 
 
 ```{r ggformula-1, fig.height=7, fig.width=7.5}
-require(ggplot2)
+#require(ggplot2)
 require(ggformula)
-require(lattice)
+#require(lattice)
  
 
 theme_set(theme_bw())
@@ -853,7 +897,7 @@ plot(predictorEffects(mod, ~ women+ education),
 
 
 ```{r effect-2, include=FALSE}
-require(stpvers)
+#require(stpvers)
 A = rnorm(100)
 B = rnorm(100, 53, 10)
 C = factor(rep(c("This", "That"), 50))
@@ -1038,31 +1082,6 @@ plot(Effect(c("source", "percent"),
 
 
 
-```{r effect-7, fig.height=2.5, fig.width=5}
- 
-emmip(ref_grid(pigs.lm2, 
-               cov.reduce = FALSE, 
-               transform = "response"), 
-      source ~ percent  #,  CIs=TRUE
-      ) + ggplot2::theme_classic()
-
-```
-
-
-```{r effect-8, fig.height=2.5, fig.width=5, warning=FALSE}
-
- lattice::trellis.par.set(bw_theme(farbe()))
-
-emmip(
-  ref_grid(pigs.lm2,
-           cov.reduce = FALSE,
-           transform = "response"),
-  source ~ percent,
-  engine = "lattice"
-)
-```
-
-
 ```{r effect-9, fig.height=2.5, fig.width=5}
 
 pigs.lm3 <- lm(log(conc) ~ source * percent, data = pigs)
@@ -1171,9 +1190,8 @@ plot(effects::allEffects(fit))
  
 
 ```{r effect-log, fig.height=3, fig.width= 5}
-APA2( ~ log(prestige) + income + type + education,
-      data = Prestige,
-      output = "text")
+Tbll_desc( ~ log(prestige) + income + type + education,
+      data = Prestige)
 mod <- lm(log(prestige) ~ income:type + education, data = Prestige)
 
 # does not work: effect("income:type", mod, transformation=list(link=log, inverse=exp))
@@ -1186,32 +1204,20 @@ plot(Effect(c("income", "type"), mod,
  
  
  
- 
-```{r effect-dots, fig.cap='Effect patial.residuals',fig.height=3, fig.width= 5}
- lattice::trellis.par.set(bw_theme())
-plot(
-  Effect(c("time", "group"), fit,
-         partial.residuals = TRUE),
-  main = FALSE,
-  lty = 0,
-  partial.residuals = list(pch = 16,
-                           col = gray.colors(nrow(DF))[order(DF$serum)])
-)
-```
- 
 
- 
 ## Effectplot mit ggplot
 
-```{reffect-ggplot, fig.cap='Effect ggplot',fig.height=3, fig.width= 5}
+```{r effect-ggplot, fig.cap='Effect ggplot',fig.height=3, fig.width= 5}
  
 Model <- lm(drat~hp*cyl, data=mtcars)
-ef <- effect(term = "hp:cyl", Model, default.levels = 9) # 9 because the breaks are nicer
+
+
+ef <- effects::effect(term = "hp:cyl", Model, default.levels = 9) # 9 because the breaks are nicer
 ef2 <- as.data.frame(ef)
 
 ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
         geom_line() +
-        labs(y = 'drat') + #+  ylim(0, 10)
+        labs(y = 'drat')# + #+  ylim(0, 10)
         jtools::theme_apa()
 ```
 
@@ -1220,9 +1226,11 @@ ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
 
 ## GOF-Plots
 
-require(car)
+
 
 ```{r gof-1, fig.cap='residualPlots', fig.height=5, fig.width= 5}
+require(car)
+
 car::residualPlots(fit) 
 ```
  
@@ -1451,7 +1459,7 @@ data(singer, package = "lattice")
 Lattice xyplot mit Pfeilen und verlaufende Farben.
 
 ```{r , fig.cap='Lattice xyplot mit Pfeilen und verlaufende Farben.',  fig.height=4, fig.width= 5}
-dat <- GetData("
+dat <- stp25tools::get_data("
   variable        value change leverage
      happiness   4.62  -0.42    0.01
     motivation   3.6   -0.41    0.05
@@ -1524,7 +1532,7 @@ panel.arrows2 <- function(x0, y0 , x1, y1,
 
 dat$change <- dat$value + dat$change * dat$value
 dat$centers <- (dat$value + dat$change) / 2
-require(latticeExtra)
+#require(latticeExtra)
 segplot(
   reorder(variable, value) ~ value + change,
   level = leverage,
@@ -1566,7 +1574,7 @@ spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
 
 
 ```{r segplot, fig.height=4, fig.width= 7}
- require(latticeExtra)
+# require(latticeExtra)
  segplot(factor(1:10) ~ rnorm(10) + rnorm(10), level = runif(10))
  
  data(USCancerRates)

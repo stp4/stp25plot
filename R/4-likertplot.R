@@ -8,12 +8,13 @@
 #' @param col HH::brewer.pal.likert
 #' @param wrap Zeien Umbrechen
 #' farbe("likert.blue.red", data$nlevels, middle = ReferenceZero)
-#' @param rightAxis,positive.order,as.percent,ReferenceZero,reference.line.col,col.strip.background
+#' @param rightAxis,as.percent,ReferenceZero,reference.line.col,col.strip.background
 #' an HH:::plot.likert.formula
+#' @param positive.order das nicht verwenden - wird ueber Tbll_likert gesteuert
 #' @param auto.key,columns,space,between   columns = 2,
 #' @param ... HH:::plot.likert.formula
 #'
-#' @return
+#' @return lattice Plot
 #' @export
 #'
 #' @examples
@@ -55,7 +56,7 @@ likertplot <- function(x = Item   ~ . ,
                        xlab = "Prozent",
                        col = NULL,
                        rightAxis = FALSE,
-                       positive.order = TRUE,
+                       positive.order = FALSE, 
                        as.percent = TRUE,
                        auto.key = list(space = space, 
                                        columns = columns,
@@ -95,14 +96,14 @@ likertplot <- function(x = Item   ~ . ,
     if (is.logical(wrap)) {
       if (wrap) {
         attr(data, "plot")$results$Item <-
-          wrap_sentence(as.character(attr(data, "plot")$results$Item),
+          stp25tools:::wrap_sentence(as.character(attr(data, "plot")$results$Item),
                         35)
         
       }
     } 
     else{
       attr(data, "plot")$results$Item <-
-        wrap_sentence(as.character(attr(data, "plot")$results$Item),
+        stp25tools:::wrap_sentence(as.character(attr(data, "plot")$results$Item),
                       wrap)
       
     }

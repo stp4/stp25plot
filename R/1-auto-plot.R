@@ -9,7 +9,7 @@
 #' @param cex.main,cex.scales Ueberschrift und Scales
 #' @param ncol an grid.arrange
 #'
-#' @return nichts
+#' @return lattice Plot
 #' @export
 #'
 #' @examples
@@ -94,7 +94,7 @@ auto_plot.default <- function(...,
                       
                       
                       ) {
-  X <- stp25formula::prepare_data2(...)
+  X <- stp25tools::prepare_data2(...)
      if(!is.null(wrap.main))  X$row_name<- stp25tools::wrap_string( X$row_name, wrap.main)
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
@@ -183,7 +183,8 @@ multi_av_plot <- function(data,
                           
                           par.settings,
                           include.n, cex.main,layout,
-                          par.strip.text) {
+                          par.strip.text,
+                          ...) {
   z <-  group.vars[1]
   res <- list()
   
@@ -591,7 +592,7 @@ multi_uv_plot <- function(data,
 #' @param par.settings,auto.key  an lattice sefault ist  
 #' par.settings = stp25output::set_lattice()
 #'
-#' @return
+#' @return lattice Plot
 #' @export
 #'
 #' @examples
@@ -610,7 +611,7 @@ multi_uv_plot <- function(data,
 marginal_plot <- function(...,
                           par.settings = bw_theme(farbe()),
                           auto.key = list(lines = TRUE)) {
-  X <- stp25formula::prepare_data2(...)
+  X <- stp25tools::prepare_data2(...)
   groups = X$data[[X$group.vars]]
   
   if (!is.factor(groups))

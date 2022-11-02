@@ -47,7 +47,7 @@ nrisk <- function(x,
 #' @param col Color for each stratum.
 #' @param ... an axis gap.axis, cex.axis, col.axis and font.axis
 #'
-#' @return
+#' @return data.frame
 #' @export
 #'
 #' @examples

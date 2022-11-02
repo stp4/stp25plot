@@ -23,6 +23,10 @@ stp25settings::reset_lattice
 #' @export
 stp25settings::set_lattice
 
+ 
+
+
+
 cbPalette <- c(
   orange = "#E69F00",
   skyblue = "#56B4E9",

@@ -171,7 +171,7 @@ prism.plots = function(formula,
 #' @param cex.stars groesse
 #' @param ... nicht benutzt
 #'
-#' @return
+#' @return  plot-text
 #' @export
 #'
 #' @examples

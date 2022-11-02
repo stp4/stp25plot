@@ -283,7 +283,7 @@ gtorte<- function(x,
                   wrap=NULL,
                   ...) {
     require(ggplot2)
-  if(!is.null(wrap)) main <- wrap_sentence(main, wrap)
+  if(!is.null(wrap)) main <- stp25tools:::wrap_sentence(main, wrap)
   n_vars <- length(all.vars(x))
   lhs <-  all.vars(x)[1L]
   rhs <-  all.vars(x)[2L]

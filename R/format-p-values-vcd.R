@@ -10,12 +10,12 @@
 #' @examples 
 #' 
 #' require(vcd)
-#' class(legend_resbased)
-#' assignInNamespace("legend_resbased", stp25plot:::legend_resbased, pos = "package:vcd")
-#' assignInNamespace("shading_hcl", stp25plot:::shading_hcl, pos = "package:vcd")
-#' 
-#' 
-#' 
+#' #' class(legend_resbased)
+#' legend_resbased<-stp25plot::legend_resbased2
+#' shading_hcl <-stp25plot::shading_hcl2
+#' assignInNamespace("legend_resbased", legend_resbased, pos = "package:vcd")
+#' assignInNamespace("shading_hcl", shading_hcl, pos = "package:vcd")
+#' #' 
 #' pst <- function(txt) {
 #'   paste(txt, "n =", n)
 #' }
