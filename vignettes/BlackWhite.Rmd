@@ -1,0 +1,201 @@
+---
+title: "black and white"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{black and white}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]
+---
+
+<!--  {inputenc} -->
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+
+
+
+require(tidyverse)
+require(stp25tools)
+require(stp25plot)
+
+require(emmeans) # for data pigs
+require(effects)
+require(cowplot)
+#require(gridExtra)
+
+
+
+```
+
+## Effect plot
+ 
+
+
+```{r}
+pigs.lm1 <- lm(conc ~ source * percent, data = pigs)
+```
+
+
+```{r}
+axes_setting <-
+  list(
+    x = list(
+      cex = .75,
+      source = list(lab = "Source of protein in the diet"),
+      percent = list(lab = "Protein percentage in the diet")
+      
+    ),
+    x = list(cex = .7),
+    y = list(
+      cex = .7,
+      lab = list("Concentration of free\nplasma leucine, in mcg/m", cex = .8),
+      ticks = list(at = c(20, 40, 60))
+    )
+  )
+```
+ 
+
+
+```{r, ohne-lattice, fig.height=3, fig.width=7, fig.cap= 'effectsTheme ohne lattice'}
+#' Wenn lattice nicht geladen wird wird impliziet
+#' lattice::trellis.par.set(effectsTheme())
+#' aufgerufen
+
+p1 <- plot(effect("source*percent", pigs.lm1), main = "", rug = FALSE)
+
+p2 <- plot(effect("source*percent", pigs.lm1), main = "", rug = FALSE, 
+           factor.names = FALSE,  axes = axes_setting)
+
+plot_grid(p1,
+          update(
+            p2,
+            par.settings = bw_theme(),
+            xlim = c(8, 19),
+            ylim = c(15, 70)
+          ),
+          nrow = 1)
+
+```
+
+```{r, mit-lattice, fig.height=3, fig.width=7, fig.cap= 'lattice'}
+
+#' wenn lattice als erstes aufgerufen wird
+#' library (lattice)
+#' dann passiert folgendes
+
+lattice::trellis.par.set(standard_theme())
+
+p3 <- plot(effect("source*percent", pigs.lm1), main = "",  rug = FALSE)
+p4 <- plot(effect("source*percent", pigs.lm1), main = "", rug = FALSE,
+           axes = axes_setting, factor.names = FALSE)
+
+plot_grid(p3,
+          update(
+            p4,
+            par.settings = bw_theme(),
+            xlim = c(8, 19),
+            ylim = c(15, 70)
+          ),
+          nrow = 1)
+
+```
+
+ 
+```{r, repatur-lattice, fig.height=6, fig.width=7, fig.cap= 'lattice'}
+lattice::trellis.par.set(standard_theme())
+
+#' und endgueltig bekommt man die Grafik
+#' in Schrarz/Weiss
+ 
+lattice::trellis.par.set(bw_theme())
+ 
+p6 <- plot(effect("source*percent", pigs.lm1), main = "", rug = FALSE, 
+           axes = axes_setting, factor.names = FALSE)
+
+plot_grid(
+  update(p1, layout = c(3, 1)),
+  update(p3, layout = c(3, 1)),
+  
+  update(
+    p6,
+    par.settings = bw_theme(),
+    xlim = c(8, 19),
+    ylim = c(15, 70),
+    layout = c(3, 1)
+  ),
+  labels = c('p1', 'p3', 'p6'),
+  nrow = 2
+)
+ 
+```
+
+
+
+```{r gridExtra-lattice, fig.height=3, fig.width=7, fig.cap= 'lattice'}
+#require(gridExtra)
+gridExtra::grid.arrange( 
+  p1,
+  update(p6,
+            par.settings = bw_theme(),
+            xlim = c(8, 19),
+            ylim = c(15, 70)
+          ),
+          nrow = 1)
+
+```
+
+
+
+
+##  Mosaic-plot
+
+
+
+```{r mosaik-1, fig.height=4, fig.width=5, fig.cap= 'mosaic'}
+require(vcd)
+mosaic(~ Sex + Age + Survived, data = Titanic,
+       main = "Survival on the Titanic",
+       shade = TRUE, 
+       legend = TRUE)
+
+
+```
+
+
+```{r mosaik-bw, fig.height=4, fig.width=5, fig.cap= 'mosaik-bw'}
+
+
+mosaic(
+  ~ Sex + Age + Survived, data = Titanic,
+  shade = TRUE,
+  legend = TRUE,
+   main = "Survival on the Titanic",
+  varnames = FALSE,
+
+  gp = shading_hcl,
+  gp_args = list(
+    interpolate = function(x)  pmin(x / 10, 1),
+    c = 0,
+    lty = 1:2
+  ),
+  
+  gp_labels = gpar(fontsize = 10), 
+  labeling_args = list(abbreviate_labs = c(3, 4, 2)),
+  labeling = labeling_residuals, 
+    gp_text  =  gpar(fontsize = 9)
+ # labeling=labeling_left  ?labeling_border
+)
+
+
+```
+
+
+Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. 
+
