@@ -90,12 +90,15 @@ auto_plot.default <- function(...,
                       par.settings =  bw_theme(farbe()),
                       include.n = TRUE,
                       par.strip.text = NULL,
-                      wrap.main=NULL
+                      wrap.main=NULL,
+                      bar.percent = FALSE
                       
                       
                       ) {
   X <- stp25tools::prepare_data2(...)
-     if(!is.null(wrap.main))  X$row_name<- stp25tools::wrap_string( X$row_name, wrap.main)
+  
+  if(!is.null(wrap.main))  X$row_name<- stp25tools::wrap_string( X$row_name, wrap.main)
+  
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
       (length(X$measure.vars) > length(X$group.vars))) {
@@ -122,7 +125,8 @@ auto_plot.default <- function(...,
       include.n,
       cex.main,
       layout,
-      par.strip.text
+      par.strip.text,
+      bar.percent
     )
   }
   else{
@@ -145,7 +149,8 @@ auto_plot.default <- function(...,
       par.settings,
       include.n,
       cex.main,
-      layout,par.strip.text
+      layout,par.strip.text,
+      bar.percent
     )
   }
   
@@ -184,6 +189,7 @@ multi_av_plot <- function(data,
                           par.settings,
                           include.n, cex.main,layout,
                           par.strip.text,
+                          bar.percent,
                           ...) {
   z <-  group.vars[1]
   res <- list()
@@ -208,7 +214,13 @@ multi_av_plot <- function(data,
       }
       else if (measure[i] == "factor" | measure[i] == "bar") {
         
-        tab <- as.data.frame(xtabs(formula(paste("~", y)), data))
+        tab <-  xtabs(formula(paste("~", y)), data)
+        if (bar.percent) {
+          tab <- as.data.frame(prop.table(tab,2)*100)
+          if(is.null(ylab)) ylab<- "percent"
+          
+          }
+        else tab <- as.data.frame(tab)
         
         res[[i]] <-
           lattice::barchart(
@@ -310,12 +322,15 @@ multi_av_plot <- function(data,
             )
         }
         else if ( measure[i]=="factor"  | measure[i] == "bar" ) {
-          tab <-
-            as.data.frame(xtabs(formula(paste(
-              "~", y, "+", z
-            )), data))
+        
+          tab <- xtabs(formula(paste("~", y, "+", z)), data)
+          if (bar.percent) {
+            tab <- as.data.frame(prop.table(tab,2)*100)
+            if(is.null(ylab)) ylab<- "percent"
+          }
+          else tab <- as.data.frame(tab)
           
-          print(tab)
+        #  print(tab)
           res[[i]] <-
             lattice::barchart(
               formula(paste("Freq~", y, "|", z)),
@@ -501,7 +516,11 @@ multi_uv_plot <- function(data,
                           lattice.options,
       
                           par.settings,
-                          include.n, cex.main,layout,par.strip.text) {
+                          include.n, 
+                          cex.main,layout,
+                          par.strip.text,
+                          bar.percent 
+                          ) {
   z <-  group.vars[1]
   res <- list()
   
@@ -526,11 +545,16 @@ multi_uv_plot <- function(data,
           )
         
       }
-      else if (measure[i] == "factor") {
+      else if (measure[i] == "factor" | measure[i] == "bar") {
         tab <-
           as.data.frame(xtabs(formula(paste(
             "~", z, "+", y
           )), data))
+        
+        
+         
+          if (bar.percent) tab <- as.data.frame(prop.table(tab,2)*100)
+          else tab <- as.data.frame(tab)
         
         res[[i]] <-
           lattice::barchart(
