@@ -8,6 +8,7 @@
 #' @param include.n noch nicht implemeniert
 #' @param cex.main,cex.scales Ueberschrift und Scales
 #' @param ncol an grid.arrange
+#' @param grid.arrange  logical Arrange multiple grobs on a page
 #'
 #' @return lattice Plot
 #' @export
@@ -47,9 +48,23 @@
 #' 
 #' auto_plot(enviro, ozone, radiation, is.windy, wind, by=~smell )
 #'
+#' p1 <-
+#' auto_plot(enviro,
+#'           ozone,
+#'           radiation,
+#'           is.windy,
+#'           wind,
+#'           smell,
+#'           temperature,
+#'           grid.arrange = FALSE)
+#' 
+#' 
+#' for (i in seq_along(p1)) {
+#'   cat("\n",  names(p1[i]))
+#'   print(p1[[i]])
+#'   #  SavePlot(  names(p1[i]) , w=3.6, h=2.9)
+#' }
 #'
-#'
- 
 auto_plot<- function(...){
   UseMethod("auto_plot")
 }
@@ -77,11 +92,12 @@ auto_plot.default <- function(...,
                       cex.main = 1,
                       cex.scales = 0.75,
                       ncol = NULL,
-                      
                       default.scales = list(abbreviate = TRUE,
                                             minlength = 5,
                                             cex = cex.scales),
-                      #   relation = "free",rot = 30,tick.number = 3, y = list(draw = FALSE)
+                      # relation = "free",
+                      # rot = 30,tick.number = 3, 
+                      # y = list(draw = FALSE)
                       layout = NULL,
                       lattice.options = list(layout.heights = list(
                         axis.xlab.padding = list(x = 0),
@@ -91,7 +107,8 @@ auto_plot.default <- function(...,
                       include.n = TRUE,
                       par.strip.text = NULL,
                       wrap.main=NULL,
-                      bar.percent = FALSE
+                      bar.percent = FALSE,
+                      grid.arrange = TRUE# Arrange multiple grobs on a page
                       
                       
                       ) {
@@ -155,16 +172,22 @@ auto_plot.default <- function(...,
   }
   
   
-  
-  if (length(res) > 0) {
-    if (is.null(ncol))
-      ncol <- ifelse(length(res) < 4, length(res),
-                     ifelse(length(res) < 10, 3, 4))
-    gridExtra::grid.arrange(grobs = res, ncol = ncol)
+  if (grid.arrange) {
+    if (length(res) > 0) {
+      if (is.null(ncol))
+        ncol <- ifelse(length(res) < 4, length(res),
+                       ifelse(length(res) < 10, 3, 4))
+      gridExtra::grid.arrange(grobs = res, ncol = ncol)
+    }
+    else {
+      plot(1)
+    }
   }
   else {
-    plot(1)
+    names(res) <- X$measure.vars
+    res
   }
+  
 }
 
 
