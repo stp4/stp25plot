@@ -62,12 +62,16 @@ bwplot2 <- function(...,
                     auto.key = list(),
                     box.width = 1 / 4,
                     space_between = 1.2,
-                    par.settings = list(superpose.symbol = list(fill = lattice::trellis.par.get()$superpose.symbol$col)),
+                    par.settings = list(
+                      superpose.symbol = list(
+                        fill = 
+                          lattice::trellis.par.get()$superpose.symbol$col)),
                     panel = function(...) {
                       dots <- list(...)
-                      lattice::panel.superpose(...,
-                                               space_between = space_between,
-                                               nlevels = nlevels(dots$groups))
+                      lattice::panel.superpose(
+                        ...,
+                        space_between = space_between,
+                        nlevels = nlevels(dots$groups))
                     },
                     panel.groups = panel.bwplot.groups) {
   
@@ -84,7 +88,8 @@ bwplot2 <- function(...,
   
 }
 #' @rdname bwplot2
-#' @details Die Funktion kann nicht mit den funktionen von lattice kombiniert werden.
+#' @details Die Funktion kann nicht mit den 
+#' funktionen von lattice kombiniert werden.
 #'
 panel.bwplot.groups <- function(x,
                                 y,
