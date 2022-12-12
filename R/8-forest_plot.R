@@ -551,13 +551,13 @@ ggplot_table <- function(gparam,
     
     gparam <- transform(
       gparam,
-      stars = ifelse(p.value < 0.001, "p<.001", stp25rndr::rndr_P(p.value)),
+      stars = ifelse(p.value < 0.001, "p<.001", stp25stat2:::rndr_P(p.value)),
       est = ifelse(is.na(estimate), refLabel, 
                    stp25stat2::render_f(exp(estimate), digits = digits)),
       ci = ifelse(
         is.na(estimate),
         "",
-        stp25rndr::rndr_CI(exp(gparam[c("conf.low", "conf.high")]),
+        stp25stat2:::rndr_CI(exp(gparam[c("conf.low", "conf.high")]),
                            digits, " -", "(", ")")
       ),
       N = ifelse(is.na(N), "", paste0("(N=", N, ")"))
@@ -585,13 +585,13 @@ ggplot_table <- function(gparam,
     
     gparam <- transform(
       gparam,
-      stars = ifelse(p.value < 0.001, "p<.001", stp25rndr::rndr_P(p.value)),
+      stars = ifelse(p.value < 0.001, "p<.001", stp25stat2:::rndr_P(p.value)),
       est = ifelse(is.na(estimate), refLabel, 
                    stp25stat2::render_f(estimate, digits = digits)),
       ci = ifelse(
         is.na(estimate),
         "",
-        stp25rndr::rndr_CI((gparam[c("conf.low", "conf.high")]),
+        stp25stat2:::rndr_CI((gparam[c("conf.low", "conf.high")]),
                            digits, " -", "(", ")")
       ),
       N = ifelse(is.na(N), "", paste0("(N=", N, ")"))
