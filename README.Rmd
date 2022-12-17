@@ -222,7 +222,7 @@ DF_sprk <- data.frame(
 )
 DF_sprk <- transform(DF_sprk,
                 x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
-DF_sprk1 <- stp25aggregate::Summarise(DF_sprk, x~ Laborwert+ Time, fun=mean )
+DF_sprk1 <-  Summarise(DF_sprk, x ~ Laborwert + Time, fun=mean )
 names(DF_sprk1)[4]<- "x"
 #DF_sprk<- DF_sprk[-3]
 ```
@@ -314,6 +314,135 @@ DF %>% auto_plot(
 auto_plot(treatment ~ n + e + sex, DF)
 
 ```
+
+```{r, include=FALSE}
+enviro <- lattice::environmental
+
+enviro2 <- transform(
+  enviro,
+  smell = cut(
+    enviro$ozone,
+    breaks = c(0, 30, 50, Inf),
+    labels = c("ok", "hm", "yuck"),
+    ordered = TRUE
+  ),
+  is.windy =   factor(wind > 10, c(TRUE, FALSE), labels = c("windy", "calm")
+  )
+) %>% Label(
+  ozone=" Average ozone concentration (of hourly measurements)",
+   radiation = "Solar radiation (from 08:00 to 12:00)",
+  temperature = "Maximum daily temperature",
+  wind = "Average wind speed (at 07:00 and 10:00)",
+  smell = "Smell of ozone"
+  
+)
+head(enviro2)
+```
+
+```{r}
+auto_plot(
+  enviro2,
+  ozone[hist],
+  radiation,
+  smell,
+  temperature,
+  by =  ~ is.windy,
+  col.bar=  farbe("Blues")[3],
+  ylab= c("ppb", "langleys",  "%",  "F"),
+  include.percent=TRUE,
+  wrap.main=30
+ # levels.logical = c(TRUE, FALSE),
+#  labels.logical = c("ja", "nein")
+)
+```
+
+
+```{r, include=FALSE}
+ 
+dat2 <- get_data(
+  "
+comp_0 comp_1 comp_2 comp_3 comp_4 comp_5 comp_6 comp_7 comp_8 gender
+    TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
+   FALSE   TRUE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE   FALSE   Male
+   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE Female
+   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
+   FALSE  FALSE   TRUE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   Male
+   FALSE   TRUE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
+   FALSE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
+   FALSE  FALSE   TRUE  FALSE   TRUE  FALSE   TRUE  FALSE   FALSE   Male
+   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
+   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
+  FALSE  FALSE  FALSE   TRUE   TRUE  FALSE  FALSE  FALSE   TRUE Female
+  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE Female
+  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
+  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   FALSE Female
+  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE   TRUE   FALSE   Male
+   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
+  FALSE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE   Male
+   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
+  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
+   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE   Male
+  FALSE  FALSE   TRUE   TRUE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
+  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
+  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   FALSE Female
+  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
+  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE  FALSE   TRUE   Male
+  FALSE   TRUE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE   TRUE Female
+  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
+  FALSE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE   Male
+   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE Female
+  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE Female
+"
+) %>% Label(
+  comp_0  =     "A+"   ,
+  comp_1  =  "Heart Failure"  ,
+  comp_2  = "Rhythm Abnormality" ,
+  comp_3   = "Valve Dysfunction" ,
+  comp_4  = "Bleeding with OAC" ,
+  comp_5   =  "ACS"  ,
+  comp_6   =   "Neurological Event",
+  comp_7  = "Neoplastic Disease",
+  comp_8   =    "Others",
+  gender  =     "Gender" 
+)
+
+
+
+
+```
+
+
+
+Mehrfachantworten mit  multi_barplot().
+
+```{r}
+
+# dat2[1:5] %>% 
+#   multi_barplot()
+# 
+# dat2 %>%  
+#   multi_barplot(. ~ gender,
+#                 reorder = TRUE,
+#                 last = c("Others" ))
+# 
+# dat2[1:5] %>% 
+#   auto_plot()
+# 
+# dat2 %>%
+#   auto_plot(. ~ gender)
+
+
+dat2 %>%  auto_plot(comp_1, comp_2, comp_3 , 
+                    include.percent=TRUE,
+                    include.reorder=TRUE,
+                    main ="Complicationen",
+                    xlab= "Prozent")
+
+
+```
+
+
+
 
 ### set_lattice()
 
@@ -1218,7 +1347,7 @@ ef2 <- as.data.frame(ef)
 ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
         geom_line() +
         labs(y = 'drat')# + #+  ylim(0, 10)
-        jtools::theme_apa()
+        # + jtools::theme_apa()
 ```
 
 
