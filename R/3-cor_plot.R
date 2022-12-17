@@ -132,7 +132,7 @@ corr_plot.data.frame <- function(x,   ...,
 #                          ...) {
 #   data <- dapply2(data, function(x)
 #     as.numeric(x))
-#  # dat <- stp25aggregate::Melt2(data, id.vars = 1)
+#  # dat <- stp25tools::Melt2(data, id.vars = 1)
 #   dat <- tidyr::gather(data, key = "variable",  value = "value",-1)
 #   
 #   names(dat)[1] <- "y"

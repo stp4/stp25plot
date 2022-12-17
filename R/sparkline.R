@@ -24,7 +24,7 @@
 #' )
 #' DF <- transform(DF,
 #'                 x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
-#' DF1 <- stp25aggregate::Summarise(DF, x~ Laborwert+ Time, fun=mean )
+#' DF1 <- stp25tools::Summarise(DF, x~ Laborwert+ Time, fun=mean )
 #' 
 #' names(DF1)[4]<- "x"
 #' #         )
@@ -365,7 +365,7 @@ draw_arrow<- function(x, y,
 #' )
 #' DF <- transform(DF,
 #'                 x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
-#' DF1 <- stp25aggregate::Summarise(DF, x~ Laborwert+ Time, fun=mean )
+#' DF1 <- stp25tools::Summarise(DF, x~ Laborwert+ Time, fun=mean )
 #' names(DF1)[4]<- "x"
 #' 
 #' #: "p", "l", "h", "b", "o", "s", "S", "r", "a", "g"

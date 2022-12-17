@@ -430,8 +430,8 @@ extract_pvalue <- function(x) {
 #getOption("contrasts") == c("contr.treatment", "contr.poly" )
   
   
-  rslt$p <- stp25rndr::rndr_P(rslt$p.value)
-  rslt$stars <- stp25rndr::rndr_Stars(rslt$p.value)
+  rslt$p <- stp25stat2:::rndr_P(rslt$p.value)
+  rslt$stars <- stp25stat2:::rndr_Stars(rslt$p.value)
   list(p.value = rslt[which(rslt$p.value <= .1), ],
        levels = levs)
 }
