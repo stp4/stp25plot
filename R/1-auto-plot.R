@@ -112,14 +112,41 @@ auto_plot.default <- function(...,
                       include.n = TRUE,
                       par.strip.text = NULL,
                       wrap.main=NULL,
-                      bar.percent = FALSE,
+                     
+                     
+                 
                       grid.arrange = TRUE, # Arrange multiple grobs on a page
                       levels.logical = c(TRUE, FALSE),
-                      labels.logical = levels.logical
+                      labels.logical = levels.logical,
                       
+                      include.percent =FALSE,
+                      # multi_barplot
+                      include.reorder = FALSE,
+                      include.reorder.last = NULL,
+        
+                      main=""
                       
                       ) {
   X <- stp25tools::prepare_data2(...)
+  
+  
+  if (all(sapply(X$data[X$measure.vars], class) == "logical")){
+     
+ 
+    
+    return(
+      multi_barplot(
+        ...,
+        reorder = include.reorder,
+        last = include.reorder.last,
+        main = main,
+        #   ylab = ylab,
+        include.percent = include.percent,
+        origin = origin,
+        xlab =  if (is.null(xlab)) {if (include.percent) "Percent" else "Count"} else xlab
+      ))
+  }
+  
   
   if (!is.null(wrap.main))
     X$row_name <- stp25tools::wrap_string(X$row_name, wrap.main)
@@ -134,8 +161,12 @@ auto_plot.default <- function(...,
       (length(X$measure.vars) > length(X$group.vars))) {
     
     
-    cat("\n in multi_av_plot\n")
-    print(xlab)
+    
+    
+     cat("\n in multi_av_plot\n")
+    
+
+  #  print(xlab)
     
     res <- multi_av_plot(
       X$data,
@@ -158,7 +189,7 @@ auto_plot.default <- function(...,
       cex.main,
       layout,
       par.strip.text,
-      bar.percent,
+      include.percent,
       levels.logical,
       labels.logical
     )
@@ -168,8 +199,8 @@ auto_plot.default <- function(...,
     if (is.null(xlab))
       xlab <-  rep(X$col_name[1], length(X$measure.vars))
     
-    cat("\n in multi_uv_plot\n")
-    print(xlab )
+  #  cat("\n in multi_uv_plot\n")
+#    print(xlab )
     res <- multi_uv_plot(
       X$data,
       X$group.vars,
@@ -190,7 +221,7 @@ auto_plot.default <- function(...,
       include.n,
       cex.main,
       layout,par.strip.text,
-      bar.percent,
+      include.percent,
       levels.logical,
       labels.logical
     )
@@ -237,7 +268,7 @@ multi_av_plot <- function(data,
                           par.settings,
                           include.n, cex.main,layout,
                           par.strip.text,
-                          bar.percent,
+                          include.percent,
                           levels.logical,
                           labels.logical,
                           ...) {
@@ -273,7 +304,7 @@ multi_av_plot <- function(data,
         if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
         tab <-  xtabs(formula(paste("~", y)), data)
         
-        if (bar.percent) {
+        if (include.percent) {
           tab <- as.data.frame(prop.table(tab,2)*100)
           if(is.null(ylab)) ylab<- "percent"
           
@@ -382,7 +413,7 @@ multi_av_plot <- function(data,
         else if ( measure[i]=="factor"  | measure[i] == "bar" | measure[i] == "logical" ) {
           if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
           tab <- xtabs(formula(paste("~", y, "+", z)), data)
-          if (bar.percent) {
+          if (include.percent) {
             tab <- as.data.frame(prop.table(tab,2)*100)
             if(is.null(ylab)) ylab <- "percent"
           }
@@ -576,7 +607,7 @@ multi_uv_plot <- function(data,
                           include.n, 
                           cex.main,layout,
                           par.strip.text,
-                          bar.percent,
+                          include.percent,
                           levels.logical,
                           labels.logical
                           ) {
@@ -615,7 +646,7 @@ multi_uv_plot <- function(data,
         
         
          
-          if (bar.percent) tab <- as.data.frame(prop.table(tab,2)*100)
+          if (include.percent) tab <- as.data.frame(prop.table(tab,2)*100)
           else tab <- as.data.frame(tab)
         
         res[[i]] <-

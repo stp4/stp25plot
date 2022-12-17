@@ -12,7 +12,7 @@
 #' @param ... an Summarise
 #' @param reorder,last  an reorder2
 #' @param main,ylab,origin,xlab an Lattice
-#' @param percent summary
+#' @param include.percent summary
 #' @return lattice plot
 #' @export
 #'
@@ -40,25 +40,25 @@
 multi_barplot <- function(...,
                           reorder = FALSE,
                           last = NULL,
-                          main = "",
+                          main = NULL,
                           
                           ylab = "",
-                          percent = FALSE,
+                          include.percent = FALSE,
                           origin = 0,
-                          xlab = if (percent) "Percent" else "Count") {
+                          xlab = if (include.percent) "Percent" else "Count") {
   dat <-
     stp25stat2::Summarise(
       ...,
       fun = function(x) {
         x <- as.numeric(na.omit(x))
-        if (percent)
+        if (include.percent)
           mean(x) * 100
         else
           sum(x)
       }
     )
   
-  
+
   if (reorder)
     dat$variable <-
       stp25tools::reorder2(dat$variable, dat$value, last = last)
@@ -70,7 +70,8 @@ multi_barplot <- function(...,
     lattice::barchart(formula(fm),
                           dat,
                           origin = origin,
-                          xlab = xlab)
+                          xlab = xlab,
+                          main=main)
   
   return(p)
 }
