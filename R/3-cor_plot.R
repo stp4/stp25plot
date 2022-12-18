@@ -197,10 +197,10 @@ corr_pairs <- function(data,
       test <- cor.test(x, y, na.action = na.omit, method = method)
       r <- test$estimate
       
-      txt <- format(c(r, 0.123456789), digits = digits)[1]
+      txt <- formatC(r, digits = digits, format = "f")
       txt <- paste(prefix, txt, sep = "")
       
-      txt.cex <- format(c(abs(r), 0.123456789), digits = digits)[1]
+      txt.cex <- formatC(abs(r), digits = digits, format = "f")
       txt.cex <- paste(prefix, txt.cex, sep = "")
       
       if (is.null(cex.cor))
