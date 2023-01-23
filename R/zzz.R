@@ -26,33 +26,33 @@ stp25settings::set_lattice
  
 
 
-
-cbPalette <- c(
-  orange = "#E69F00",
-  skyblue = "#56B4E9",
-  green = "#009E73",
-  yellow = "#F0E442",
-  blue = "#0072B2",
-  vermillion = "#D55E00",
-  purple = "#CC79A7"
-  # "#66C2A5",
-  # "#FC8D62",
-  # "#8DA0CB",
-  # "#E78AC3",
-  # "#A6D854" ,
-  # "#FFD92F",
-  # "#E5C494",
-  # "#B3B3B3",
-  # "#1B9E77" ,
-  # "#D95F02",
-  # "#7570B3" ,
-  # "#E7298A" ,
-  # "#66A61E" ,
-  # "#E6AB02" ,
-  # "#A6761D",
-  # "#666666"
-
-)
+# 
+# cbPalette <- c(
+#   orange =   "#E69F00",
+#   skyblue =  "#56B4E9",
+#   green =    "#009E73",
+#   yellow =   "#F0E442",
+#   blue =     "#0072B2",
+#   vermillion="#D55E00",
+#   purple =   "#CC79A7",
+#              "#66C2A5",
+#              "#FC8D62",
+#              "#8DA0CB",
+#              "#E78AC3",
+#              "#A6D854" ,
+#              "#FFD92F",
+#              "#E5C494",
+#              "#B3B3B3",
+#              "#1B9E77" ,
+#              "#D95F02",
+#              "#7570B3" ,
+#              "#E7298A" ,
+#              "#66A61E" ,
+#              "#E6AB02" ,
+#              "#A6761D",
+#              "#666666"
+# 
+# )
 
 useLabels<- function(x,
                      lbl=NULL,
@@ -99,4 +99,5 @@ to_table <- function(x, data, drop.unused.levels = FALSE, ...) {
   merge(df_freq, df_perc, by = 1:n, sort = FALSE)
 }
 
-
+is.odd <- function(x)
+  trunc(x) - x == 0
