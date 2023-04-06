@@ -14,6 +14,49 @@
 #' @export
 #'
 #' @examples
+#' 
+#'  # Create test data.
+#' data <- data.frame(
+#'   category=c("Granulocytes", "CD3+", "CD56+",  "CD19+", "Monocytes"),
+#'   count=c(80,10,5,3,2)
+#' )
+#' 
+#' # Compute percentages
+#' data$fraction <- data$count / sum(data$count)
+#' # Compute the cumulative percentages (top of each rectangle)
+#' data$ymax <- cumsum(data$fraction)
+#' # Compute the bottom of each rectangle
+#' data$ymin <- c(0, head(data$ymax, n=-1))
+#' # Compute label position
+#' data$labelPosition <- (data$ymax + data$ymin) / 2
+#' # Compute a good label
+#' #data$label <- paste0(data$category, "\n value: ", data$count)
+#' 
+#' # Make the plot
+#' Plot_D <-ggplot(data, 
+#'                 aes(ymax=ymax, ymin=ymin, xmax=4, xmin=2, 
+#'                     fill=category)) +
+#'   geom_rect() +
+#'   # geom_text( x=2, 
+#'   #            aes(y=labelPosition, 
+#'   #                label=label, 
+#'   #                color=1), size=6) + # x here controls label position (inner / outer)
+#'   scale_fill_manual(
+#'     values = 
+#'       c("#918E00","#00F801","#FF2600","#0433FF","#FE9300")) +
+#'   coord_polar(theta="y") +
+#'   xlim(c(-1, 4)) +
+#'   theme_void() +
+#'   theme(legend.position = "top") +
+#'   labs(title = "Leukocyte composition 1h NMP") +
+#'   theme(legend.title = element_blank(),# element_text(size=12, color = "salmon", face="bold"),
+#'         legend.justification=c(0,1), 
+#'         legend.position=c(0.4, 0.7),
+#'         legend.background = element_blank(),
+#'         legend.key = element_blank()
+#'   )  
+#' 
+#' 
 #' # require(stpvers)
 #' 
 #' set.seed(2)
@@ -281,6 +324,14 @@ gtorte<- function(x,
                 #  auto.key = NULL,#list(space = "bottom", columns = 2),
                 #  orientation = NULL,
                   wrap=NULL,
+                cbPalette= c(
+                  orange     = "#E69F00",
+                  skyblue    = "#56B4E9",
+                  green      = "#009E73",
+                  yellow     = "#F0E442",
+                  blue       = "#0072B2",
+                  vermillion = "#D55E00",
+                  purple     = "#CC79A7"),
                   ...) {
     require(ggplot2)
   if(!is.null(wrap)) main <- stp25tools:::wrap_sentence(main, wrap)
