@@ -237,15 +237,17 @@ prepare_forest <- function(...,
 #' @param scale.log fuer die Beschriftung
 #'
 #' @return data.frame
+#' 
+#' 
 prepare_forest1 <- function(x,
-                        data = insight::get_data(x),  
-                        main = NULL,
-                        include.indercept = TRUE,
-                        include.referenze = include.referenze,
-                        include.label=FALSE,
-                        standardize = FALSE,  
-                        scale.log = FALSE
-                   ) {
+                            data = insight::get_data(x),  
+                            main = NULL,
+                            include.indercept = TRUE,
+                            include.referenze = include.referenze,
+                            include.label=FALSE,
+                            standardize = FALSE,  
+                            scale.log = FALSE
+) {
   stopifnot(!is.null(data))
   
   model <- stp25stat2::model_info(x)
@@ -294,73 +296,73 @@ prepare_forest1 <- function(x,
   allTerms <-
     lapply(seq_along(terms),
            function(i) {
-             #  print(i)
              var <- names(terms)[i]
-             #  print(var)
              if (terms[i] %in% c("factor", "character")) {
-               
                adf <- as.data.frame(table(data[, var]))
-               # print(adf)
-               cbind(var = var,
-                     adf,
-                     pos = 1:nrow(adf)) }
+               
+               rst <- cbind(var = var,
+                            adf,
+                            pos = 1:nrow(adf))
+             }
              
              else if (terms[i] == "numeric") {
-               data.frame(
+               rst <- data.frame(
                  var = var,
                  Var1 = "",
                  Freq = model$N,
                  pos = 1,
-                 stringsAsFactors = FALSE)}
-             
+                 stringsAsFactors = FALSE
+               )
+             }
              else if (terms[i] %in% c("interaction")) {
-               
-               #' Es fehlen noch die N 
+               #' Es fehlen noch die N
                #' sowie die Referenz ist noch nicht vorhanden
-               #' 
+               #'
                
                # datx <- model.matrix(x)
                ix <- colnames(model.matrix(x))
                ax <- stringr::str_split(var, "\\:")[[1]]
                
-               #' am Ende $  
+               #' am Ende $
                #' aber name kann auch bei factoren dazischen liegen
-               #' 
+               #'
                # matches <-
-               #   grep(paste0("^", ax[1], ".*\\:", ax[2], "$"), ix, 
+               #   grep(paste0("^", ax[1], ".*\\:", ax[2], "$"), ix,
                #        ignore.case = TRUE)
                matches <-
-                 grep(paste0("^", ax[1], ".*\\:", ax[2]), ix, 
+                 grep(paste0("^", ax[1], ".*\\:", ax[2]), ix,
                       ignore.case = TRUE)
                
                vars <- ix[matches]
                
-               data.frame(var = vars,
-                          Var1 = "",
-                          Freq = NA,
-                          pos = seq_along(var),
-                          stringsAsFactors = FALSE)
+               rst <- data.frame(
+                 var = vars,
+                 Var1 = "",
+                 Freq = NA,
+                 pos = seq_along(var),
+                 stringsAsFactors = FALSE
+               )
              }
              else {
                vars = grep(paste0("^", var, "*."), coef$term, value = TRUE)
-               
-               
-               data.frame(
+               rst <- data.frame(
                  var = vars,
                  Var1 = "",
                  Freq = model$N,
                  pos = seq_along(vars),
-                 stringsAsFactors = FALSE)}
+                 stringsAsFactors = FALSE
+               )
+             }
+             names(rst) <- c("var", "level", "N", "pos")
+             rst
            })
   
-  
-  # print(terms)
+
   
   allTermsDF <- do.call(rbind, allTerms)
   
-  colnames(allTermsDF) <- c("var", "level", "N", "pos")
-  
-  # print(allTermsDF)
+
+
   inds <- apply(allTermsDF[, 1:2], 1, paste0, collapse = "")
   
   rownames(coef) <- gsub("\\[T\\.", "",
@@ -407,7 +409,7 @@ prepare_forest1 <- function(x,
     gparam$var <- dplyr::recode(gparam$var, !!!include.label)
   
   gparam$term<- paste0(gparam$var, ": ", gparam$level) 
- 
+  
   gparam <- gparam[c(
     "term","var","level","N",
     "estimate",
@@ -419,6 +421,9 @@ prepare_forest1 <- function(x,
   attr(gparam, "caption") <-  main
   gparam
 }
+
+
+
 
 
 
