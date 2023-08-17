@@ -83,8 +83,7 @@ likertplot <- function(x = Item   ~ . ,
                        horizontal = TRUE,
                        between = list(x = 1 + (horizontal), 
                                       y = 0.5 +2 * (!horizontal)),
-                     #  between.key = 1,
-                       ...) {
+                      ...) {
   name_item <- "Item"
   
   if(is.null(data)){
@@ -168,6 +167,7 @@ likertplot <- function(x = Item   ~ . ,
 #' @rdname likertplot
 #'
 #' @param ... an Tbll_likert
+#' @param output Tabelle ausgeben
 #'
 #' @return HH likertplot
 #' @export
@@ -177,6 +177,7 @@ likertplot <- function(x = Item   ~ . ,
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers)
 #' 
 likert_plot <- function(...,
+                        include.total=FALSE,
                         main = '',
                         ylab = "",
                         sub = "",
@@ -199,10 +200,12 @@ likert_plot <- function(...,
                         horizontal = TRUE,
                         between = list(x = 1 + (horizontal), 
                                        y = 0.5 +2 * (!horizontal)),
-                        par.strip.text = list(lines = 1, cex = .8)
+                        par.strip.text = list(lines = 1, cex = .8),
+                        output = FALSE,
+                        include.na = FALSE
                         ){
   if (is.null(relevel)){
-    X <- stp25stat2:::Likert(...)
+    X <- stp25stat2:::Likert(..., include.total=include.total)
    }
   else{
     X_old <-  stp25tools::prepare_data2(...)
@@ -218,10 +221,10 @@ likert_plot <- function(...,
           x
         }
       )
-    X <- stp25stat2:::Likert(X_old$formula,  X_old$data)
+    X <- stp25stat2:::Likert(X_old$formula,  X_old$data, include.total=include.total)
   }
   
-
+if(output) stp25output2::Output(stp25stat2::Tbll_likert(X, include.na=include.na))
   
 
  likertplot(

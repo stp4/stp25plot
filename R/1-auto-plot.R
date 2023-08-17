@@ -105,7 +105,7 @@ auto_plot.default <- function(...,
                       )),
                       
                       col = farbe(),
-                      col.bar = NULL,
+                      col.bar = "gray50",
                       
                       par.settings =  bw_theme(col=col, col.bar =col.bar),
                       
@@ -728,21 +728,73 @@ multi_uv_plot <- function(data,
 #' #               auto.key = list(lines = TRUE))
 #' marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
 marginal_plot <- function(...,
-                          par.settings = bw_theme(farbe()),
-                          auto.key = list(lines = TRUE)) {
+                           par.settings = bw_theme(farbe()),
+                           auto.key = list(lines = TRUE),
+                           
+                           # plot.points, ref, cut	->   passed to panel.densityplot
+                           plot.points = FALSE, #"jitter",
+                           ref = TRUE, 
+                           cut = 0,
+                           
+                           origin = 0,
+                           xlab = NULL,
+                           ylab = NULL,
+                           type = NULL,
+                           main = "marginal distributions",
+                           subset = TRUE,
+                           as.table = TRUE,
+                           subscripts = TRUE,
+                           default.scales = list(
+                             relation = "free",
+                             abbreviate = TRUE,
+                             minlength = 5,
+                             rot = 0,
+                             cex = 0.75,
+                             tick.number = 3#,
+                             # y = list(draw = FALSE)
+                           ),
+                           layout = NULL,
+                           lattice.options = list(layout.heights = list(
+                             axis.xlab.padding = list(x = 0),
+                             xlab.key.padding = list(x = 0)
+                           ))) {
   X <- stp25tools::prepare_data2(...)
-  groups = X$data[[X$group.vars]]
-  
-  if (!is.factor(groups))
-    groups <- cut(groups, 3)
-  
+  groups <- NULL
+  if (!is.null(X$group.vars)) {
+    groups = X$data[[X$group.vars]]
+    if (!is.factor(groups))
+      groups <- cut(groups, 3)
+    
+    if (is.null(type))
+      type <- "p"
+  } else{
+    if (is.null(type))
+      type <- "h"
+  }
   
   latticeExtra::marginal.plot(
     X$data[X$measure.vars],
     data = X$data,
     groups = groups,
+    main = main,
     auto.key = auto.key,
-    par.settings = par.settings
+    par.settings = par.settings,
+    
+    plot.points = plot.points,
+    ref = ref,
+    cut = cut,
+    origin = origin,
+    xlab = xlab,
+    ylab = ylab,
+    type =  type,
+    
+    subset = subset,
+    as.table = as.table,
+    subscripts = subscripts,
+    default.scales = default.scales,
+    layout = layout,
+    lattice.options = lattice.options
+    
   )
   
 }

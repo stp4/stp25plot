@@ -1,7 +1,7 @@
 ---
 title: "Grafiken"
 output:
-  pdf_document: default
+  html_document: default
   github_document: default
 ---
 
@@ -56,6 +56,50 @@ DF <-
 + Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
 
 
+### Likertplot
+
+
+```{r, include=FALSE}
+set.seed(1)
+n <- 100
+lvs <- c("--", "-", "o", "+", "++")
+DF2 <- data.frame(
+  Magazines = gl(length(lvs), 1, n, lvs),
+  Comic.books = gl(length(lvs), 2, n, lvs),
+  Fiction = gl(length(lvs), 3, n, lvs),
+  Newspapers = gl(length(lvs), 5, n, lvs)
+)
+
+
+
+DF2$Comic.books[sample.int(n / 2)] <- lvs[length(lvs)]
+DF2$Newspapers[sample.int(n / 2)] <- lvs[1]
+DF2$Magazines[sample.int(n / 2)] <- lvs[2]
+
+DF2 <- transform(DF2, Geschlecht = cut(rnorm(n), 2, c("m", "f")))
+
+```
+
+
+```{r likert-plot-1, fig.height=3, fig.width=5}
+#Res1 <- Tbll_likert( ~ ., DF2[, -5])
+Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
+
+likertplot(Item ~ . | Geschlecht,
+           data = Res2,
+            between=list(x=0), columns=5)
+
+ # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
+
+```
+```{r likert-plot-2, fig.height=2.5, fig.width=4}
+DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
+                    relevel = letters[1:5],
+                    auto.key = list(columns=5, between=.15, space="top"),
+                   # between=list(x=0),
+                    horizontal=FALSE,
+                    ReferenceZero = 1.5)
+```
 
 
 
@@ -432,11 +476,11 @@ Mehrfachantworten mit  multi_barplot().
 #   auto_plot(. ~ gender)
 
 
-dat2 %>%  auto_plot(comp_1, comp_2, comp_3 , 
-                    include.percent=TRUE,
-                    include.reorder=TRUE,
-                    main ="Complicationen",
-                    xlab= "Prozent")
+# dat2 %>%  auto_plot(comp_1, comp_2, comp_3 , 
+#                     include.percent=TRUE,
+#                     include.reorder=TRUE,
+#                     main ="Complicationen",
+#                     xlab= "Prozent")
 
 
 ```
@@ -504,6 +548,29 @@ p3 <- update(obj, par.settings = bw_theme(), axis = axis.grid)
 
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
+
+
+
+
+### strip Sonderzeichen + Größe
+
+```{r}
+ x1<-rnorm(100);  x2<-gl(2, 50, labels = c("Control", "Treat"))
+ y<-(1.5-as.numeric(x2))*x1+rnorm(100)
+#windows(7,4)
+p1<- xyplot(y~x1|x2,
+            xlab = expression(hat(mu)[0]),
+            type=(c("p", "r")),
+            # - auch mit fontsize=20
+            ylab=list(label="Percent of Respondents", cex=2),
+            par.strip.text=list(lines=2.5, col=6),
+            strip=strip.custom(factor.levels=
+                                 expression(
+                                   sqrt(G^{1}), sqrt(italic(R)^{1}))))
+ print(p1)
+```
+ 
+
 
       
 ###  bwplot2
@@ -700,6 +767,51 @@ data.frame(
 
 ```
  
+### Balken mít Errorbars
+
+```{r}
+
+mycol <- c("#0433FF",
+                    "#00F801",
+                    "#FF2600",
+                    "#918E00",
+                    "#FE9300")
+                    
+data <- data.frame(
+  name = c("0h", "1h", "24h"),
+  value = c(1.4,	2.6,	2) / 100,
+  sd1 =   c(1.2,	2.8,	1.9) / 100,
+  sd2 =   c(2,  	0.75,	2.4) / 100
+)
+
+# Most basic error bar
+  ggplot(data) +
+  geom_bar(
+    aes(x = name, y = value),
+    stat = "identity",
+    fill = "#64B2FC",
+    alpha = 0.7
+  ) +
+  geom_errorbar(
+    aes(x = name,
+        ymin = sd1,
+        ymax = sd2),
+    width = 0.2,
+    colour = "gray40",
+    alpha = 0.9,
+    size = 1
+  ) + scale_y_continuous(labels = scales::percent) +
+  labs(title = "Non-viable cells",
+       # subtitle = "(1973-74)",
+       # caption = "Data from the 1974 Motor Trend US magazine.",
+     #   tag = "B",
+       x = "Time [h]",
+       y = "",) + 
+  theme_classic()
+```
+
+ 
+ 
 ### Balken mit Zahlen
 
 
@@ -746,9 +858,52 @@ barchart(
  
 ### Tortendiagramme
 
+```{r}
+# Create test data.
+data <- data.frame(
+  category=c("Granulocytes", "CD3+", "CD56+",  "CD19+", "Monocytes"),
+  count=c(80,10,5,3,2)
+)
+
+# Compute percentages
+data$fraction <- data$count / sum(data$count)
+# Compute the cumulative percentages (top of each rectangle)
+data$ymax <- cumsum(data$fraction)
+# Compute the bottom of each rectangle
+data$ymin <- c(0, head(data$ymax, n=-1))
+# Compute label position
+data$labelPosition <- (data$ymax + data$ymin) / 2
+# Compute a good label
+#data$label <- paste0(data$category, "\n value: ", data$count)
+
+# Make the plot
+ggplot(data, 
+           aes(ymax=ymax, ymin=ymin, xmax=4, xmin=2, 
+               fill=category)) +
+  geom_rect() +
+  # geom_text( x=2, 
+  #            aes(y=labelPosition, 
+  #                label=label, 
+  #                color=1), size=6) + # x here controls label position (inner / outer)
+  scale_fill_manual(
+    values = 
+      c("#918E00","#00F801","#FF2600","#0433FF","#FE9300")) +
+ coord_polar(theta="y") +
+  xlim(c(-1, 4)) +
+ theme_void() +
+  theme(legend.position = "top") +
+  labs(title = "Leukocyte composition 1h NMP") +
+  theme(legend.title = element_blank(),# element_text(size=12, color = "salmon", face="bold"),
+        legend.justification=c(0,1), 
+        legend.position=c(0.4, 0.7),
+        legend.background = element_blank(),
+        legend.key = element_blank()
+        )  
+```
 
  
-```{r torte-1, fig.height=3, fig.width=5}
+``` 
+#  Geht nicht problemlos in Markdown
 print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
 
 ```
@@ -760,11 +915,15 @@ print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
 ```
 
 
-```{r pie, fig.height=3, fig.width=5}
+```
 #  Geht nicht problemlos in Markdown
- tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
 # par(new = TRUE)
-  stp25plot::piechart(~Freq|sex, tab, groups= treatment, auto.key=list(columns=3))
+
+  stp25plot::piechart(~Freq|sex, 
+  tab, groups= treatment,
+  auto.key=list(columns=3))
+  
 ```
 
 
@@ -1005,89 +1164,246 @@ cowplot::plot_grid(p1, p2, p3, ncol=2)
 
 ```
 
+## Effectplot
 
 
-## Effectplot mit effect
+```{r, include=FALSE}
+require(ggplot2)
+mtcars2 <- within(mtcars, {
+  vs <- factor(vs, labels = c("V", "S"))
+  am <- factor(am, labels = c("automatic", "manual"))
+  cyl  <-  (cyl)
+  cyl_ord  <-  ordered(cyl)
+  gear <- ordered(gear)
+  carb <- ordered(carb)
+})
 
-### predictorEffect()
+mtcars2$mpg[mtcars2$cyl_ord==6]  <- mtcars2$mpg[mtcars2$cyl_ord==6] *.5
 
-Von mir lang ignorierte Variante von Effect mit Formeln!
+mtcars2 <- mtcars2 %>% Label(
+  mpg	= "Miles/(US) gallon",
+  cyl	= "Number of cylinders",
+  disp	= "Displacement (cu.in.)",
+  hp	= "Gross horsepower",
+  drat =	"Rear axle ratio",
+  wt =	"Weight (1000 lbs)",
+  qsec =	"1/4 mile time",
+  vs =	"Engine (0 = V-shaped, 1 = straight)",
+  am	= "Transmission (0 = automatic, 1 = manual)",
+  gear	= "Number of forward gears",
+  carb =	"Number of carburetors"
+)
 
-```{r effect-1, fig.height=3, fig.width=7}
-mod <- lm(prestige ~ type*(education + income) + women, Prestige)
-plot(predictorEffect("income", mod), main="", rug=FALSE)
-plot(predictorEffects(mod, ~ education + women), main="", rug=FALSE)
-plot(predictorEffects(mod, ~ women+ education),
-     axes= list(x=list( women=list(lab="Anteil Frauen"),
-                        education=list(lab="Bildung"))), main="", rug=FALSE)
-```
-
-### Modifizier plot.efflist
-
-
-```{r effect-2, include=FALSE}
-#require(stpvers)
-A = rnorm(100)
-B = rnorm(100, 53, 10)
-C = factor(rep(c("This", "That"), 50))
-A <- A + log(B / 50) + as.numeric(C)
-#log(B)
-Logit <- function(x)
-  car::logit(x, adjust = 0)
-
-invLogit <- function(x)
-  exp(x) / (1 + exp(x))
-
-
-
-prop <- function(odds)
-  odds / c(1 + odds)
-odds <- function(p)
-  p / (1 - p)
-
+fit <- lm(mpg ~ hp * wt + am +cyl  , data = mtcars2)
+fit2 <- lm(mpg ~ hp * wt + am +cyl_ord  , data = mtcars2)
 ```
 
 
-### allEffects
+Konfidenz-Band mit  *geom_ribbon()*
 
-```{r effect-3, fig.height=2.5, fig.width=5}
+```{r}
+ef1 <-
+  as.data.frame(
+    effects::effect(term = "hp", fit,
+                    xlevels = list(
+                      hp = seq(50, 350, by =10))))
 
-ef <- allEffects(lm(A ~ B + C))
-plot(ef,
-     axes = list(
-       x = list(
-        B = list(
-         transform = list(trans = log, inverse = exp),
-         ticks = list(at = c(30, 50, 70)),
-         lab = "Age, log-scale"),
-       C = list(lab = "Treatment")
-      ),
-     y = list(lim= c(.0, 2.5),
-              lab = "Vitamins"
-              #  transform = list(link = Logit, inverse = invLogit),
-              #  transform=list(trans=log, inverse=exp),
-              #  type="rescale",
-              #  ticks = list(at = c(.05, .25, .50, .75)),
-              #   
-       )),
-     main = "")
-
+p1 <- ggplot(ef1, aes(hp, fit)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
+  labs(y = 'Miles/(US) gallon',
+       x = 'Gross horsepower',
+       title = 'Main-Effect-Plot') +
+  theme_classic()
 ```
 
+Interaction mit *geom_line()*
 
-Das ist hingegen obsolet!
+```{r}
+ef2 <- as.data.frame(effects::effect("hp:wt", fit))
+
+ef2$Weight <- factor(ef2$wt)
+
+p2 <- ggplot(ef2, aes(hp, fit, col = Weight)) +
+  geom_line() +
+  labs(y = 'Miles/(US) gallon',
+       x = 'Gross horsepower',
+       title = 'Interaction-Plot') +
+  theme_classic()
+```
+
+Fehlerbalken mit **
+
+```{r}
+#ef3<-  as.data.frame(effects::effect("am", fit))
  
-``` 
-plot.efflist <- stp25plot:::plot.efflist
-ef <- allEffects(lm(A ~ B + C))
-plot(ef, xlab = c("Foo", "Bar"), main="Modifiziert")
+ef4 <-  as.data.frame(effects::effect("cyl_ord", fit2))
+p3 <- ggplot(ef4, aes(cyl_ord, fit, group=1 )) +
+  geom_point()+
+  geom_line()+
+  geom_errorbar(
+    aes(x = cyl_ord,
+        ymin = lower,
+        ymax = upper),
+    width = 0.2,
+    colour = "gray40",
+    alpha = 0.9,
+    linewidth = .75
+  ) +   labs(y = 'Miles/(US) gallon',
+             x = 'Number of cylinders',
+             title = 'Cylinder Ordinal (nicht linear)')  +
+  theme_classic()
 
+ef4 <-  as.data.frame(effects::effect("cyl", fit))
+p4 <- ggplot(ef4, aes(cyl, fit, group=1 )) +
+  geom_point()+
+  geom_line()+
+  geom_errorbar(
+    aes(x = cyl,
+        ymin = lower,
+        ymax = upper),
+    width = 0.2,
+    colour = "gray40",
+    alpha = 0.9,
+    linewidth = .75
+  ) +   labs(y = 'Miles/(US) gallon',
+             x = 'Number of cylinders ',
+             title = 'Cylinder Metrisch (linear)')  +
+  ylim(c(8,23))+
+ # xlim(c(4, 8))+
+  annotate("text", x = 6, y=9, label =  stp25stat2::APA(fit)) +
+  theme_classic()
 ```
 
 
-## ggeffects
+```{r effect-ggplot, fig.cap='Effect ggplot',fig.height=7, fig.width= 8}
+
+library(patchwork)
+p1 + p2 + p3 + p4 +
+  plot_layout(ncol=2)
+```
+
+### ggeffects
+
+```{r, include=FALSE}
+require(ggeffects)
+```
+
+```
+require(ggeffects)
+
+ggeffect() 
+# computes marginal effects by internally calling  effects::Effect()
+
+ggemmeans() 
+# uses emmeans::emmeans()
+
+ggpredict() 
+# uses predict() 
+
+ggpredict(fit, term = "hp") %>% plot() +
+ggeffect(fit, term = "hp")  %>% plot( add.data = TRUE) +
+ggemmeans(fit,term = "hp") %>% plot(log.y = TRUE) 
+
+```
+
+```
+## S3 method for class 'ggeffects'
+plot(
+  x,
+  ci = TRUE,
+  ci.style = c("ribbon", "errorbar", "dash", "dot"),
+  facets,
+  add.data = FALSE,
+  limit.range = FALSE,
+  residuals = FALSE,
+  residuals.line = FALSE,
+  collapse.group = FALSE,
+  colors = "Set1",
+  alpha = 0.15,
+  dodge = 0.25,
+  use.theme = TRUE,
+  dot.alpha = 0.35,
+  jitter = 0.2,
+  log.y = FALSE,
+  case = NULL,
+  show.legend = TRUE,
+  show.title = TRUE,
+  show.x.title = TRUE,
+  show.y.title = TRUE,
+  dot.size = NULL,
+  line.size = NULL,
+  connect.lines = FALSE,
+  grid,
+  one.plot = TRUE,
+  rawdata,
+  ...
+)
+```
+
+
 
 Quelle: https://strengejacke.github.io/ggeffects/
+
+Die lib *ggeffects()*  berechnet die Marginalen Effecte bei Interactionen anderst als *effect()*, daher aufpassen!!
+
+```{r}
+ef1 <-
+  as.data.frame(effects::effect(term = "hp", fit,
+                                xlevels = list(hp = c(
+                                  50, 85, 120, 155, 195, 230, 265, 335
+                                ))))
+
+
+ effects::effect(term = "hp", 
+                 fit,
+                 xlevels = 
+                   list(hp = 
+                          c(50, 85, 120, 155, 195, 230, 265, 335)))
+
+ggpredict(fit, term = "hp") 
+ggeffect(fit,term = "hp")
+ggemmeans(fit,term = "hp")
+```
+
+
+
+
+
+
+```{r }
+mydf <- ggpredict(fit, terms = "hp")
+p2 <- ggplot(mydf, aes(x, predicted)) +
+  geom_line() +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+  theme_classic()
+
+mydf <- ggpredict(fit, terms = c("hp", "wt"))
+
+ 
+p3 <- ggplot(mydf, aes(x = x, y = predicted, colour = group)) +
+  geom_line()
+
+
+p4 <- ggplot(mydf,
+             aes(x = x, y = predicted)) +
+               geom_line() +
+               facet_wrap( ~ group)
+
+
+
+```
+
+```{r, fig.height=8, fig.width= 6}
+library(patchwork)
+p1 + p2 + p3 + p4 + plot(mydf) +
+    plot_layout(ncol=2)
+```
+
+
+
+
+
 
 ```{r}
 require(ggeffects)
@@ -1105,7 +1421,6 @@ p1
 
 p1 +
   facet_wrap(~group)  +
-
   theme(legend.position = "none")
 
 #plot(allEffects(mod))
@@ -1117,18 +1432,26 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
 ```
 
 
+```
+theme_set(theme_ggeffects())
+p1<-ggpredict(fit, "am") %>%
+  plot(
+    connect.lines = TRUE,
+    ci=FALSE,
+    dot.size = 5)+ geom_errorbar(
+    aes_string(ymin = "conf.low",
+                        ymax = "conf.high"),
+    width = 0.099#,
+    #size = line.size
+  ) +
+  theme_classic() 
+
+p1
+```
 
 
 
-grid.arrange(plot(eff), g, 
-             xyplot(y~education, dat),
-             plot(mydf),
-             ncol = 2)
-
-
-
-
-## Effectplot mit emmeans
+### Effectplot mit emmeans
 
 
 ```{r effect-4, fig.height=2.5, fig.width=5}
@@ -1145,7 +1468,7 @@ ref_grid(pigs.lm2)
 
  
 
-### emmeans default
+#### emmeans default
 
 
 ```{r fit1-emean, fig.height=3, fig.width=4}
@@ -1153,7 +1476,7 @@ plot(emmeans(pigs.lm1,
              ~ percent | source))
 ```
 
-### emmeans ruecktransformiert
+#### emmeans ruecktransformiert
 
 ```{r fit1-emean-trans, fig.height=3, fig.width=4}
 plot(emmeans(pigs.lm1,  
@@ -1196,6 +1519,74 @@ emmip(ref_grid(pigs.lm2,
 
 
 ### Klassiker mit Effect()
+
+#### predictorEffect()
+
+Von mir lang ignorierte Variante von Effect mit Formeln!
+
+```{r effect-1, fig.height=3, fig.width=7}
+mod <- lm(prestige ~ type*(education + income) + women, Prestige)
+plot(predictorEffect("income", mod), main="", rug=FALSE)
+plot(predictorEffects(mod, ~ education + women), main="", rug=FALSE)
+plot(predictorEffects(mod, ~ women+ education),
+     axes= list(x=list( women=list(lab="Anteil Frauen"),
+                        education=list(lab="Bildung"))), main="", rug=FALSE)
+```
+
+#### Modifizier plot.efflist
+
+
+```{r effect-2, include=FALSE}
+#require(stpvers)
+A = rnorm(100)
+B = rnorm(100, 53, 10)
+C = factor(rep(c("This", "That"), 50))
+A <- A + log(B / 50) + as.numeric(C)
+#log(B)
+Logit <- function(x)
+  car::logit(x, adjust = 0)
+
+invLogit <- function(x)
+  exp(x) / (1 + exp(x))
+
+
+
+prop <- function(odds)
+  odds / c(1 + odds)
+odds <- function(p)
+  p / (1 - p)
+
+```
+
+
+#### allEffects
+
+```{r effect-3, fig.height=2.5, fig.width=5}
+
+ef <- allEffects(lm(A ~ B + C))
+plot(ef,
+     axes = list(
+       x = list(
+        B = list(
+         transform = list(trans = log, inverse = exp),
+         ticks = list(at = c(30, 50, 70)),
+         lab = "Age, log-scale"),
+       C = list(lab = "Treatment")
+      ),
+     y = list(lim= c(.0, 2.5),
+              lab = "Vitamins"
+              #  transform = list(link = Logit, inverse = invLogit),
+              #  transform=list(trans=log, inverse=exp),
+              #  type="rescale",
+              #  ticks = list(at = c(.05, .25, .50, .75)),
+              #   
+       )),
+     main = "")
+
+```
+
+
+
 
 ```{r effect-6, fig.height=2.5, fig.width=5}
  lattice::trellis.par.set(bw_theme(farbe()))
@@ -1275,7 +1666,7 @@ stripplot(
 
 
 
-### transformation
+#### transformation
 
 require(effects)
  John Fox URL http://www.jstatsoft.org/v32/i01/
@@ -1334,21 +1725,6 @@ plot(Effect(c("income", "type"), mod,
  
  
 
-## Effectplot mit ggplot
-
-```{r effect-ggplot, fig.cap='Effect ggplot',fig.height=3, fig.width= 5}
- 
-Model <- lm(drat~hp*cyl, data=mtcars)
-
-
-ef <- effects::effect(term = "hp:cyl", Model, default.levels = 9) # 9 because the breaks are nicer
-ef2 <- as.data.frame(ef)
-
-ggplot(ef2, aes(hp, fit, col = factor(cyl))) +
-        geom_line() +
-        labs(y = 'drat')# + #+  ylim(0, 10)
-        # + jtools::theme_apa()
-```
 
 
  

@@ -39,7 +39,8 @@ panel.bwplot.groups(x, y, ..., group.number, nlevels, space_between)
 Lattice bwplot mit groups. Ist eine erweiterung von lattice \link{bwplot}. Die Funktion arbeitet mit \link{panel.superpose}.
 }
 \details{
-Die Funktion kann nicht mit den funktionen von lattice kombiniert werden.
+Die Funktion kann nicht mit den 
+funktionen von lattice kombiniert werden.
 }
 \examples{
 set.seed(2)

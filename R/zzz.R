@@ -1,3 +1,8 @@
+#' @importFrom plyr is.formula
+
+
+
+
 
 #' @importFrom stp25settings farbe
 #' @export
