@@ -58,7 +58,97 @@
 #' #             data = colon), data=colon)
 #'
 #'
-#'
+#' # Alternative
+#' 
+#' 
+#' #' library('ggplot2') 
+#' 
+#' Outcome_order <-
+#'   c('Outcome C', 'Outcome A', 'Outcome B', 'Outcome D')
+#' 
+#' #this is the first dataset you have
+#' df1 <-
+#'   data.frame(
+#'     Outcome = c("Outcome A", "Outcome B", "Outcome C", "Outcome D"),
+#'     estimate = c(1.50, 2.60, 1.70, 1.30),
+#'     conf.low = c(1.00, 0.98, 0.60, 1.20),
+#'     conf.high = c(2.00, 3.01, 1.80, 2.20)
+#'   )
+#' 
+#' 
+#' 
+#' 
+#' # add a group column
+#' df1$group <- "X"
+#' # create a second dataset, similar format to first
+#' df2 <- df1
+#' # different group
+#' df2$group <- "Y"
+#' # and we adjust the values a bit, so it will look different in the plot
+#' df2[, c("estimate", "conf.low", "conf.high")] <-
+#'   df2[, c("estimate", "conf.low", "conf.high")] + 0.5
+#' 
+#' # combine the two datasets
+#' df = rbind(df1, df2)
+#' # you can do the factoring here
+#' df$Outcome = factor (df$Outcome, level = Outcome_order)
+#' 
+#' df
+#' 
+#' 
+#' 
+#' 
+#' 
+#' p <- ggplot(df,
+#'             aes(
+#'               x = Outcome,
+#'               y = estimate,
+#'               ymin = conf.low ,
+#'               ymax = conf.high,
+#'               col = group,
+#'               fill = group
+#'             )) +
+#'   #specify position here
+#'   
+#'   geom_hline(yintercept = c(0, 20, 40, 60), lty = 2) +
+#'   geom_vline(xintercept = seq(0, 15) + .5, lty = 2, col = "gray") +
+#'   geom_linerange(linewidth = 3, position = position_dodge(width = .7)) +
+#'   #specify position here too
+#'   geom_point(
+#'     size = 3,
+#'     shape = 21,
+#'     colour = "white",
+#'     stroke = 0.5,
+#'     position = position_dodge(width = .7)
+#'   ) +
+#'   # scale_fill_manual(values = barCOLS) +
+#'   # scale_color_manual(values = dotCOLS) + 
+#'   
+#'   guides( 
+#'     colour = guide_legend(reverse=TRUE),
+#'     fill = guide_legend(reverse=TRUE)
+#'   ) +
+#'   
+#'   scale_x_discrete(name = "") +
+#'   scale_y_continuous(name = "Estimate 95% CI", limits = c(-0, 5)) +
+#'   coord_flip() +
+#'   # GGally::geom_stripped_cols()+
+#'   #theme_void()
+#'   theme_minimal() +
+#'   theme( 
+#'     
+#'     panel.grid.major = element_blank(),
+#'     panel.grid.minor = element_blank())
+#' 
+#' 
+#' 
+#' dotCOLS = c(  "#74C476","#BAE4B3","#f9b282")
+#' barCOLS = c("#006D2C" , "#74C476","#A63603")
+#' 
+#' 
+#' p  +  
+#'   scale_fill_manual(values = barCOLS) +
+#'   scale_color_manual(values = dotCOLS)
 forest_plot <- function(x, ...) {
   UseMethod("forest_plot")
 }
@@ -154,11 +244,6 @@ forest_plot.default <- function(x,
   else ggplot_forest(gparam, ...)
 
 }
-
-
-
-
-
 
 
 #' ggplot_table
@@ -458,21 +543,18 @@ ggplot_table <- function(gparam,
 
 
 
-
-
-#   Anmerkung: 
-#   ggforestplot scheint nicht mehr betreut zu werden - manche 
-#   ggplot Funktionen sind nict mehr aktuell!
-
-
-
-
 #' Draw a Forestplot of Measures of Effects
+#' 
+#'  Intern wird geom_pointrange verwendet
 #'
 #' Visualize multiple measures of effect with their confidence intervals in a
 #' vertical layout.
 #' 
 #' stolen from https://github.com/NightingaleHealth/ggforestplot
+#' 
+#'  Anmerkung: 
+#'   ggforestplot scheint nicht mehr betreut zu werden - manche 
+#'    ggplot Funktionen sind nict mehr aktuell!
 #'
 #' @param df A data frame 
 #' @param name,estimate,se,pvalue, the variable 
@@ -481,9 +563,10 @@ ggplot_table <- function(gparam,
 #' @param groups,colour,shape the variable
 #' @param logodds logical (defaults to FALSE) 
 #' @param ...   main, xlab, graphical parameters
-#' @param col.strip,col Farbe strips und Symbole
+#' @param col.strip,col Farbe strips und Symbole col.strip =NULL keine strips
 #' @param cex size
-#' @param cex.pchpch size symbol
+#' @param cex.pch, pch size symbol
+#' @param dodge.width  abstand bei Gruppen zwischen den Balken
 #' 
 #' @export
 #' @import ggplot2
@@ -500,7 +583,6 @@ ggplot_table <- function(gparam,
 #'  # Draw a Forestplot of Measures of Effects
 #'  # ----------------------------------------
 #' 
-#' 
 #' require(magrittr)
 #' require(ggplot2)
 #' require(stp25plot)
@@ -516,11 +598,14 @@ ggplot_table <- function(gparam,
 #' data <- data[-which(data$var == "age"), ]
 #' data <- data[-which(data$var == "(Intercept)"), ]
 #' 
-#' 
-#' 
 #' data$level <- factor(data$level,
 #'                      c("M/UM", "HM" , "10 km"),
 #'                      c("M/UM", "HM", "10 km (Reference)"))
+#' 
+#' dotCOLS = c(  "#74C476","#9E9AC8","#f9b282")
+#' barCOLS = c("#006D2C" , "#756BB1","#A63603")
+#' 
+#' 
 #' ggplot_forest(
 #'   data,
 #'   name = group,
@@ -528,41 +613,45 @@ ggplot_table <- function(gparam,
 #'   title = "Associations to Running",
 #'   xlab = "Estimate (95% CI)",
 #'   legend.title = "legend title using guide",
+#'   col = barCOLS,
+#'   cex.pch = 3,
 #'   cex = 1.1,
 #'   # cex.pch =  1,
 #'   pch = c(19, 15, 17)
 #' )
 #' 
+#' #----------------------------
+#' # Alternative geom_pointrange
+#' #----------------------------
 #' 
-#' # Alternative
-#' 
-#'  ggplot(data = dat, aes(x = group  , y = estimate)) +
-#' geom_pointrange(
-#'   mapping = aes(
-#'     ymin = conf.low ,
-#'     ymax = conf.high,
-#'     color = level,
-#'     shape = level
-#'   ),
-#'   position = ggplot2::position_dodge(width =  0.5)
-#' ) +
+#' ggplot(data = data, aes(x = group  , y = estimate)) +
+#'   geom_pointrange(
+#'     mapping = aes(
+#'       ymin = conf.low ,
+#'       ymax = conf.high,
+#'       color = level,
+#'       shape = level
+#'     ),
+#'     position = ggplot2::position_dodge(width =  0.5)
+#'   ) +
 #'   GGally::geom_stripped_cols(odd = "#00000000", even = "#11111111") +
 #'   ggplot2::guides(
 #'     colour = guide_legend(
 #'       reverse = TRUE,
 #'       title = "legend.title",
-#'       override.aes =  list(size = 1)
+#'       override.aes =  list(linewidth = 1)
 #'     ),
 #'     shape = guide_legend(reverse = TRUE, title = "legend.title")
 #'   ) +
-#'   theme_forest2(base_size = 12) +
-#'   coord_flip() 
+#'   scale_color_manual(values = dotCOLS) +
+#'   stp25plot::theme_forest(base_size = 12) +
+#'   coord_flip()
 #' 
+#' #-----------------------------
+#' #' # Alternative geom_errorbar
+#' #-----------------------------
 #' 
-#' #' # Alternative
-#' 
-#' 
-#' ggplot(data = data, aes(x = group  , y = estimate)) +
+#' ggplot(data = data, aes(x = group, y = estimate)) +
 #'   geom_point(
 #'     mapping = aes(
 #'       color = level,
@@ -579,7 +668,59 @@ ggplot_table <- function(gparam,
 #'     ),
 #'     position = ggplot2::position_dodge(width =  0.5)
 #'   ) +
-#'   coord_flip()
+#'   GGally::geom_stripped_cols(odd = "#00000000", even = "#11111111") +
+#'   coord_flip() +
+#'   scale_color_manual(values = dotCOLS) +
+#'   stp25plot::theme_forest(base_size = 12)
+#' 
+#' #---------------------------
+#' # Alternative geom_linerange
+#' #---------------------------
+#' 
+#' p <- ggplot(data,
+#'             aes(
+#'               x = group,
+#'               y = estimate,
+#'               ymin = conf.low ,
+#'               ymax = conf.high,
+#'               col = level,
+#'               fill = level
+#'             )) +
+#'   #specify position here
+#'   #geom_hline(yintercept = c(0, 20, 40, 60), lty = 2) +
+#'   # geom_vline(xintercept = seq(0, 15) + .5, lty = 2, col = "gray") +
+#'   geom_linerange(linewidth = 3, position = position_dodge(width = .7)) +
+#'   #specify position here too
+#'   geom_point(
+#'     size = 3,
+#'     shape = 21,
+#'     colour = "white",
+#'     stroke = 0.5,
+#'     position = position_dodge(width = .7)
+#'   ) +
+#'   # scale_fill_manual(values = barCOLS) +
+#'   # scale_color_manual(values = dotCOLS) +
+#'   
+#'   guides(
+#'     colour = guide_legend(reverse=TRUE),
+#'     fill = guide_legend(reverse=TRUE)
+#'   ) +
+#'   
+#'   scale_x_discrete(name = "") +
+#'   scale_y_continuous(name = "Estimate 95% CI", limits = c(-10, 5)) +
+#'   coord_flip() +
+#'   
+#'   stp25plot::theme_forest(base_size = 12)
+#' # theme_minimal() +
+#' # theme(
+#' #   panel.grid.major = element_blank(),
+#' #   panel.grid.minor = element_blank())
+#' 
+#' p  +
+#'   scale_fill_manual(values = barCOLS) +
+#'   scale_color_manual(values = dotCOLS)
+#' 
+
 ggplot_forest <-
   function (data,
             name = term,
@@ -599,6 +740,8 @@ ggplot_forest <-
             cex = 1,
             cex.pch = 1.2,
             cex.pch.legende = cex.pch ,
+            
+            dodge.width = .5,
             pch = c(21L, 22L, 23L, 24L, 25L),
             main = NULL,
            # title=NULL,
@@ -613,7 +756,7 @@ ggplot_forest <-
     stopifnot(is.logical(logodds))
     
     if(is.null(data$term))
-      data$term<- 
+      data$term <- 
       paste(data$var, ifelse(is.na(data$level), "",  data$level))
     
     name <-     rlang::enquo(name)
@@ -694,7 +837,7 @@ ggplot_forest <-
         g + scale_x_continuous(trans = "log10", breaks = scales::log_breaks(n = 7))
     }
     
-    g <- g + theme_forest2(base_size = cex * 13)
+    g <- g + theme_forest(base_size = cex * 13)
     
     if (!is.null(col.strip))
       g <- g + geom_stripes(odd = col.strip[1], even = col.strip[2])
@@ -704,7 +847,8 @@ ggplot_forest <-
       ggplot2::geom_vline(
         xintercept = ifelse(test = logodds, yes = 1, no = 0),
         linetype = "solid",
-        size = 0.4,
+      #  size = 0.4,
+        linewidth= 0.4,
         colour = "black"
       )
     
@@ -717,7 +861,8 @@ ggplot_forest <-
           shape = !!shape
         ),
         size = cex.pch*.5,
-        stroke = cex.pch
+        stroke = cex.pch,
+        dodge.width = dodge.width
       ) 
     
     
@@ -799,60 +944,6 @@ ggplot_forest <-
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggplot2::geom_rect
 #' @author Ilari Scheinin
-#' @examples
-#' 
-#'  # ----------------------------- 
-#'  # Alternating Background Colour
-#'  # ----------------------------- 
-#' library(ggplot2)
-#' library(magrittr)
-#' data <-
-#'   # Use built-in demo dataset
-#'   data_linear_associations %>%
-#'     # Arrange by name in order to filter the first few biomarkers for more
-#'     # than one studies
-#'     dplyr::arrange(name) %>%
-#'     # Estimate confidence intervals
-#'     dplyr::mutate(
-#'       xmin = beta - qnorm(1 - (1 - 0.95) / 2) * se,
-#'       xmax = beta + qnorm(1 - (1 - 0.95) / 2) * se
-#'     ) %>%
-#'     # Select only first 30 rows (10 biomarkers)
-#'     dplyr::filter(dplyr::row_number() <= 30) %>%
-#'     # Add a logical variable for statistical significance
-#'     dplyr::mutate(filled = pvalue < 0.001)
-#'
-#' g <-
-#'   ggplot(data = data, aes(x = beta, y = name)) +
-#'   # And point+errorbars
-#'   geom_effect(
-#'     ggplot2::aes(
-#'       xmin = xmin,
-#'       xmax = xmax,
-#'       colour = trait,
-#'       shape = trait,
-#'       filled = filled
-#'     ),
-#'     position = ggstance::position_dodgev(height = 0.5)
-#'   )
-#' print(g)
-#'
-#' # Add custom theme, horizontal gray rectangles, vertical line to signify the
-#' # NULL point, custom color palettes.
-#' g <-
-#'   g +
-#'   # Add custom theme
-#'   theme_forest() +
-#'   # Add striped background
-#'   geom_stripes(odd = "#33333333", even = "#00000000") +
-#'   # Add vertical line at null point
-#'   geom_vline(
-#'     xintercept = 0,
-#'     linetype = "solid",
-#'     size = 0.4,
-#'     colour = "black"
-#'   )
-#' print(g)
 geom_stripes <- function(mapping = NULL,
                          data = NULL,
                          stat = "identity",
@@ -946,65 +1037,11 @@ GeomStripes <- ggplot2::ggproto(
 #' @inheritParams ggplot2::layer
 #' @inheritParams ggstance::geom_pointrangeh
 #' @author Ilari Scheinin
-#' @examples
-#'  # --------------------------------------------------
-#'  # Horizontal Study Effects with Confidence Intervals
-#'  # --------------------------------------------------
-#'  
-#' library(ggplot2)
-#' library(magrittr)
-#' df <-
-#'   # Use built-in demo dataset
-#'   df_linear_associations %>%
-#'     # Arrange by name in order to filter the first few biomarkers for more
-#'     # than one studies
-#'     dplyr::arrange(name) %>%
-#'     # Estimate confidence intervals
-#'     dplyr::mutate(
-#'       xmin = beta - qnorm(1 - (1 - 0.95) / 2) * se,
-#'       xmax = beta + qnorm(1 - (1 - 0.95) / 2) * se
-#'     ) %>%
-#'     # Select only first 30 rows (10 biomarkers)
-#'     dplyr::filter(dplyr::row_number() <= 30) %>%
-#'     # Add a logical variable for statistical significance
-#'     dplyr::mutate(filled = pvalue < 0.001)
-#'
-#' g <-
-#'   ggplot(data = df, aes(x = beta, y = name)) +
-#'   # And point+errorbars
-#'   geom_effect(
-#'     ggplot2::aes(
-#'       xmin = xmin,
-#'       xmax = xmax,
-#'       colour = trait,
-#'       shape = trait,
-#'       filled = filled
-#'     ),
-#'     position = ggstance::position_dodgev(height = 0.5)
-#'   )
-#' print(g)
-#'
-#' # Add custom theme, horizontal gray rectangles, vertical line to signify the
-#' # NULL point, custom color palettes.
-#' g <-
-#'   g +
-#'   # Add custom theme
-#'   theme_forest() +
-#'   # Add striped background
-#'   geom_stripes() +
-#'   # Add vertical line at null point
-#'   geom_vline(
-#'     xintercept = 0,
-#'     linetype = "solid",
-#'     size = 0.4,
-#'     colour = "black"
-#'   )
-#' print(g)
-#' 
 geom_effect2 <- function(mapping = NULL,
                          data = NULL,
                          stat = "identity",
-                         position = ggplot2::position_dodge(width =  0.5),
+                         dodge.width = 0.5,
+                         position = ggplot2::position_dodge(width =  dodge.width),
                          ...,
                          na.rm = FALSE,
                          show.legend = NA,
@@ -1041,7 +1078,6 @@ GeomEffect2 <- ggplot2::ggproto(
   # Implement draw_key
   draw_key = 
     function(data, params, size) {
-      
       if (is.character(data$shape)) {
         data$shape <- translate_shape_string(data$shape)
       }
@@ -1054,18 +1090,20 @@ GeomEffect2 <- ggplot2::ggproto(
           # fill = scales::alpha(data$fill, data$alpha),
           fill = scales::alpha(data$colour, data$alpha),
           fontsize = data$size * .pt + data$stroke * .stroke / 2,
-          lwd = data$stroke * .stroke / 2
-        )
+          lwd = data$stroke * .stroke / 2)
       )
     },
+  
   required_aes = c("x", "y", "ymin|xmin", "ymax|xmax"),
   draw_panel = function(data,
                         panel_params,
                         coord) {
     ggplot2::GeomPointrange$draw_panel(
+    
       dplyr::mutate(data,
                     fatten = 1
-                    #             ,
+                    #  fatten	  A multiplicative factor used to increase 
+                    # the size of the middle point in geom_pointrange().
                     # fill = dplyr::case_when(
                     #   is.na(.data$filled) ~ "#00000000",!.data$filled ~ "white",
                     #   TRUE ~ .data$colour
@@ -1074,13 +1112,15 @@ GeomEffect2 <- ggplot2::ggproto(
       panel_params,
       coord,
       flipped_aes = TRUE
-      
     )
   }
 )
 
-#' @noRd
-theme_forest2 <-
+
+
+#' @rdname ggplot_forest
+#' @export
+theme_forest <-
   function (base_size = 13,
             base_line_size = base_size / 22,
             base_rect_size = base_size / 22) {
@@ -1094,7 +1134,7 @@ theme_forest2 <-
       ggplot2::theme(
         axis.line.x = element_line(
           color = "black",
-          size = .5,
+          linewidth = .5,
           lineend = "square"
         ),
         
@@ -1107,7 +1147,7 @@ theme_forest2 <-
         #   panel.background = element_rect(colour = NA, fill = NA),
         panel.grid.major.x = element_line(
           colour = "gray50",
-          size = .25,
+          linewidth = .25,
           linetype = 2
         ),
         panel.grid.minor.x = element_blank(),
@@ -1118,37 +1158,3 @@ theme_forest2 <-
 
 
 
-
-
- 
-
-# load(
-#   "C:/Users/wpete/Dropbox/1_Projekte/002-NURMI/791_Martina_Gregori/dummy-forest-df.Rdata"
-# )
-# 
-# data$std.error[is.na(data$estimate)] <- 0
-# data$conf.low[is.na(data$estimate)] <- 0
-# data$conf.high[is.na(data$estimate)] <- 0
-# data$estimate[is.na(data$estimate)] <- 0
-# data <- data[-which(data$var == "age"), ]
-# data <- data[-which(data$var == "(Intercept)"), ]
-# 
-# 
-# 
-# data$level <- factor(data$level,
-#                      c("M/UM", "HM" , "10 km"),
-#                      c("M/UM", "HM", "10 km (Reference)"))
-# ggplot_forest(
-#   data,
-#   name = group,
-# #  groups = NULL,
-# #  colour = level,
-# #  shape = NULL,
-#   groups = level ,
-#   main = "Associations to Running",
-#   xlab = "Estimate (95% CI)",
-#   legend.title = "legend title using guide",
-#   cex = 1.1,
-#   # cex.pch =  1,
-#   pch = c(19, 15, 17)
-# )

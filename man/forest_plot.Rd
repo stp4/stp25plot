@@ -147,7 +147,97 @@ data = colon, family = binomial()))
 #             data = colon), data=colon)
 
 
+# Alternative
 
+
+#' library('ggplot2') 
+
+Outcome_order <-
+  c('Outcome C', 'Outcome A', 'Outcome B', 'Outcome D')
+
+#this is the first dataset you have
+df1 <-
+  data.frame(
+    Outcome = c("Outcome A", "Outcome B", "Outcome C", "Outcome D"),
+    estimate = c(1.50, 2.60, 1.70, 1.30),
+    conf.low = c(1.00, 0.98, 0.60, 1.20),
+    conf.high = c(2.00, 3.01, 1.80, 2.20)
+  )
+
+
+
+
+# add a group column
+df1$group <- "X"
+# create a second dataset, similar format to first
+df2 <- df1
+# different group
+df2$group <- "Y"
+# and we adjust the values a bit, so it will look different in the plot
+df2[, c("estimate", "conf.low", "conf.high")] <-
+  df2[, c("estimate", "conf.low", "conf.high")] + 0.5
+
+# combine the two datasets
+df = rbind(df1, df2)
+# you can do the factoring here
+df$Outcome = factor (df$Outcome, level = Outcome_order)
+
+df
+
+
+
+
+
+p <- ggplot(df,
+            aes(
+              x = Outcome,
+              y = estimate,
+              ymin = conf.low ,
+              ymax = conf.high,
+              col = group,
+              fill = group
+            )) +
+  #specify position here
+  
+  geom_hline(yintercept = c(0, 20, 40, 60), lty = 2) +
+  geom_vline(xintercept = seq(0, 15) + .5, lty = 2, col = "gray") +
+  geom_linerange(linewidth = 3, position = position_dodge(width = .7)) +
+  #specify position here too
+  geom_point(
+    size = 3,
+    shape = 21,
+    colour = "white",
+    stroke = 0.5,
+    position = position_dodge(width = .7)
+  ) +
+  # scale_fill_manual(values = barCOLS) +
+  # scale_color_manual(values = dotCOLS) + 
+  
+  guides( 
+    colour = guide_legend(reverse=TRUE),
+    fill = guide_legend(reverse=TRUE)
+  ) +
+  
+  scale_x_discrete(name = "") +
+  scale_y_continuous(name = "Estimate 95\% CI", limits = c(-0, 5)) +
+  coord_flip() +
+  # GGally::geom_stripped_cols()+
+  #theme_void()
+  theme_minimal() +
+  theme( 
+    
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank())
+
+
+
+dotCOLS = c(  "#74C476","#BAE4B3","#f9b282")
+barCOLS = c("#006D2C" , "#74C476","#A63603")
+
+
+p  +  
+  scale_fill_manual(values = barCOLS) +
+  scale_color_manual(values = dotCOLS)
 
 
 
