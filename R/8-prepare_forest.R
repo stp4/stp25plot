@@ -19,11 +19,6 @@
 #'
 #' @examples
 #' 
-#' 
-#' 
-#' #' 
-#' 
-#' 
 #' # require(magrittr)
 #' # require(tidyverse)
 #' # require(stp25plot)
@@ -127,10 +122,9 @@ prepare_forest <- function(...,
         scale.log = FALSE
       )
       rst[group_name] = names[i]
-      if (i == 1)
-        rslt <- rst
-      else
-        rslt <- rbind(rslt, rst)
+   #   print(rst)
+      if (i == 1) rslt <- rst
+      else  rslt <- rbind(rslt, rst)
     }
   }
   
@@ -172,10 +166,8 @@ prepare_forest1 <- function(x,
     interact_terms_class <-
       sapply(stringr::str_split(interact_terms, "\\:"),
              function(x)  {
-               if ("factor" %in% terms[x])
-                 "interaction"
-               else
-                 "numeric"
+               if ("factor" %in% terms[x]) "interaction"
+               else "numeric"
              })
     
     names(interact_terms_class) <- interact_terms
@@ -196,13 +188,10 @@ prepare_forest1 <- function(x,
   }
   else {
     coef <- as.data.frame(
-      parameters::model_parameters(x, 
-                                   standardize = "refit"))
+      parameters::model_parameters(x, standardize = "refit"))
     names(coef) <- c(
-      "term",
-      "estimate", "std.error",
-      "CI", "conf.low", "conf.high",
-      "statistic","DF", "p.value")
+      "term", "estimate", "std.error","CI", "conf.low", "conf.high",
+      "statistic", "DF", "p.value")
   }
   
   allTerms <-
@@ -269,17 +258,13 @@ prepare_forest1 <- function(x,
              rst
            })
   
-  
-  
   allTermsDF <- do.call(rbind, allTerms)
   
   inds <- apply(allTermsDF[, 1:2], 1, paste0, collapse = "")
-  
   rownames(coef) <- gsub("\\[T\\.", "",
-                         gsub("[\\]\\[]", "",
-                              gsub("`", "",   coef$term)))
-  
-  
+                         gsub("[\\]\\[\\(\\)]", "",
+                              gsub("`", "",  coef$term)))
+
   if (inherits(x, "lm")) {
     if (inherits(x, "glm") & is.null(main)) main <- "Odds Ratio"
     else{
@@ -311,6 +296,8 @@ prepare_forest1 <- function(x,
   }
   
   gparam <- cbind(allTermsDF, coef[inds, ])
+  
+ 
   if (!include.indercept)  gparam <- gparam[-1, ]
   
   if (is.logical(include.label))
@@ -339,4 +326,5 @@ prepare_forest1 <- function(x,
   attr(gparam, "caption") <-  main
   gparam
 }
+
 
