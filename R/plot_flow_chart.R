@@ -123,7 +123,7 @@ visr.default <- function(x, ...) {
 
 visr.attrition <- function(x,
                            description_column_name = "Criteria",
-                           value_column_name = "Remaining N",
+                           value_column_name = "Remaining.N",
                            complement_column_name = "",
                            box_width = 50,
                            font_size = 12,
