@@ -42,23 +42,26 @@
 #' Res1 <- Tbll_likert( ~ ., DF2[, -5])
 #' Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
 #' 
-#' #require(HH)  # ?likertplot
-#' class(Res2)
-#' #windows(7, 3)
-#' #attr(Res2, "plot")$results 
+#' # require(HH)  # ?likertplot
+#' # class(Res2)
+#' # windows(7, 3)
+#' # attr(Res2, "plot")$results 
+#' 
 #' likertplot(Item ~ . | Geschlecht,
 #'            data = Res2,    
 #'             between=list(x=0))
 #' 
-#'  # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
+#' # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
 #'   
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers,
 #'                     relevel = letters[1:5],
 #'                     ReferenceZero = 1.5,
 #'                     columns=5)
 #' 
-#' #DF2 %>% Likert(Magazines, Comic.books, Fiction, Newspapers) %>% likertplot()
-
+#' # DF2 %>% 
+#' #   Likert(Magazines, Comic.books, Fiction, Newspapers) %>% 
+#' #   likertplot()
+#' 
 likertplot <- function(x = Item   ~ . ,
                        data=NULL,
                        main = '',
@@ -66,6 +69,7 @@ likertplot <- function(x = Item   ~ . ,
                        sub = "",
                        xlab = if(horizontal) {if(as.percent) "Prozent" else "Anzahl"} else "",
                        col = NULL,
+                   
                        rightAxis = FALSE,
                        positive.order = FALSE, 
                        as.percent = TRUE,
@@ -128,12 +132,21 @@ likertplot <- function(x = Item   ~ . ,
            else likert_col(nlevels, middle = ReferenceZero)
   }
   
+
+  
   if (is.logical(wrap)) {
-    if (wrap) 
-      data[[name_item]] <- stp25tools:::wrap_sentence( data[[name_item]], 35)
-  } 
-  else{
-    data[[name_item]] <- stp25tools:::wrap_sentence( data[[name_item]], wrap)
+    if (wrap) {
+     # if (!is.character(data[[name_item]]))
+     #   stop("Hier kann ein fehler vorliegen!! wrap_string")
+      data[[name_item]] <-
+        stp25tools::wrap_factor(data[[name_item]], 35)
+    }
+  }
+  else if (is.numeric(wrap)) {
+   # if (!is.character(data[[name_item]]))
+   #   stop("Hier kann ein fehler vorliegen!! wrap_string")
+    data[[name_item]] <-
+      stp25tools::wrap_factor(data[[name_item]], wrap)
   }
   
   
@@ -168,6 +181,7 @@ likertplot <- function(x = Item   ~ . ,
 #'
 #' @param ... an Tbll_likert
 #' @param output Tabelle ausgeben
+#' @param type  nur in likert_plot Bei Gruppen Items als Zeilen => 1, oder Gruppen als Zeilen => 2
 #'
 #' @return HH likertplot
 #' @export
@@ -182,6 +196,7 @@ likert_plot <- function(...,
                         ylab = "",
                         sub = "",
                         xlab = if(as.percent) "Prozent" else "Anzahl",
+                        type = 1, 
                         col = NULL,
                         rightAxis = FALSE,
                         positive.order = FALSE, 
@@ -204,6 +219,7 @@ likert_plot <- function(...,
                         output = FALSE,
                         include.na = FALSE
                         ){
+
   if (is.null(relevel)){
     X <- stp25stat2:::Likert(..., include.total=include.total)
    }
@@ -226,7 +242,19 @@ likert_plot <- function(...,
   
 if(output) stp25output2::Output(stp25stat2::Tbll_likert(X, include.na=include.na))
   
-
+if( type !=1 ){
+ 
+ 
+  fm <- X$formula
+  x_in <- all.names(fm)
+  
+  if (length(x_in) == 5) {
+    X$formula <-  formula(paste(x_in[5],  x_in[1], x_in[4], x_in[3], x_in[2]))
+  } else if (length(x_in) == 7) {
+    X$formula <-
+      formula(paste(x_in[6],  x_in[1], x_in[4], x_in[3], x_in[2], x_in[5], x_in[7]))
+  }
+}
  likertplot(
  X,
     main = main,
@@ -244,8 +272,7 @@ if(output) stp25output2::Output(stp25stat2::Tbll_likert(X, include.na=include.na
     wrap = wrap,
     horizontal = horizontal,
     between = between,
-    par.strip.text = par.strip.text
-
+    par.strip.text = par.strip.text 
   )
   }
 
@@ -275,9 +302,20 @@ likert_col <- function(n = 5,
                        # c("RdBl", "BlRd", "RdGr", "GrRd","GrBl", "BlGr","Bw"),
                        middle = mean(1:n),
                        middle.color =  "gray90") {
-  stp25settings:::likert_col( n=n, name=name, middle=middle, middle.color=middle.color)
+  stp25settings:::likert_col(
+    n = n,
+    name = name,
+    middle = middle,
+    middle.color = middle.color
+  )
 }
 
 
-
+# DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
+#                     by=~Geschlecht,
+#                     type=2,
+#                     relevel = letters[1:5],
+#                     
+#                     ReferenceZero = 1.5,
+#                     columns=5)
 
