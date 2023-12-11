@@ -239,11 +239,6 @@ p  +
   scale_fill_manual(values = barCOLS) +
   scale_color_manual(values = dotCOLS)
 
-
-
-#' 
-
-
 # require(magrittr)
 # require(tidyverse)
 # require(stp25plot)

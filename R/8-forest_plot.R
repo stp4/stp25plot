@@ -777,7 +777,7 @@ ggplot_forest <-
     
     
     
-    #' calc 95%- CI if needed
+    # calc 95%- CI if needed
     if (rlang::quo_is_null(se)) {
       data <- data %>%
         tidyr::drop_na(!!estimate) %>%

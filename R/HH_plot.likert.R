@@ -1,6 +1,7 @@
 
 
 
+
 HH_plot.likert.formula <-
   function (x,
             data,
@@ -8,8 +9,7 @@ HH_plot.likert.formula <-
             value,
             levelsName = "",
             scales.in = NULL,
-            between = list(x = 1 + (horizontal), y = 0.5 +
-                             2 * (!horizontal)),
+            between = list(x = 1 + (horizontal), y = 0.5 +2 * (!horizontal)),
             auto.key.in = NULL,
             panel.in = NULL,
             horizontal = TRUE,
@@ -17,42 +17,27 @@ HH_plot.likert.formula <-
             ...,
             as.percent = FALSE,
             ylab = if (horizontal) {
-              if (length(x) == 3)
-                deparse(x[[2]])
-              else
-                "Question"
-            } else if (as.percent != FALSE)
-              "Percent"
-            else
-              "Count",
+                      if (length(x) == 3) deparse(x[[2]])
+                      else "Question"
+                   } else if (as.percent != FALSE) "Percent"
+                          else "Count",
             xlab = if (!horizontal) {
-              if (length(x) == 3)
-                deparse(x[[2]])
-              else
-                "Question"
-            } else if (as.percent != FALSE)
-              "Percent"
-            else
-              "Count",
+                        if (length(x) == 3) deparse(x[[2]])
+                        else "Question"
+                   } else if (as.percent != FALSE) "Percent"
+                          else"Count",
             main = x.sys.call,
             rightAxisLabels = rowSums(data.list$Nums),
             rightAxis = !missing(rightAxisLabels),
-            ylab.right = if (rightAxis)
-              "Row Count Totals"
-            else
-              NULL,
+            ylab.right = if (rightAxis) "Row Count Totals"
+                         else NULL,
             xlab.top = NULL,
             right.text.cex = if (horizontal) {
-              if (!is.null(scales$y$cex))
-                scales$y$cex
-              else
-                0.8
-            } else {
-              if (!is.null(scales$x$cex))
-                scales$x$cex
-              else
-                0.8
-            },
+                                  if (!is.null(scales$y$cex)) scales$y$cex
+                                  else 0.8
+                             } else {
+                                  if (!is.null(scales$x$cex)) scales$x$cex
+                                  else 0.8},
             xscale.components = xscale.components.top.HH,
             yscale.components = yscale.components.right.HH,
             xlimEqualLeftRight = FALSE,
@@ -60,10 +45,8 @@ HH_plot.likert.formula <-
             as.table = TRUE,
             positive.order = FALSE,
             data.order = FALSE,
-            reverse = ifelse(horizontal,
-                             as.table, FALSE),
-            h.resizePanels = sapply(result$y.used.at,
-                                    length),
+            reverse = ifelse(horizontal, as.table, FALSE),
+            h.resizePanels = sapply(result$y.used.at, length),
             w.resizePanels = sapply(result$x.used.at, length),
             reference.line.col = "gray65",
             col.strip.background = "gray97",
@@ -78,8 +61,7 @@ HH_plot.likert.formula <-
             colorFunctionOption = "lighter")
   {
     rightAxisMissing <- missing(rightAxis)
-    if (positive.order)
-      data.order <- FALSE
+    if (positive.order) data.order <- FALSE
     if (!missing(value)) {
       x.sys.call <- deparse(match.call()[1:4], width.cutoff = 500L)
       varNamesUsedLong <- c(getVarNames(x, data), list(Value = value))
@@ -94,6 +76,7 @@ HH_plot.likert.formula <-
       varNamesUsed <- getVarNames(x, data)
       data.list <- getLikertData(data, varNamesUsed)
     }
+    
     if (as.percent != FALSE) {
       Nums.pct <- data.list$Nums / rowSums(data.list$Nums) *
         100
@@ -117,17 +100,14 @@ HH_plot.likert.formula <-
         par.settings$layout.widths$ylab.right <-
           max(6, par.settings$layout.widths$ylab.right,
               na.rm = TRUE)
-        par.settings$layout.widths$axis.key.padding <- max(2,
-                                                           par.settings$layout.widths$axis.key.padding,
-                                                           na.rm = TRUE)
+        par.settings$layout.widths$axis.key.padding <- 
+          max(2,par.settings$layout.widths$axis.key.padding,na.rm = TRUE)
       }
       else {
-        par.settings$layout.heights$main.key.padding <- max(2,
-                                                            par.settings$layout.heights$main.key.padding,
-                                                            na.rm = TRUE)
-        par.settings$layout.heights$key.axis.padding <- max(1.5,
-                                                            par.settings$layout.heights$key.axis.padding,
-                                                            na.rm = TRUE)
+        par.settings$layout.heights$main.key.padding <- 
+          max(2,par.settings$layout.heights$main.key.padding,na.rm = TRUE)
+        par.settings$layout.heights$key.axis.padding <- 
+          max(1.5,par.settings$layout.heights$key.axis.padding,na.rm = TRUE)
       }
     }
     Nums.attr <- attributes(Nums.lik)
@@ -214,10 +194,8 @@ HH_plot.likert.formula <-
                               "`",
                               QuestionName,
                               "` ~ .value",
-                              if (is.null(CondNames))
-                                NULL
-                              else
-                                paste(" |", paste(CondNames, collapse = " + ")),
+                              if (is.null(CondNames)) NULL
+                              else paste(" |", paste(CondNames, collapse = " + ")),
                               sep = ""
                             ))
     else
@@ -226,10 +204,8 @@ HH_plot.likert.formula <-
                               ".value ~ `",
                               QuestionName,
                               "`",
-                              if (is.null(CondNames))
-                                NULL
-                              else
-                                paste(" |", paste(CondNames, collapse = " + ")),
+                              if (is.null(CondNames)) NULL
+                              else paste(" |", paste(CondNames, collapse = " + ")),
                               sep = ""
                             ))
     if (is.logical(auto.key.in) && length(auto.key.in) == 1 &&
@@ -249,10 +225,8 @@ HH_plot.likert.formula <-
         points = FALSE,
         rectangles = FALSE,
         rect = list(col = col,
-                    border = if (key.border.white)
-                      "white"
-                      else
-                        col)
+                    border = if (key.border.white) "white"
+                              else col)
       )
       if (!missing(auto.key.in))
         auto.key[names(auto.key.in)] <- auto.key.in
@@ -273,16 +247,16 @@ HH_plot.likert.formula <-
       if (positive.order || data.order) {
         if (positive.order) {
           if (reverse)
-            data2 <- data2[Nums.attr$positive.order,]
+            data2 <- data2[Nums.attr$positive.order, ]
           else
-            data2 <- data2[rev(Nums.attr$positive.order),]
+            data2 <- data2[rev(Nums.attr$positive.order), ]
         }
         else {
           do <- 1:nrow(data2)
           if (reverse)
-            data2 <- data2[do,]
+            data2 <- data2[do, ]
           else
-            data2 <- data2[rev(do),]
+            data2 <- data2[rev(do), ]
         }
         newQ <- factor(data2[[varNamesUsed$QuestionName]],
                        levels = unique(data2[[varNamesUsed$QuestionName]]))
@@ -299,17 +273,19 @@ HH_plot.likert.formula <-
                levels = rev(levels(data2[[varNamesUsed$QuestionName]])))
     }
     if (rightAxis)
-      data2.melt <- reshape2::melt((data2[match(unique(names(data2)),
-                                                names(data2))]),
-                                   id.vars = c(unique(unlist(varNamesUsed[1:2])),
-                                               "rightAxisLabels"),
-                                   variable.name = ".variable"
+      data2.melt <-
+      reshape2::melt((data2[match(unique(names(data2)),
+                                  names(data2))]),
+                     id.vars = c(unique(unlist(varNamesUsed[1:2])),
+                                 "rightAxisLabels"),
+                     variable.name = ".variable"
       )
     else
-      data2.melt <- reshape2::melt((data2[match(unique(names(data2)),
-                                                names(data2))])[,-1],
-                                   id.vars = unique(unlist(varNamesUsed[1:2])),
-                                   variable.name = ".variable")
+      data2.melt <-
+      reshape2::melt((data2[match(unique(names(data2)),
+                                  names(data2))])[, -1],
+                     id.vars = unique(unlist(varNamesUsed[1:2])),
+                     variable.name = ".variable")
     names(data2.melt)[ncol(data2.melt)] <- ".value"
     panel <- function(x,
                       y,
@@ -401,4 +377,3 @@ HH_plot.likert.formula <-
     }
     result
   }
-

@@ -242,6 +242,9 @@ likert_plot <- function(...,
   
 if(output) stp25output2::Output(stp25stat2::Tbll_likert(X, include.na=include.na))
   
+  
+  
+ 
 if( type !=1 ){
  
  
@@ -310,12 +313,4 @@ likert_col <- function(n = 5,
   )
 }
 
-
-# DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
-#                     by=~Geschlecht,
-#                     type=2,
-#                     relevel = letters[1:5],
-#                     
-#                     ReferenceZero = 1.5,
-#                     columns=5)
-
+ 

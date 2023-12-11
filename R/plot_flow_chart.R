@@ -1,3 +1,21 @@
+
+#' simple consort plot
+#' 
+#' 
+#' @description   consort_plot
+#'
+#' @param x data.frame
+#' @param ... an  stp25plot:::visr
+#'
+#' @return  plot
+#' @export
+#'
+simple_consort_plot <- function(x, ...) {
+ visr(attr(x, "filter"),  ...)
+}
+
+
+
 #' @title Plot a supported S3 object
 #'
 #' @description S3 method for creating plots directly from objects using `ggplot2`,

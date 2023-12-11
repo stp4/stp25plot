@@ -299,7 +299,7 @@ blank_theme_torte<- function(){
 #' @param col Farbe
 #' @param cex.key Schriftgrösse
 #' @param margin an to_table 
-#' @param wrap wrap_sentence
+#' @param wrap   Titel  wrap_string -> main
 #' @param ... 
 #'
 #' @return ggplot
@@ -334,7 +334,8 @@ gtorte<- function(x,
                   purple     = "#CC79A7"),
                   ...) {
     require(ggplot2)
-  if(!is.null(wrap)) main <- stp25tools:::wrap_sentence(main, wrap)
+  if(!is.null(wrap)) main <- stp25tools:::wrap_string(main, wrap)
+  
   n_vars <- length(all.vars(x))
   lhs <-  all.vars(x)[1L]
   rhs <-  all.vars(x)[2L]

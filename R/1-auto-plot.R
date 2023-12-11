@@ -150,6 +150,7 @@ auto_plot.default <- function(...,
   
   if (!is.null(wrap.main))
     X$row_name <- stp25tools::wrap_string(X$row_name, wrap.main)
+  
   if (length(xlab) == 1)
     xlab <- rep(xlab, length(X$measure.vars))
   if (length(ylab) == 1)
