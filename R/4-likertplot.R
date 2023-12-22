@@ -171,19 +171,19 @@ likertplot <- function(x = Item   ~ . ,
       ...
   
     )
- 
-  
-  
-}
+ }
 
 
 #' @rdname likertplot
 #'
 #' @param ... an Tbll_likert
-#' @param output Tabelle ausgeben
+#' @param include.table,include.na,caption Tabelle ausgeben (output ist eine Altlast)
 #' @param type  nur in likert_plot Bei Gruppen Items als Zeilen => 1, oder Gruppen als Zeilen => 2
-#'
-#' @return HH likertplot
+#' @param include.total an stp25stat2:::Likert
+#' @param include.order sortiere muss die länge der Items entsprechen
+#' @param relevel  Uberschreibt die levels levels(x) <- relevel ist nur nur in likert_plot vorhanden
+#' @param par.strip.text an  HH:::plot.likert.formula
+#' @return HH likertplot (lattice-Plot)
 #' @export
 #'
 #' @examples
@@ -191,7 +191,12 @@ likertplot <- function(x = Item   ~ . ,
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers)
 #' 
 likert_plot <- function(...,
-                        include.total=FALSE,
+                        include.total = FALSE,
+                        relevel = NULL, 
+                        include.table = FALSE,
+                        include.order = NULL,
+                        caption = "",
+                        # an likertplot
                         main = '',
                         ylab = "",
                         sub = "",
@@ -199,7 +204,7 @@ likert_plot <- function(...,
                         type = 1, 
                         col = NULL,
                         rightAxis = FALSE,
-                        positive.order = FALSE, 
+                        positive.order =  if(is.logical(include.order)) include.order else FALSE, 
                         as.percent = TRUE,
                         auto.key = list(space = space, 
                                         columns = columns,
@@ -211,12 +216,13 @@ likert_plot <- function(...,
                         wrap = TRUE,
                         columns = 2,
                         space ="top",
-                        relevel = NULL,
+                       
                         horizontal = TRUE,
                         between = list(x = 1 + (horizontal), 
                                        y = 0.5 +2 * (!horizontal)),
                         par.strip.text = list(lines = 1, cex = .8),
-                        output = FALSE,
+                       
+                      #  output = include.table,
                         include.na = FALSE
                         ){
 
@@ -240,26 +246,38 @@ likert_plot <- function(...,
     X <- stp25stat2:::Likert(X_old$formula,  X_old$data, include.total=include.total)
   }
   
-if(output) stp25output2::Output(stp25stat2::Tbll_likert(X, include.na=include.na))
+  if(is.numeric(include.order)){
+    positive.order <- FALSE
+    ny_levels <- levels(X$results$Item)
+    if( length(ny_levels) != length(include.order)) stop("include.order ist die Reihenfolge der Items - muss also exakt gleich lang sein wie die Items!")
+    X$results$Item <- factor(X$results$Item, ny_levels[include.order] )
+  }
+  
+  if(include.table)
+    stp25output2::Output(
+      stp25stat2::Tbll_likert(X,
+                              include.na = include.na,
+                              ReferenceZero = ReferenceZero),
+      caption = caption
+    )
   
   
-  
- 
+
 if( type !=1 ){
- 
- 
   fm <- X$formula
   x_in <- all.names(fm)
   
   if (length(x_in) == 5) {
-    X$formula <-  formula(paste(x_in[5],  x_in[1], x_in[4], x_in[3], x_in[2]))
+    X$formula <-  formula(paste(x_in[5], x_in[1], x_in[4], x_in[3], x_in[2]))
   } else if (length(x_in) == 7) {
     X$formula <-
       formula(paste(x_in[6],  x_in[1], x_in[4], x_in[3], x_in[2], x_in[5], x_in[7]))
   }
 }
- likertplot(
- X,
+
+
+  likertplot(
+    X,
     main = main,
     ylab = ylab,
     sub = sub,
@@ -275,8 +293,9 @@ if( type !=1 ){
     wrap = wrap,
     horizontal = horizontal,
     between = between,
-    par.strip.text = par.strip.text 
+    par.strip.text = par.strip.text
   )
+ 
   }
 
 #' likert_col
