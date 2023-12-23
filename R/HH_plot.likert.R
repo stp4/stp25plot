@@ -1,6 +1,6 @@
 
 
-
+# ?HH::plot.likert
 
 HH_plot.likert.formula <-
   function (x,
@@ -81,7 +81,8 @@ HH_plot.likert.formula <-
       Nums.pct <- data.list$Nums / rowSums(data.list$Nums) *
         100
       Nums.pct[data.list$Nums == 0] <- 0
-      Nums.lik <- as.likert(Nums.pct, ReferenceZero = ReferenceZero)
+      Nums.lik <- as.likert(Nums.pct, 
+                            ReferenceZero = ReferenceZero)
       if (rightAxisMissing && as.percent != "noRightAxis") {
         rightAxis <- TRUE
         if (missing(ylab.right))
@@ -89,7 +90,8 @@ HH_plot.likert.formula <-
       }
     }
     else {
-      Nums.lik <- as.likert(data.list$Nums, ReferenceZero = ReferenceZero)
+      Nums.lik <- as.likert(data.list$Nums, 
+                            ReferenceZero = ReferenceZero)
     }
     par.settings <-
       list(strip.background = list(col = col.strip.background))
@@ -111,6 +113,8 @@ HH_plot.likert.formula <-
       }
     }
     Nums.attr <- attributes(Nums.lik)
+    
+   # print(str(Nums.lik))
     scales <-
       list(x = list(alternating = 1), y = list(alternating = 1))
     if (!missing(scales.in)) {
@@ -246,10 +250,26 @@ HH_plot.likert.formula <-
     {
       if (positive.order || data.order) {
         if (positive.order) {
-          if (reverse)
+          cat("\nin positive.order \n")
+          print( data2)
+          print(Nums.attr$positive.order)
+          
+          if (reverse){
+            cat("\n reverse \n")
+         
             data2 <- data2[Nums.attr$positive.order, ]
-          else
+            print( data2)
+           
+            
+           
+            }
+          else{
+            cat("\n reverse FALSE \n")
             data2 <- data2[rev(Nums.attr$positive.order), ]
+            
+              print( data2)
+         
+            }
         }
         else {
           do <- 1:nrow(data2)
@@ -377,3 +397,314 @@ HH_plot.likert.formula <-
     }
     result
   }
+
+
+# as.likert <- HH:::as.likert
+# xscale.components.top.HH <- HH:::xscale.components.top.HH
+# yscale.components.right.HH <- HH:::yscale.components.right.HH
+# getLikertData <- HH:::getLikertData
+# getVarNames <- HH:::getVarNames
+
+
+# 
+# 
+# getVarNames <- function(x, data) {
+#   switch(length(x),
+#          stop(paste("formula must be in form",
+#                     "  Question ~ . | Subtable",
+#                     "or",
+#                     "  Question ~ A+B+C | Subtable",
+#                     "or",
+#                     "  Question ~ .",
+#                     "or",
+#                     "  Question ~ A+B+C",
+#                     "or",
+#                     "  ~ . | Subtable",
+#                     "or",
+#                     "  ~ A+B+C | Subtable",
+#                     "or",
+#                     "  ~ .",
+#                     "or",
+#                     "  ~ A+B+C",
+#                     sep="\n"),
+#               call.=FALSE),
+#          {
+#            QuestionName <- 'rownames(data)'
+#            x <- as.formula(paste('` `', deparse(x, width.cutoff = 500L))) ## length(x) is now 3
+#          },
+#          QuestionName <- as.character(x[[2]]))
+#   
+#   x3 <- x[[3]]
+#   DOT <- as.call(~ .)[[2]]
+#   
+#   if (x3 == DOT) {
+#     CondNamesFormula <- NULL
+#     LevelNamesFormula <- NULL
+#   }
+#   else { ## ((x3 != DOT)
+#     if (length(x3) > 1 && x3[[1]] == '|' && x3[[2]] == DOT) {
+#       CondNamesFormula <- x3[[3]]
+#       LevelNamesFormula <- NULL
+#     }
+#     else {
+#       if (length(x3) > 1 && x3[[1]] == '|' && x3[[2]] != DOT) {
+#         LevelNamesFormula <- x3[[2]]
+#         CondNamesFormula <- x3[[3]]
+#       }
+#       else { ## length(x3) == 1 || x3[[1]] != '|'
+#         LevelNamesFormula <- x3
+#         CondNamesFormula <- NULL
+#       }
+#     }
+#   }
+#   
+#   if (is.null(CondNamesFormula))
+#     CondNames <- NULL
+#   else {
+#     CondNamesRaw <- strsplit(deparse(CondNamesFormula, width.cutoff = 500L),
+#                              "[\\*\\+]", fixed=FALSE)[[1]]
+#     CondNames <- sub('^[[:space:]]+', '', sub('[[:space:]]+$', '', CondNamesRaw )) ## remove leading and trailing white space, POSIX-style
+#     CondNames <- sub('^\"', '', sub('\"$', '', CondNames )) ## remove leading and trailing '\"' character
+#   }
+#   
+#   if (is.null(LevelNamesFormula))
+#     LevelNames <- NULL
+#   else {
+#     LevelNamesRaw <- strsplit(deparse(LevelNamesFormula, width.cutoff = 500L),
+#                               "[\\*\\+]", fixed=FALSE)[[1]]
+#     LevelNames <- sub('^[[:space:]]+', '', sub('[[:space:]]+$', '', LevelNamesRaw )) ## remove leading and trailing white space, POSIX-style
+#     LevelNames <- sub('^\"', '', sub('\"$', '', LevelNames )) ## remove leading and trailing '\"' character
+#   }
+#   
+#   list(QuestionName=QuestionName, CondNames=CondNames, LevelNames=LevelNames)
+# }
+# 
+# 
+# getLikertData <- function(data, varNamesUsed) {
+#   if (varNamesUsed$QuestionName == 'rownames(data)') {
+#     Question <- data.frame('rownames(data)'=factor(rownames(data), levels=unique(rownames(data))),
+#                            check.names=FALSE)
+#     RemainingNames <- names(data)
+#   }
+#   else {
+#     Question <- data[, varNamesUsed$QuestionName, drop=FALSE]
+#     if (!is.factor(Question[[1]]))
+#       Question[[1]] <- factor(Question[[1]], levels=unique(Question[[1]]))
+#     RemainingNames <- names(data)[! names(data) %in% varNamesUsed$QuestionName]
+#   }
+#   
+#   if (length(varNamesUsed$CondNames) > 0) {
+#     Conditions <- data.frame(
+#       lapply(data[, varNamesUsed$CondNames, drop=FALSE],
+#              function(ff) {
+#                if (is.factor(ff))
+#                  ff
+#                else
+#                  factor(ff, levels=unique(ff))
+#              }))
+#     RemainingNames <- RemainingNames[! RemainingNames %in% varNamesUsed$CondNames]
+#   }
+#   else
+#     Conditions <- data.frame(matrix(NA, nrow(Question), 0))
+#   
+#   Nums <- if (is.null(varNamesUsed$LevelNames)) {
+#     tmp <- data[, RemainingNames, drop=FALSE]
+#     tmp[, sapply(tmp, is.numeric), drop=FALSE]
+#   }  else
+#     data[, varNamesUsed$LevelNames, drop=FALSE]
+#   
+#   Nums <- data.matrix(Nums)
+#   names(dimnames(Nums)) <- if (is.null(attr(data, "names.dimnames")))
+#     c(varNamesUsed$QuestionName, "Level Names")
+#   else
+#     attr(data, "names.dimnames")
+#   list(Question=Question, Conditions=Conditions, Nums=Nums)
+#   
+# }
+# 
+# getLikertDataLong <- function(x, data, varNamesUsedLong) {
+#   if (inherits(x[[3]], "call")) {
+#     cond <- deparse(x[[3]][[3]])
+#     aaa <- strsplit(cond, " ", fixed=TRUE)[[1]]
+#     aaa[aaa=='+'] <- ' + '
+#     bbb <- paste(rev(aaa), collapse="")
+#     y <- paste(bbb, ' + ', as.character(x[[2]]), ' ~ ', x[[3]][[2]], sep='')
+#     levelsName <- as.character(x[[3]][[2]])
+#     x[[3]][[2]] <- as.name(".")
+#   } else {
+#     y <- x
+#     levelsName <- as.character(x[[3]])
+#     x[[3]] <- as.name(".")
+#   }
+#   
+#   varNamesUsed <- c(varNamesUsedLong[c("QuestionName","CondNames")],
+#                     Nums=levels(data[[varNamesUsedLong$LevelNames]]))
+#   data2 <- reshape2::dcast(y, data=data[unlist(varNamesUsedLong)], value.var=varNamesUsedLong$Value)
+#   list(data.list=getLikertData(data2, varNamesUsed), varNamesUsed=varNamesUsed, x=x)
+# }
+# 
+# likertStripDefault <- strip.custom(
+#   bg="gray97", ## col.strip.background,
+#   par.strip.text=list(cex=.6))
+# 
+## if (FALSE) {
+
+##   require(HH)
+##   require(reshape)
+
+##   data(SFF8121)
+##   SFF <- as.likertDataFrame(SFF8121)
+
+##   ## These two statements are equivalent to each other and will be
+##   ## equivalent to the next two in the special case that there are no
+##   ## repetitions in the rownames(data).
+
+##   likert( ~ . | Subtable, data=SFF, layout=c(2,1))
+
+##   likert( ~
+##          "Strongly Disagree" + Disagree + Neutral + Agree + "Strongly Agree" | Subtable,
+##          data=SFF, layout=c(2,1))
+
+##   ## These two statements are equivalent
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1))
+
+##   likert(Question ~
+##          "Strongly Disagree" + Disagree + Neutral + Agree + "Strongly Agree" | Subtable,
+##          data=SFF, layout=c(2,1))
+
+##   ## fancy
+##   fancy <-
+##   update(par.strip.text=list(cex=.7), xlab="Percent", main="Student Evaluations", scales=list(x=list(limits=c(-20, 100))),
+##          resizePanels(useOuterStrips(combineLimits(
+##            likert(Question ~ . | Subtable+fake,
+##                   data=cbind(SFF,
+##                     fake=rep(
+##                       factor(c("Instructor","Course","Instructor","Course"),
+##                              levels=c("Instructor","Course")),
+##                       c(8,3,8,3))),
+##                   scales=list(y=list(relation="free")), between=list(y=.5, x=.5))
+##            )), h=c(8,3))
+##          )
+##   fancy
+
+##   ## others
+##   tmpvert <-
+##   likert(Question ~ . | Subtable, data=SFF, ylab="Percent", layout=c(1,2), horizontal=FALSE,
+##          between=list(y=1), scales=list(x=list(rot=90), y=list(limits=c(-30,110), alternating=1)))
+##   tmpvert
+
+##   likert(Question ~ . | Subtable, data=SFF, ylab="Percent", layout=c(1,2), horizontal=FALSE,
+##          between=list(y=1), scales=list(x=list(rot=90)), ylim=c(-30,110))
+
+##   tmp <- likert(Question ~ . | Subtable, data=SFF, layout=c(2,1),
+##                 scales=list(x=list(limits=c(-30, 110), alternating=1, at=seq(-20, 100, 20), labels=abs(seq(-20, 100,20)))))
+##   tmp
+
+
+##   tmp2 <- likert(Question ~ . | Subtable, data=SFF, layout=c(2,1),
+##                  scales=list(x=list(limits=c(-30, 110), alternating=1)))
+##   tmp2
+
+##   ## ## if (!is.numeric(tmp2$x.scales$labels)) {
+##   ## ##   if (!is.numeric(tmp2$x.scales$at))
+##   ## ##     tmp2$x.scales$at <- pretty(tmp2$x.scales$limits)
+##   ## ##   tmp2$x.scales$labels <- abs(tmp2$x.scales$at)
+##   ## ## }
+##   ## ## tmp2
+
+##   ## TickLabelsPositive <- function(trellis, horizontal=TRUE) { ## trellis is a trellis object
+##   ##   scales <-if (horizontal) trellis$x.scales else trellis$y.scales
+##   ##   if (!is.numeric(scales$labels)) {
+##   ##     if (!is.numeric(scales$at))
+##   ##       scales$at <- pretty(scales$limits)
+##   ##     scales$labels <- abs(scales$at)
+##   ##   }
+##   ##   else
+##   ##     scales$labels <- abs(scales$labels)
+##   ##   if (horizontal) trellis$x.scales <- scales else trellis$y.scales <- scales
+##   ##   trellis
+##   ## }
+
+##   ## TickLabelsPositive(tmp2)
+
+##   ## TickLabelsPositive(tmpvert, FALSE)
+
+
+
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1))
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1), xlimEqualLeftRight=TRUE)
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1), xTickLabelsPositive=FALSE, xlim=c(-80,110))
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1), xlim=c(-80,110))
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1), xlimEqualLeftRight=TRUE, xTickLabelsPositive=FALSE)
+
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1))
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(2,1), as.percent=TRUE)  ## rightAxisLabels doesn't work with layout=c(2,1)
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(1,2), as.percent=TRUE)  ## rightAxisLabels doesn't work with layout=c(1,2)
+
+##   HH:::plot.likert.formula.old(Question ~ . | Subtable, data=SFF, layout=c(2,1), as.percent=TRUE)  ## Works but needs horizontal stretch to be useful
+##   HH:::plot.likert.formula.old(Question ~ . | Subtable, data=SFF, layout=c(1,2), as.percent=TRUE)  ## Works
+
+##   likert(Question ~ . | Subtable, data=SFF, layout=c(1,2), as.percent=TRUE)
+
+## }
+
+
+
+
+
+
+#  # 
+# getVarNames <- function (x, data) 
+# {
+#   switch(length(x), stop(paste("formula must be in form", "  Question ~ . | Subtable", 
+#                                "or", "  Question ~ A+B+C | Subtable", "or", "  Question ~ .", 
+#                                "or", "  Question ~ A+B+C", "or", "  ~ . | Subtable", 
+#                                "or", "  ~ A+B+C | Subtable", "or", "  ~ .", "or", "  ~ A+B+C", 
+#                                sep = "\n"), call. = FALSE), {
+#                                  QuestionName <- "rownames(data)"
+#                                  x <- as.formula(paste("` `", deparse(x, width.cutoff = 500L)))
+#                                }, QuestionName <- as.character(x[[2]]))
+#   x3 <- x[[3]]
+#   DOT <- as.call(~.)[[2]]
+#   if (x3 == DOT) {
+#     CondNamesFormula <- NULL
+#     LevelNamesFormula <- NULL
+#   }
+#   else {
+#     if (length(x3) > 1 && x3[[1]] == "|" && x3[[2]] == DOT) {
+#       CondNamesFormula <- x3[[3]]
+#       LevelNamesFormula <- NULL
+#     }
+#     else {
+#       if (length(x3) > 1 && x3[[1]] == "|" && x3[[2]] != 
+#           DOT) {
+#         LevelNamesFormula <- x3[[2]]
+#         CondNamesFormula <- x3[[3]]
+#       }
+#       else {
+#         LevelNamesFormula <- x3
+#         CondNamesFormula <- NULL
+#       }
+#     }
+#   }
+#   if (is.null(CondNamesFormula)) 
+#     CondNames <- NULL
+#   else {
+#     CondNamesRaw <- strsplit(deparse(CondNamesFormula, width.cutoff = 500L), 
+#                              "[\\*\\+]", fixed = FALSE)[[1]]
+#     CondNames <- sub("^[[:space:]]+", "", sub("[[:space:]]+$", 
+#                                               "", CondNamesRaw))
+#     CondNames <- sub("^\"", "", sub("\"$", "", CondNames))
+#   }
+#   if (is.null(LevelNamesFormula)) 
+#     LevelNames <- NULL
+#   else {
+#     LevelNamesRaw <- strsplit(deparse(LevelNamesFormula, 
+#                                       width.cutoff = 500L), "[\\*\\+]", fixed = FALSE)[[1]]
+#     LevelNames <- sub("^[[:space:]]+", "", sub("[[:space:]]+$", 
+#                                                "", LevelNamesRaw))
+#     LevelNames <- sub("^\"", "", sub("\"$", "", LevelNames))
+#   }
+#   list(QuestionName = QuestionName, CondNames = CondNames, 
+#        LevelNames = LevelNames)
+# }

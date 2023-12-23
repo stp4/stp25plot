@@ -1,6 +1,8 @@
 #' Barcharts for Likert
 #'
 #' Constructs and plots diverging stacked barcharts for Likert (copie from HH:::plot.likert.formula)
+#' 
+#' Die orginale Funktion hat bei der Sortierung (positive.order) einen Fehler.
 #'
 #' @param x formula
 #' @param data daten
@@ -10,7 +12,8 @@
 #' farbe("likert.blue.red", data$nlevels, middle = ReferenceZero)
 #' @param rightAxis,as.percent,ReferenceZero,reference.line.col,col.strip.background
 #' an HH:::plot.likert.formula
-#' @param positive.order das nicht verwenden - wird ueber Tbll_likert gesteuert
+#' @param include.order,decreasing Sortieren der Items
+#' @param positive.order das nicht verwenden!! - wird ueber Tbll_likert oder include.order = TRUE gesteuert.
 #' @param auto.key,columns,space  columns = 2,
 #' @param ... HH:::plot.likert.formula  
 #'    between=list(x=0))
@@ -71,7 +74,9 @@ likertplot <- function(x = Item   ~ . ,
                        col = NULL,
                    
                        rightAxis = FALSE,
-                       positive.order = FALSE, 
+                       positive.order = NULL, 
+                       include.order = NULL,
+                       decreasing =  TRUE,
                        as.percent = TRUE,
                        auto.key = list(space = space, 
                                        columns = columns,
@@ -85,22 +90,30 @@ likertplot <- function(x = Item   ~ . ,
                        columns = 2,
                        space ="top",
                        horizontal = TRUE,
+                     #  as.table = TRUE,
+                     #  reverse = ifelse(horizontal, as.table, FALSE),
                        between = list(x = 1 + (horizontal), 
                                       y = 0.5 +2 * (!horizontal)),
                       ...) {
-  name_item <- "Item"
   
+  if(!is.null(positive.order)) 
+    stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
+  
+  name_item <- "Item"
+  x_mean <- NULL
   if(is.null(data)){
     if(is.data.frame(x) & ("plot" %in% names(attributes(x))) ){
       # Tbll_likert() 
       formula <-  attr(x, "plot")$formula
       nlevels <-  attr(x, "plot")$nlevels
       data <-  attr(x, "plot")$results
+      x_mean <- attr(data, "plot")$m
     }
     else if(inherits(x, "likert")){
       formula <- x$formula
       nlevels <- x$nlevels
       data <-  x$results
+      x_mean <- x$m
     }
     else{ stop("No data.frame !") }
   }
@@ -111,6 +124,7 @@ likertplot <- function(x = Item   ~ . ,
        formula <-  x
        nlevels <-  attr(data, "plot")$nlevels
        data <-  attr(data, "plot")$results
+       x_mean <- attr(data, "plot")$m
      }
      else{
        formula <-  x
@@ -121,6 +135,7 @@ likertplot <- function(x = Item   ~ . ,
        formula <- x
        nlevels <- data$nlevels
        data <-  data$results
+       x_mean <- x$m
       }
   }
   
@@ -151,6 +166,11 @@ likertplot <- function(x = Item   ~ . ,
   
   
   
+  if (!is.null(include.order)) {
+   data <-  re_order_mean(data, x_mean, decreasing, include.order)
+  }
+  
+ #HH_plot.likert.formula 
   HH:::plot.likert.formula(
       x = formula,
       data = data,
@@ -160,7 +180,7 @@ likertplot <- function(x = Item   ~ . ,
       xlab = xlab,
       col = col,
       rightAxis = rightAxis,
-      positive.order = positive.order,
+      positive.order = FALSE,
       as.percent = as.percent,
       auto.key = auto.key,
       ReferenceZero =  ReferenceZero,
@@ -168,6 +188,8 @@ likertplot <- function(x = Item   ~ . ,
       col.strip.background = col.strip.background,
       between=between,
       horizontal = horizontal,
+    #  as.table = as.table,
+     # reverse = reverse,
       ...
   
     )
@@ -204,7 +226,17 @@ likert_plot <- function(...,
                         type = 1, 
                         col = NULL,
                         rightAxis = FALSE,
-                        positive.order =  if(is.logical(include.order)) include.order else FALSE, 
+                        
+                        
+                        
+                      #  positive.order =  if(is.logical(include.order)) include.order else FALSE, 
+                        
+                        positive.order = NULL,
+                      #  include.order = positive.order.
+                        decreasing =  TRUE,
+                        
+                        
+                        
                         as.percent = TRUE,
                         auto.key = list(space = space, 
                                         columns = columns,
@@ -218,6 +250,8 @@ likert_plot <- function(...,
                         space ="top",
                        
                         horizontal = TRUE,
+                        as.table = TRUE,
+                        reverse = ifelse(horizontal, as.table, FALSE),
                         between = list(x = 1 + (horizontal), 
                                        y = 0.5 +2 * (!horizontal)),
                         par.strip.text = list(lines = 1, cex = .8),
@@ -226,6 +260,9 @@ likert_plot <- function(...,
                         include.na = FALSE
                         ){
 
+  if(!is.null(positive.order)) 
+    stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
+  
   if (is.null(relevel)){
     X <- stp25stat2:::Likert(..., include.total=include.total)
    }
@@ -246,12 +283,13 @@ likert_plot <- function(...,
     X <- stp25stat2:::Likert(X_old$formula,  X_old$data, include.total=include.total)
   }
   
-  if(is.numeric(include.order)){
-    positive.order <- FALSE
-    ny_levels <- levels(X$results$Item)
-    if( length(ny_levels) != length(include.order)) stop("include.order ist die Reihenfolge der Items - muss also exakt gleich lang sein wie die Items!")
-    X$results$Item <- factor(X$results$Item, ny_levels[include.order] )
+  
+  if (!is.null(include.order)) {
+    X$results <-  re_order_mean(X$results, X$m, decreasing, include.order)
   }
+  
+ 
+
   
   if(include.table)
     stp25output2::Output(
@@ -276,7 +314,12 @@ if( type !=1 ){
 }
 
 
-  likertplot(
+  
+  
+
+  
+
+ likertplot(
     X,
     main = main,
     ylab = ylab,
@@ -284,7 +327,7 @@ if( type !=1 ){
     xlab = xlab,
     col = col,
     rightAxis = rightAxis,
-    positive.order = positive.order,
+  #  positive.order = positive.order,
     as.percent = as.percent,
     auto.key = auto.key,
     ReferenceZero = ReferenceZero,
@@ -292,11 +335,48 @@ if( type !=1 ){
     col.strip.background = col.strip.background,
     wrap = wrap,
     horizontal = horizontal,
+    as.table = as.table,
+  #  reverse =reverse,
     between = between,
     par.strip.text = par.strip.text
   )
  
+}
+
+re_order_mean <-
+  function(data, m, decreasing = TRUE, include.order) {
+    if (is.logical(include.order) & include.order) {
+      my_order <-
+        tapply(
+          m,
+          data$Item,
+          FUN = function(x)
+            mean(x, na.rm = TRUE)
+        )
+      
+      data$Item <-
+        factor(data$Item ,
+               names(my_order)[order(my_order, decreasing = decreasing)])
+    }
+    else  if (is.numeric(include.order)) {
+      positive.order <- FALSE
+      ny_levels <- levels(X$results$Item)
+      if (length(ny_levels) != length(include.order))
+        stop(
+          "include.order ist die Reihenfolge der Items - muss also exakt gleich lang sein wie die Items!"
+        )
+      X$results$Item <-
+        factor(X$results$Item, ny_levels[include.order])
+    }
+    
+    
+    
+    data
   }
+
+
+
+
 
 #' likert_col
 #'
