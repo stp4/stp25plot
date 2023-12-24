@@ -65,55 +65,51 @@
 #' #   Likert(Magazines, Comic.books, Fiction, Newspapers) %>% 
 #' #   likertplot()
 #' 
-likertplot <- function(x = Item   ~ . ,
-                       data=NULL,
-                       main = '',
-                       ylab = "",
-                       sub = "",
-                       xlab = if(horizontal) {if(as.percent) "Prozent" else "Anzahl"} else "",
-                       col = NULL,
-                   
-                       rightAxis = FALSE,
-                       positive.order = NULL, 
-                       include.order = NULL,
-                       decreasing =  TRUE,
-                       as.percent = TRUE,
-                       auto.key = list(space = space, 
-                                       columns = columns,
-                                       between = 1
-                                       ),
-                       
-                       ReferenceZero = NULL,
-                       reference.line.col = "gray65",
-                       col.strip.background = "gray97",
-                       wrap = TRUE,
-                       columns = 2,
-                       space ="top",
-                       horizontal = TRUE,
-                     #  as.table = TRUE,
-                     #  reverse = ifelse(horizontal, as.table, FALSE),
-                       between = list(x = 1 + (horizontal), 
-                                      y = 0.5 +2 * (!horizontal)),
-                      ...) {
-  
+likertplot <-
+  function(x = Item   ~ . ,
+           data = NULL,
+           main = '',
+           ylab = "",
+           sub = "",
+           xlab = if (horizontal) { if (as.percent)"Prozent" else "Anzahl" } else "",
+           ylim =NULL, xlim=NULL,
+           col = NULL,
+           rightAxis = FALSE,
+           positive.order = NULL,
+           include.order = NULL,
+           decreasing =  TRUE,
+           as.percent = TRUE,
+           auto.key = list(space = space, columns = columns, between = 1),
+           ReferenceZero = NULL,
+           reference.line.col = "gray65",
+           col.strip.background = "gray97",
+           wrap = TRUE,
+           columns = 2,
+           space = "top",
+           horizontal = TRUE,
+           between = list(x = 1 + (horizontal), y = 0.5 + 2 * (!horizontal)),
+           par.settings  = NULL,
+           ...) {
+
   if(!is.null(positive.order)) 
     stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
   
   name_item <- "Item"
-  x_mean <- NULL
+  x_mean    <- NULL
+  
   if(is.null(data)){
     if(is.data.frame(x) & ("plot" %in% names(attributes(x))) ){
       # Tbll_likert() 
-      formula <-  attr(x, "plot")$formula
-      nlevels <-  attr(x, "plot")$nlevels
-      data <-  attr(x, "plot")$results
-      x_mean <- attr(data, "plot")$m
+      formula <- attr(x, "plot")$formula
+      nlevels <- attr(x, "plot")$nlevels
+      data    <- attr(x, "plot")$results
+      x_mean  <- attr(data, "plot")$m
     }
     else if(inherits(x, "likert")){
       formula <- x$formula
       nlevels <- x$nlevels
-      data <-  x$results
-      x_mean <- x$m
+      data    <- x$results
+      x_mean  <- x$m
     }
     else{ stop("No data.frame !") }
   }
@@ -121,34 +117,29 @@ likertplot <- function(x = Item   ~ . ,
    if (is.data.frame(data) ) {
      if("plot" %in% names(attributes(data))){
        # Tbll_likert()
-       formula <-  x
-       nlevels <-  attr(data, "plot")$nlevels
-       data <-  attr(data, "plot")$results
-       x_mean <- attr(data, "plot")$m
+       formula <- x
+       nlevels <- attr(data, "plot")$nlevels
+       data    <- attr(data, "plot")$results
+       x_mean  <- attr(data, "plot")$m
      }
      else{
-       formula <-  x
-       name_item<- all.vars(x)[1]
+       formula   <- x
+       name_item <- all.vars(x)[1]
      }
    }
     else if( inherits(x, "likert") ){
        formula <- x
        nlevels <- data$nlevels
-       data <-  data$results
-       x_mean <- x$m
+       data    <- data$results
+       x_mean  <- x$m
       }
   }
   
-  
-  
-
   if (is.null(col)) {
     col <- if (is.null(ReferenceZero)) likert_col(nlevels)
            else likert_col(nlevels, middle = ReferenceZero)
   }
-  
 
-  
   if (is.logical(wrap)) {
     if (wrap) {
      # if (!is.character(data[[name_item]]))
@@ -164,14 +155,12 @@ likertplot <- function(x = Item   ~ . ,
       stp25tools::wrap_factor(data[[name_item]], wrap)
   }
   
-  
-  
   if (!is.null(include.order)) {
-   data <-  re_order_mean(data, x_mean, decreasing, include.order)
+   data <- re_order_mean(data, x_mean, decreasing, include.order)
   }
   
- #HH_plot.likert.formula 
-  HH:::plot.likert.formula(
+  lattice_plot <-
+    HH:::plot.likert.formula(
       x = formula,
       data = data,
       main = main,
@@ -186,20 +175,39 @@ likertplot <- function(x = Item   ~ . ,
       ReferenceZero =  ReferenceZero,
       reference.line.col = reference.line.col,
       col.strip.background = col.strip.background,
-      between=between,
+      between = between,
       horizontal = horizontal,
-    #  as.table = as.table,
-     # reverse = reverse,
+      par.settings.in = par.settings,
       ...
-  
     )
+  
+  if (horizontal) {
+    if (!is.null(xlim))
+      lattice_plot <-
+        lattice:::update.trellis(lattice_plot, xlim = xlim)
+    if (!is.null(ylim))
+      lattice_plot <-
+        lattice:::update.trellis(lattice_plot, ylim = ylim)
+    
+  }
+  else  {
+    if (!is.null(xlim))
+      lattice_plot <-
+        lattice:::update.trellis(lattice_plot, ylim = xlim)
+    if (!is.null(ylim))
+      lattice_plot <-
+        lattice:::update.trellis(lattice_plot, xlim = ylim)
+  }
+  
+  lattice_plot
  }
+
 
 
 #' @rdname likertplot
 #'
-#' @param ... an Tbll_likert
-#' @param include.table,include.na,caption Tabelle ausgeben (output ist eine Altlast)
+#' @param ... an stp25stat2::Likert
+#' @param include.table,include.mean,include.n,include.percent,include.count,include.na,caption Tabelle ausgeben (output ist eine Altlast)
 #' @param type  nur in likert_plot Bei Gruppen Items als Zeilen => 1, oder Gruppen als Zeilen => 2
 #' @param include.total an stp25stat2:::Likert
 #' @param include.order sortiere muss die länge der Items entsprechen
@@ -212,53 +220,45 @@ likertplot <- function(x = Item   ~ . ,
 #' 
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers)
 #' 
-likert_plot <- function(...,
-                        include.total = FALSE,
-                        relevel = NULL, 
-                        include.table = FALSE,
-                        include.order = NULL,
-                        caption = "",
-                        # an likertplot
-                        main = '',
-                        ylab = "",
-                        sub = "",
-                        xlab = if(as.percent) "Prozent" else "Anzahl",
-                        type = 1, 
-                        col = NULL,
-                        rightAxis = FALSE,
-                        
-                        
-                        
-                      #  positive.order =  if(is.logical(include.order)) include.order else FALSE, 
-                        
-                        positive.order = NULL,
-                      #  include.order = positive.order.
-                        decreasing =  TRUE,
-                        
-                        
-                        
-                        as.percent = TRUE,
-                        auto.key = list(space = space, 
-                                        columns = columns,
-                                        between = 1
-                        ),
-                        ReferenceZero = NULL,
-                        reference.line.col = "gray65",
-                        col.strip.background = "gray97",
-                        wrap = TRUE,
-                        columns = 2,
-                        space ="top",
-                       
-                        horizontal = TRUE,
-                        as.table = TRUE,
-                        reverse = ifelse(horizontal, as.table, FALSE),
-                        between = list(x = 1 + (horizontal), 
-                                       y = 0.5 +2 * (!horizontal)),
-                        par.strip.text = list(lines = 1, cex = .8),
-                       
-                      #  output = include.table,
-                        include.na = FALSE
-                        ){
+likert_plot <-
+  function(...,
+           main = '',
+           ylab = "",
+           sub = "",
+           xlab = if (as.percent) "Prozent" else "Anzahl",
+           ylim =NULL, xlim=NULL,
+           type = 1,
+           col = NULL,
+           rightAxis = FALSE,
+           as.percent = TRUE,
+           auto.key = list(space = space, columns = columns, between = 1),
+           ReferenceZero = include.reference,
+           reference.line.col = "gray65",
+           col.strip.background = "gray97",
+           wrap = TRUE,
+           columns = 2,
+           space = "top",
+           horizontal = TRUE,
+           #as.table = TRUE,
+           positive.order = NULL,
+          # reverse = ifelse(horizontal, as.table, FALSE),
+           between = list(x = 1 + (horizontal), y = 0.5 +2 * (!horizontal)),
+           par.strip.text = list(lines = 1, cex = .8),
+           par.settings = NULL,
+           include.reference = NULL,
+           include.total = FALSE,
+           relevel = NULL,
+           include.order = NULL,
+           decreasing =  TRUE,
+           
+           caption = "",
+           include.table = FALSE,
+           include.mean = TRUE,
+           include.n = FALSE,
+           include.na = FALSE,
+           include.percent = TRUE,
+           include.count = TRUE) 
+{
 
   if(!is.null(positive.order)) 
     stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
@@ -284,24 +284,24 @@ likert_plot <- function(...,
   }
   
   
-  if (!is.null(include.order)) {
+ if (!is.null(include.order)) {
     X$results <-  re_order_mean(X$results, X$m, decreasing, include.order)
   }
   
- 
-
-  
-  if(include.table)
+ if(include.table){
     stp25output2::Output(
       stp25stat2::Tbll_likert(X,
+                              include.reference = ReferenceZero,
+                              include.mean = include.mean,
+                              include.n = include.n,
                               include.na = include.na,
-                              ReferenceZero = ReferenceZero),
+                              include.percent = include.percent,
+                              include.count = include.count
+                              ),
       caption = caption
-    )
+    )}
   
-  
-
-if( type !=1 ){
+ if( type !=1 ){
   fm <- X$formula
   x_in <- all.names(fm)
   
@@ -313,18 +313,13 @@ if( type !=1 ){
   }
 }
 
-
-  
-  
-
-  
-
  likertplot(
     X,
     main = main,
     ylab = ylab,
     sub = sub,
     xlab = xlab,
+    ylim = ylim, xlim = xlim,
     col = col,
     rightAxis = rightAxis,
   #  positive.order = positive.order,
@@ -335,10 +330,13 @@ if( type !=1 ){
     col.strip.background = col.strip.background,
     wrap = wrap,
     horizontal = horizontal,
-    as.table = as.table,
+  #  as.table = as.table,
   #  reverse =reverse,
     between = between,
-    par.strip.text = par.strip.text
+    par.strip.text = par.strip.text,
+  par.settings =par.settings
+ 
+ 
   )
  
 }
