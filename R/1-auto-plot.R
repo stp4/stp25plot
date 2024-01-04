@@ -162,13 +162,7 @@ auto_plot.default <- function(...,
       (length(X$measure.vars) > length(X$group.vars))) {
     
     
-    
-    
-     cat("\n in multi_av_plot\n")
-    
-
-  #  print(xlab)
-    
+     
     res <- multi_av_plot(
       X$data,
       X$measure.vars,
@@ -200,8 +194,7 @@ auto_plot.default <- function(...,
     if (is.null(xlab))
       xlab <-  rep(X$col_name[1], length(X$measure.vars))
     
-  #  cat("\n in multi_uv_plot\n")
-#    print(xlab )
+ 
     res <- multi_uv_plot(
       X$data,
       X$group.vars,
