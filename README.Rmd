@@ -93,7 +93,7 @@ likertplot(Item ~ . | Geschlecht,
 
 ```
 ```{r likert-plot-2, fig.height=2.5, fig.width=4}
-DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
+DF2 |> likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
                     relevel = letters[1:5],
                     auto.key = list(columns=5, between=.15, space="top"),
                    # between=list(x=0),
@@ -239,9 +239,9 @@ plot_differenz <-
     xx
   }
 op=par(mar=c(4.2, 5, 3.8, 2))
-fit1 %>%  
-  emmeans("time2") %>% 
-  pairs() %>%  
+fit1 |>  
+  emmeans("time2") |> 
+  pairs() |>  
   plot_differenz(las = 1, xlim =c(15, -25)) 
 par(op)
 ```
@@ -326,7 +326,7 @@ plot_grid(p1,  p2,  p3,
 
 Die Funktion klebt lattice- plots zu einer matrix zusammen.
 
-Verwendung: auto_plot(formula, data) oder data %>% auto_plot(var_x, var_y, var_z) Die Funktion kann dabei Formel wie z.B.
+Verwendung: auto_plot(formula, data) oder data |> auto_plot(var_x, var_y, var_z) Die Funktion kann dabei Formel wie z.B.
 $a+b+c\sim g$ 
 
 $a[box]+b[bar]+c[dot]\sim g$
@@ -340,7 +340,7 @@ https://www.zahlen-kern.de/editor/
 
 ```{r lattice-matrix-1, fig.height=5, fig.width=8}
 
-DF %>% auto_plot(
+DF |> auto_plot(
   n,
   e[box],
   o[hist],
@@ -372,7 +372,7 @@ enviro2 <- transform(
   ),
   is.windy =   factor(wind > 10, c(TRUE, FALSE), labels = c("windy", "calm")
   )
-) %>% Label(
+) |> Label(
   ozone=" Average ozone concentration (of hourly measurements)",
    radiation = "Solar radiation (from 08:00 to 12:00)",
   temperature = "Maximum daily temperature",
@@ -437,7 +437,7 @@ comp_0 comp_1 comp_2 comp_3 comp_4 comp_5 comp_6 comp_7 comp_8 gender
    TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE Female
   FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE Female
 "
-) %>% Label(
+) |> Label(
   comp_0  =     "A+"   ,
   comp_1  =  "Heart Failure"  ,
   comp_2  = "Rhythm Abnormality" ,
@@ -461,22 +461,22 @@ Mehrfachantworten mit  multi_barplot().
 
 ```{r}
 
-# dat2[1:5] %>% 
+# dat2[1:5] |> 
 #   multi_barplot()
 # 
-# dat2 %>%  
+# dat2 |>  
 #   multi_barplot(. ~ gender,
 #                 reorder = TRUE,
 #                 last = c("Others" ))
 # 
-# dat2[1:5] %>% 
+# dat2[1:5] |> 
 #   auto_plot()
 # 
-# dat2 %>%
+# dat2 |>
 #   auto_plot(. ~ gender)
 
 
-# dat2 %>%  auto_plot(comp_1, comp_2, comp_3 , 
+# dat2 |>  auto_plot(comp_1, comp_2, comp_3 , 
 #                     include.percent=TRUE,
 #                     include.reorder=TRUE,
 #                     main ="Complicationen",
@@ -1180,9 +1180,10 @@ mtcars2 <- within(mtcars, {
 
 mtcars2$mpg[mtcars2$cyl_ord==6]  <- mtcars2$mpg[mtcars2$cyl_ord==6] *.5
 
-mtcars2 <- mtcars2 %>% Label(
+mtcars2 <- mtcars2 |> 
+  Label(
   mpg	= "Miles/(US) gallon",
-  cyl	= "Number of cylinders",
+  cyl_ord	= "Number of cylinders",
   disp	= "Displacement (cu.in.)",
   hp	= "Gross horsepower",
   drat =	"Rear axle ratio",
@@ -1197,6 +1198,52 @@ mtcars2 <- mtcars2 %>% Label(
 fit <- lm(mpg ~ hp * wt + am +cyl  , data = mtcars2)
 fit2 <- lm(mpg ~ hp * wt + am +cyl_ord  , data = mtcars2)
 ```
+
+
+### Meine Version vs plot.efflist
+
+```{r}
+plot( effects::allEffects(fit2) )
+```
+
+
+
+```{r}
+plot2( effects::allEffects(fit2) )
+```
+
+
+```{r}
+e2 <- effects::allEffects(fit2)
+p1 <- plot2(e2,
+            axes =  list(
+              x = list(
+                hp = list(lab = "Gross horsepower"),
+                wt = list(lab = "Weight (1000 lbs"),
+                am = list(lab = "Transmission (0 = automatic, 1 = manual)"),
+                cyl_ord = list(lab = "Number of cylinders"),
+                cex = .75
+              ),
+              y = list(lab = "Miles/(US) gallon")
+            )
+)
+
+
+```
+
+
+```{r}
+p2<-plot2(e2,
+  labels = stp25tools::get_label(mtcars2),
+  plot=FALSE)
+
+cowplot::plot_grid(plotlist =p2, 
+                   labels = c('A', 'B', 'C'),
+                  # scale = c(1, .9, .8),
+                   rel_heights = c(3,4))
+```
+
+
 
 
 Konfidenz-Band mit  *geom_ribbon()*
@@ -1301,9 +1348,9 @@ ggemmeans()
 ggpredict() 
 # uses predict() 
 
-ggpredict(fit, term = "hp") %>% plot() +
-ggeffect(fit, term = "hp")  %>% plot( add.data = TRUE) +
-ggemmeans(fit,term = "hp") %>% plot(log.y = TRUE) 
+ggpredict(fit, term = "hp") |> plot() +
+ggeffect(fit, term = "hp")  |> plot( add.data = TRUE) +
+ggemmeans(fit,term = "hp") |> plot(log.y = TRUE) 
 
 ```
 
@@ -1434,7 +1481,7 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
 
 ```
 theme_set(theme_ggeffects())
-p1<-ggpredict(fit, "am") %>%
+p1<-ggpredict(fit, "am") |>
   plot(
     connect.lines = TRUE,
     ci=FALSE,
@@ -1880,7 +1927,7 @@ Giavarina <- transform(Giavarina, C = round( A + rnorm(30,0,20)),
 
 x <- MetComp_BAP(~A+B, Giavarina)
 #> Warning: Warning in bland.altman.stats:Mehr als 2 Methoden.
-# x %>% Output("BA-Analyse der Messwertreihe")
+# x |> Output("BA-Analyse der Messwertreihe")
 plot(x)
 ```
 
