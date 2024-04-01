@@ -503,6 +503,10 @@ aufgerufen und die default Werte in opar und oopt gespeichert um sie mit reset_l
  
 reset_lattice()
 
+
+lattice::trellis.par.set(bw_theme(farbe()))
+
+
 p1<-barchart(xtabs(~treatment + sex + a,  DF), 
              auto.key=list(space="top", columns=3, 
                            cex=.7, between=.7 ),
