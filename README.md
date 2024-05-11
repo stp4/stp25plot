@@ -1,102 +1,41 @@
----
-title: "Grafiken"
-output:
-  github_document: default
-  html_document: default
----
+Grafiken
+================
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-require(stp25tools)
-require(stp25plot)    # meine Funktionen
-require(stp25stat2)
-require(magrittr)
- lattice::trellis.par.set(bw_theme)
-
-require(lattice)      # Lattice-Plots
-require(RColorBrewer) # Farben
-require(latticeExtra)
-require(effects)      # Effekte
-require(gridExtra)    # Plots agregieren
-require(ggplot2)
-require(cowplot)
- 
-set.seed(2)
-n <- 20 * 3 * 2
-DF <- data.frame(
-  n = runif(n, min = 1, max = 5),
-  e = runif(n, min = 1, max = 5),
-  o = runif(n, min = 1, max = 5),
-  g = runif(n, min = 1, max = 5),
-  a = cut(runif(n, min = 1, max = 5), 3, 1:3),
-  treatment = gl(3, n / 3, labels = c("UG1", "UG2", "KG"))[sample.int(n)],
-  sex = gl(2, n / 2, labels = c("male", "female"))
-) 
-
-
-DF <-
-  Label(
-    DF,
-    sex="Geschlecht",
-    n = "Neuroticism",
-    e =  "Extraversion",
-    o = "Openness",
-    g = "Conscientiousness",
-    a ="Agreeableness"
-  )
-```
- 
 ## Funktionen
 
-
-+ Theme for lattice-plots  set_lattice(),  reset_lattice() und  lattice::trellis.par.set(bw_theme(farbe()))
-+ auto_plot Einzelne lattice plots analog wie die Funktion Tabelle()
-+ Boxplot bwplot2()
-+ plot.bland_altman()
-+ Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
+- Theme for lattice-plots set_lattice(), reset_lattice() und
+  lattice::trellis.par.set(bw_theme(farbe()))
+- auto_plot Einzelne lattice plots analog wie die Funktion Tabelle()
+- Boxplot bwplot2()
+- plot.bland_altman()
+- Hilfsfunktionen wrap_sentence(), stp25plot:::plot.efflist()
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project.org/package=stp25stat2)
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project.org/package=stp25stat2)
 <!-- badges: end -->
 
 ### Likertplot
 
-
-```{r, include=FALSE}
-set.seed(1)
-n <- 100
-lvs <- c("--", "-", "o", "+", "++")
-DF2 <- data.frame(
-  Magazines = gl(length(lvs), 1, n, lvs),
-  Comic.books = gl(length(lvs), 2, n, lvs),
-  Fiction = gl(length(lvs), 3, n, lvs),
-  Newspapers = gl(length(lvs), 5, n, lvs)
-)
-
-
-
-DF2$Comic.books[sample.int(n / 2)] <- lvs[length(lvs)]
-DF2$Newspapers[sample.int(n / 2)] <- lvs[1]
-DF2$Magazines[sample.int(n / 2)] <- lvs[2]
-
-DF2 <- transform(DF2, Geschlecht = cut(rnorm(n), 2, c("m", "f")))
-
-```
-
-
-```{r likert-plot-1, fig.height=3, fig.width=5}
+``` r
 #Res1 <- Tbll_likert( ~ ., DF2[, -5])
 Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
 
 likertplot(Item ~ . | Geschlecht,
            data = Res2,
             between=list(x=0), columns=5)
-
- # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
-
 ```
-```{r likert-plot-2, fig.height=2.5, fig.width=4}
+
+![](README_files/figure-gfm/likert-plot-1-1.png)<!-- -->
+
+``` r
+ # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
+```
+
+``` r
 DF2 |> likert_plot(Magazines, Comic.books, Fiction, Newspapers, 
                     relevel = letters[1:5],
                     auto.key = list(columns=5, between=.15, space="top"),
@@ -105,63 +44,13 @@ DF2 |> likert_plot(Magazines, Comic.books, Fiction, Newspapers,
                     ReferenceZero = 1.5)
 ```
 
-
+![](README_files/figure-gfm/likert-plot-2-1.png)<!-- -->
 
 ### Signifikanz-Plot
 
 Der Fliegen-Schiss-Plot mein absoluter lieblings Plot!!
 
-```{r data-nmp, include=FALSE}
-require(stpvers)
-#require(lmerTest)
-require(emmeans)
-
-#dummy
-
-
-dat<-   data.frame(
-  nmp=factor(c(
-    'nmp01', 'nmp02', 'nmp03', 'nmp04', 'nmp05', 'nmp05', 'nmp05', 'nmp05', 
-    'nmp06', 'nmp06', 'nmp06', 'nmp12', 'nmp12', 'nmp12', 'nmp12', 'nmp12', 
-    'nmp13', 'nmp13', 'nmp13', 'nmp13', 'nmp14', 'nmp14', 'nmp14', 'nmp14', 
-    'nmp14', 'nmp15', 'nmp15', 'nmp15', 'nmp15', 'nmp15', 'nmp16', 'nmp16', 
-    'nmp16', 'nmp16', 'nmp17', 'nmp17', 'nmp17', 'nmp17', 'nmp17', 'nmp18', 
-    'nmp18', 'nmp18', 'nmp18', 'nmp18', 'nmp19', 'nmp20', 'nmp20', 'nmp20', 
-    'nmp20', 'nmp20', 'nmp21', 'nmp21', 'nmp21', 'nmp21', 'nmp21', 'nmp22', 
-    'nmp22', 'nmp22', 'nmp22', 'nmp23', 'nmp23', 'nmp23', 'nmp23', 'nmp23', 
-    'nmp24', 'nmp24', 'nmp24', 'nmp24', 'nmp24', 'nmp26', 'nmp26', 'nmp26', 
-    'nmp26', 'nmp27', 'nmp27', 'nmp27', 'nmp28', 'nmp28', 'nmp28', 'nmp28', 
-    'nmp28', 'nmp29', 'nmp29', 'nmp29', 'nmp29', 'nmp29', 'nmp30', 'nmp30', 
-    'nmp30', 'nmp31', 'nmp31', 'nmp31', 'nmp31', 'nmp36', 'nmp36', 'nmp36', 'nmp36')),
-  time= c(NA, NA, NA, NA, 1, 4, 6, 7.9, 1, 4, 8.1, 1, 4, 6, 12, 19, 1, 4, 
-          6, 10.3, 1, 4, 6, 12, 24, 1, 4, 6, 12, 23.4, 1, 4, 6, 10.9, 1, 4, 
-          6, 12, 19.6, 1, 4, 6, 12, 20.3, NA, 1, 4, 6, 12, 21.6, 1, 4, 6, 
-          12, 21, 1, 4, 6, 10.5, 1, 4, 6, 12, 20.5, 1, 4, 6, 12, 21.5, 4, 
-          6, 12, 22.2, 1, 4, 5, 1, 4, 6, 12, 27.8, 1, 4, 6, 12, 18.1, 1, 
-          4, 9.1, 1, 4, 6, 20.3, 1, 4, 6, 11.4),
-  t.cell=c(NA, NA, NA, NA, 24.4, 35.5, 32.8, 33, 19.6, 21.1, 19.1, 22.9,
-           22.6, 20.3, 22.4, 20.7, 30.9, 32.1, 36.5, 41.8, 18.8, 16.4, 
-           17.5, 18.4, 16.5, 31.6, 28.5, 30, 26.1, 23.6, 14.4, 24.8, 24.8, 
-           19.8, 21.8, 23.8, 24.8, 23.1, 17.7, 26.6, 25.1, 27.5, 25, 16.9, 
-           NA, 38.7, 44, 47.3, 42.9, 39.8, 11.7, 20.8, 26.7, 22, 15.2, 17.4, 
-           28, 30.5, 27.1, 6.21, 12.6, 12, 12.1, 9.2, 5.34, 6.69, 8.93, 8.63, 
-           4.15, 5.93, 6.47, 3.31, 6.95, 8.39, 9.31, 12.7, 2.99, 3.34, 4.35, 
-           3.45, 1.28, 10.1, 8.78, 9.25, 12.4, 11.6, 7.7, 12.6, 13, 2.18, 2.44, 
-           2.78, 5.31, 10.6, 12, 15.6, 15.9))
-
-dat<- transform(dat,
-                time2=cut(time, c(0, 2, 4, 9, 18, Inf), paste0(c(1, 4, 6, 12, 24), "h")),
-                DC4= t.cell+ time/1.3)
-dat<- na.omit(dat)
-#prism.plots(Sepal.Length ~ Species, data = iris, centerfunc=mean)
-#plotSigBars(Sepal.Length ~ Species, data = iris, type="tukey")
-
-
-
-```
-
-```{r sig-bar-1, fig.height=4, fig.width=5}
-
+``` r
 #dat1 <- Long(dat, DC4 ~ nmp + time2, value = "DC4")
 #fit2 <- lmer(DC4 ~ time2 + (1 | nmp), data = dat1) 
 
@@ -175,22 +64,25 @@ prism.plots(
   ylim = c(-8, 60)
 )
 plotSigBars(fit1)
-
-
-
 ```
 
+![](README_files/figure-gfm/sig-bar-1-1.png)<!-- -->
 
-```{r sig-bar-2, fig.height=4, fig.width=5}
+``` r
 boxplot(  DC4 ~ time2,
           data = dat,
           ylim = c(-15, 70))
 
 plotSigBars(fit1, stars=FALSE)
+```
+
+![](README_files/figure-gfm/sig-bar-2-1.png)<!-- -->
+
+``` r
 #plotSigBars(em1, stars=FALSE)
 ```
 
-```{r sig-bar-3, fig.height=4, fig.width=5}
+``` r
 #stripplot(  DC4 ~ time2,  data = dat, jitter.data=TRUE,pch=20, col="gray50")
 
 stripplot(
@@ -206,24 +98,22 @@ stripplot(
     panel.sig.bars(fit1, include.stars = FALSE, offset = .4)
   }
 )
-
-
 ```
 
+![](README_files/figure-gfm/sig-bar-3-1.png)<!-- -->
 
-
-```{r sig-bar-4, fig.height=4, fig.width=5}
+``` r
 #require(latticeExtra)
 #require(effects)
 fit1 <- lm(DC4 ~ time2, data = dat)
  
 p2<- plot(effect("time2", fit1), ylim=c(0,60))
 p2 +  latticeExtra::layer( panel.sig.bars(fit1, include.stars = FALSE) )
-
 ```
 
+![](README_files/figure-gfm/sig-bar-4-1.png)<!-- -->
 
-```{r mean-diff, fig.height=4, fig.width=5}
+``` r
 require(emmeans)
 plot_differenz <-
   function (x, ...)
@@ -247,91 +137,38 @@ fit1 |>
   emmeans("time2") |> 
   pairs() |>  
   plot_differenz(las = 1, xlim =c(15, -25)) 
+```
+
+![](README_files/figure-gfm/mean-diff-1.png)<!-- -->
+
+    ##                 diff       lwr       upr    p.value
+    ## 1h - 4h    -4.567907 -14.16111  5.025301 0.67556397
+    ## 1h - 6h    -8.430068 -18.02328  1.163140 0.11248355
+    ## 1h - 12h  -11.339568 -21.46837 -1.210768 0.02027568
+    ## 1h - 24h  -13.671896 -24.61063 -2.733167 0.00682780
+    ## 4h - 6h    -3.862161 -13.33766  5.613334 0.78729677
+    ## 4h - 12h   -6.771661 -16.78904  3.245721 0.33406688
+    ## 4h - 24h   -9.103990 -19.93963  1.731654 0.14212665
+    ## 6h - 12h   -2.909500 -12.92688  7.107883 0.92716613
+    ## 6h - 24h   -5.241829 -16.07747  5.593815 0.66236834
+    ## 12h - 24h  -2.332329 -13.64489  8.980236 0.97847868
+
+``` r
 par(op)
 ```
 
+### Sparkplot
 
-###  Sparkplot
+Stolen from <http://www.motioninsocial.com/tufte/#sparklines>
 
-
-Stolen from http://www.motioninsocial.com/tufte/#sparklines
-
-```{r, echo=FALSE}
-set.seed(1)
-
-DF_sprk <- data.frame(
-  Laborwert = gl(7, 8,
-                 labels = c(
-                   "Albumin", "Amylase", "Lipase",
-                   "AST", "ALT","Bilirubin","C-Peptid")),
-  Treat = gl(2, 4, labels = c("Control", "Treat")),
-  Time = gl(4, 1, labels = c("t0", "t1", "t2", "t4")),
-  x = rnorm(7 * 8)
-)
-DF_sprk <- transform(DF_sprk,
-                x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
-DF_sprk1 <-  Summarise(DF_sprk, x ~ Laborwert + Time, fun=mean )
-names(DF_sprk1)[4]<- "x"
-#DF_sprk<- DF_sprk[-3]
-```
-
-
-```{r, echo=FALSE, warning=FALSE}
-#head(DF_sprk)
-#: "p", "l", "h", "b", "o", "s", "S", "r", "a", "g"
-p1 <- sparkplot(x ~ Time | Laborwert, DF_sprk1, between=1.5
-                #,char.arrows= c(down= '-', updown='', up= "+" )
-  )
- 
-col<- c("purple", "darkgreen")
-
-p2<- sparkplot(
-  x ~ Time | Laborwert,
-  DF_sprk,
-  groups = Treat,
-  between=1.5,
-  include.labels = FALSE,
-  left.padding=-5,  right.padding=3,
-  col = col ,
-  key = list(
-    corner = c(1, 1.1),
-    lines = list(col = col, lwd = 2),
-    cex = .75,
-    columns = 2,
-    text = list(levels(DF_sprk$Treat))
-  )
-  #,  char.arrows= c(down= '-', updown='', up= "+" )
-)
-
-p3 <- sparkplot(
-  x ~ Time | Laborwert,
-  DF_sprk,
-  groups = Treat,
-  type="barchart",
-  between=1.5,
-  include.labels = FALSE,
-  left.padding=-5,  right.padding=3,
-  col =  col
-  #,  char.arrows= c(down= '-', updown='', up= "+" )
-)
-#windows(8,4)
-#require(cowplot)
-plot_grid(p1,  p2,  p3,
-          nrow=1,
-          rel_widths = c(.7, .5, .5)
-)
-
-
-```
-
-
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ### Auto-Plot auto_plot()
 
 Die Funktion klebt lattice- plots zu einer matrix zusammen.
 
-Verwendung: auto_plot(formula, data) oder data |> auto_plot(var_x, var_y, var_z) Die Funktion kann dabei Formel wie z.B.
-$a+b+c\sim g$ 
+Verwendung: auto_plot(formula, data) oder data \|\> auto_plot(var_x,
+var_y, var_z) Die Funktion kann dabei Formel wie z.B. $a+b+c\sim g$
 
 $a[box]+b[bar]+c[dot]\sim g$
 
@@ -339,11 +176,9 @@ $log(a) +b +c \sim g$
 
 $y \sim a+b+c$
 
+<https://www.zahlen-kern.de/editor/>
 
-https://www.zahlen-kern.de/editor/
-
-```{r lattice-matrix-1, fig.height=5, fig.width=8}
-
+``` r
 DF |> auto_plot(
   n,
   e[box],
@@ -356,38 +191,15 @@ DF |> auto_plot(
 )
 ```
 
+![](README_files/figure-gfm/lattice-matrix-1-1.png)<!-- -->
 
-```{r lattice-matrix-2, fig.height=2.5, fig.width=8}
- 
+``` r
 auto_plot(treatment ~ n + e + sex, DF)
-
 ```
 
-```{r, include=FALSE}
-enviro <- lattice::environmental
+![](README_files/figure-gfm/lattice-matrix-2-1.png)<!-- -->
 
-enviro2 <- transform(
-  enviro,
-  smell = cut(
-    enviro$ozone,
-    breaks = c(0, 30, 50, Inf),
-    labels = c("ok", "hm", "yuck"),
-    ordered = TRUE
-  ),
-  is.windy =   factor(wind > 10, c(TRUE, FALSE), labels = c("windy", "calm")
-  )
-) |> Label(
-  ozone=" Average ozone concentration (of hourly measurements)",
-   radiation = "Solar radiation (from 08:00 to 12:00)",
-  temperature = "Maximum daily temperature",
-  wind = "Average wind speed (at 07:00 and 10:00)",
-  smell = "Smell of ozone"
-  
-)
-head(enviro2)
-```
-
-```{r}
+``` r
 auto_plot(
   enviro2,
   ozone[hist],
@@ -404,67 +216,11 @@ auto_plot(
 )
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
-```{r, include=FALSE}
- 
-dat2 <- get_data(
-  "
-comp_0 comp_1 comp_2 comp_3 comp_4 comp_5 comp_6 comp_7 comp_8 gender
-    TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
-   FALSE   TRUE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE   FALSE   Male
-   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE Female
-   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
-   FALSE  FALSE   TRUE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   Male
-   FALSE   TRUE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
-   FALSE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
-   FALSE  FALSE   TRUE  FALSE   TRUE  FALSE   TRUE  FALSE   FALSE   Male
-   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
-   FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
-  FALSE  FALSE  FALSE   TRUE   TRUE  FALSE  FALSE  FALSE   TRUE Female
-  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE Female
-  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
-  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   FALSE Female
-  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE   TRUE   FALSE   Male
-   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
-  FALSE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE   Male
-   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
-  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
-   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE   Male
-  FALSE  FALSE   TRUE   TRUE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
-  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE   Male
-  FALSE  FALSE  FALSE  FALSE  TRUE  FALSE  FALSE  FALSE   FALSE Female
-  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   FALSE Female
-  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE  FALSE   TRUE   Male
-  FALSE   TRUE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE   TRUE Female
-  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   Male
-  FALSE   TRUE   TRUE  FALSE  FALSE   TRUE  FALSE  FALSE  FALSE   Male
-   TRUE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE Female
-  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE  FALSE   TRUE Female
-"
-) |> Label(
-  comp_0  =     "A+"   ,
-  comp_1  =  "Heart Failure"  ,
-  comp_2  = "Rhythm Abnormality" ,
-  comp_3   = "Valve Dysfunction" ,
-  comp_4  = "Bleeding with OAC" ,
-  comp_5   =  "ACS"  ,
-  comp_6   =   "Neurological Event",
-  comp_7  = "Neoplastic Disease",
-  comp_8   =    "Others",
-  gender  =     "Gender" 
-)
+Mehrfachantworten mit multi_barplot().
 
-
-
-
-```
-
-
-
-Mehrfachantworten mit  multi_barplot().
-
-```{r}
-
+``` r
 # dat2[1:5] |> 
 #   multi_barplot()
 # 
@@ -485,26 +241,18 @@ Mehrfachantworten mit  multi_barplot().
 #                     include.reorder=TRUE,
 #                     main ="Complicationen",
 #                     xlab= "Prozent")
-
-
 ```
-
-
-
 
 ### set_lattice()
 
-~Initialisieren der Lattice - Optionen mit  set_lattice(). 
-Im Hintergrund werden die  latticeExtra::ggplot2like.opts()
-aufgerufen und die default Werte in opar und oopt gespeichert um sie mit reset_lattice() zurück seten zu können.~
+~Initialisieren der Lattice - Optionen mit set_lattice(). Im Hintergrund
+werden die latticeExtra::ggplot2like.opts() aufgerufen und die default
+Werte in opar und oopt gespeichert um sie mit reset_lattice() zurück
+seten zu können.~
 
-```
- 
+     
 
-```   
- 
-```{r pressure, fig.height=3, fig.width=8, fig.cap='Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden', warning=FALSE}
- 
+``` r
 reset_lattice()
 
 
@@ -526,12 +274,17 @@ p3<-barchart(xtabs(~ treatment + sex + a,  DF),
 
 grid.arrange(p1, p2, p3, ncol=3)
 ```
-  
- 
+
+<figure>
+<img src="README_files/figure-gfm/pressure-1.png"
+alt="Plot mit grid.arrange - hier muss das Theme mit par.settings= set_lattice() uebergeben werden" />
+<figcaption aria-hidden="true">Plot mit grid.arrange - hier muss das
+Theme mit par.settings= set_lattice() uebergeben werden</figcaption>
+</figure>
 
 Einbetten von set_lattice() über update()
 
-```{r update-lattice, fig.height=4.5, fig.width=8, fig.cap='Plot mit grid.arrange und update'}
+``` r
 obj <-
   xyplot(
     Sepal.Length + Sepal.Width ~ Petal.Length + Petal.Width,
@@ -557,12 +310,16 @@ p3 <- update(obj, par.settings = bw_theme(), axis = axis.grid)
 grid.arrange(p1, p2, p3, ncol = 3)
 ```
 
-
-
+<figure>
+<img src="README_files/figure-gfm/update-lattice-1.png"
+alt="Plot mit grid.arrange und update" />
+<figcaption aria-hidden="true">Plot mit grid.arrange und
+update</figcaption>
+</figure>
 
 ### strip Sonderzeichen + Größe
 
-```{r}
+``` r
  x1<-rnorm(100);  x2<-gl(2, 50, labels = c("Control", "Treat"))
  y<-(1.5-as.numeric(x2))*x1+rnorm(100)
 #windows(7,4)
@@ -577,17 +334,15 @@ p1<- xyplot(y~x1|x2,
                                    sqrt(G^{1}), sqrt(italic(R)^{1}))))
  print(p1)
 ```
- 
 
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-      
-###  bwplot2
+### bwplot2
 
-Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die Funktion arbeitet mit panel.superpose.
-  
- 
-```{r bwplot-2, results='asis', fig.cap='Boxplot mit bwplot2() und panel.superpose()', fig.height=5, fig.width=7}
+Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die
+Funktion arbeitet mit panel.superpose.
 
+``` r
 p1 <- bwplot2(
   yield ~ site,
   data = barley, groups = year, main="bwplot2()", par.settings = bw_theme(),
@@ -615,15 +370,16 @@ p2 <-
 
 
 grid.arrange(p1, p2)
-
 ```
 
+<figure>
+<img src="README_files/figure-gfm/bwplot-2-1.png"
+alt="Boxplot mit bwplot2() und panel.superpose()" />
+<figcaption aria-hidden="true">Boxplot mit bwplot2() und
+panel.superpose()</figcaption>
+</figure>
 
-
-```{r bwplot, fig.cap='Boxplot mit panel.bwplot() und  panel.superpose()',fig.height=2.5, fig.width=7, warning=FALSE}
-
- 
-
+``` r
 bwplot(yield ~ site, data = barley, groups=year,
        pch = "|", box.width = 1/3,
        auto.key = list(points = FALSE, rectangles = TRUE, space = "right"),
@@ -638,10 +394,14 @@ bwplot(yield ~ site, data = barley, groups=year,
 )
 ```
 
+<figure>
+<img src="README_files/figure-gfm/bwplot-1.png"
+alt="Boxplot mit panel.bwplot() und panel.superpose()" />
+<figcaption aria-hidden="true">Boxplot mit panel.bwplot() und
+panel.superpose()</figcaption>
+</figure>
 
-
-```{r bwplot-superposs, results='asis', fig.cap='Mittelwerte mit einer Variante von panel.superpose()', fig.height=2.5, fig.width=7}
-
+``` r
   bwplot(
     yield ~ site,
     barley, groups = year, main="panel.superpose", par.settings = bw_theme(), 
@@ -664,102 +424,113 @@ bwplot(yield ~ site, data = barley, groups=year,
       #              groups = groups, subscripts = subscripts)
     }
   )
-
-
- 
-
 ```
 
+<figure>
+<img src="README_files/figure-gfm/bwplot-superposs-1.png"
+alt="Mittelwerte mit einer Variante von panel.superpose()" />
+<figcaption aria-hidden="true">Mittelwerte mit einer Variante von
+panel.superpose()</figcaption>
+</figure>
 
 ### Forest
 
-forest_plot() Tabelle und Vertikaler-Plot gestohlen von survminer::ggforest()
- 
-ggplot_forest() Vertikaler-Plot ohne Tabelle aber dafuer sind Gruppen moeglich - stolen from https://github.com/NightingaleHealth/ggforestplot
+forest_plot() Tabelle und Vertikaler-Plot gestohlen von
+survminer::ggforest()
 
+ggplot_forest() Vertikaler-Plot ohne Tabelle aber dafuer sind Gruppen
+moeglich - stolen from
+<https://github.com/NightingaleHealth/ggforestplot>
 
-
-```{r}
+``` r
  model1 <- lm(mpg ~ wt, data = mtcars)
  model2 <- lm(mpg ~ wt + cyl, data = mtcars)
  prepare_forest(model1, model2)
- 
- 
 ```
 
+    ##                     term         var level  N  estimate std.error  conf.low
+    ## (Intercept)  (Intercept) (Intercept)       NA 37.285126 1.8776273 33.450500
+    ## wt                    wt          wt       32 -5.344472 0.5591010 -6.486308
+    ## (Intercept)1 (Intercept) (Intercept)       NA 39.686261 1.7149840 36.178725
+    ## wt1                   wt          wt       32 -3.190972 0.7569065 -4.739020
+    ## cyl                  cyl         cyl       32 -1.507795 0.4146883 -2.355928
+    ##               conf.high statistic      p.value  group
+    ## (Intercept)  41.1197528 19.857575 8.241799e-19 model1
+    ## wt           -4.2026349 -9.559044 1.293959e-10 model1
+    ## (Intercept)1 43.1937976 23.140893 3.043182e-20 model2
+    ## wt1          -1.6429245 -4.215808 2.220200e-04 model2
+    ## cyl          -0.6596622 -3.635972 1.064282e-03 model2
 
-
-```{r prepare-forest, include=FALSE}
-require(survival)
-colon<- Label(colon, sex="Geschlecht")
-
-```
-
-```{r forest-1, fig.height=4, fig.width=7}
+``` r
 fit1 <- lm(status ~ sex + rx + adhere,
            data = colon)
 forest_plot(fit1)
- 
 ```
 
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_text()`).
 
-```{r forest-2, fig.height=4, fig.width=7}
+![](README_files/figure-gfm/forest-1-1.png)<!-- -->
 
+``` r
 fit2 <- glm(status ~ sex + rx + adhere,
             data = colon, family = binomial())
 
 forest_plot(fit2)
-
 ```
 
-```{r forest-3, fig.height=4, fig.width=7}
+    ## Waiting for profiling to be done...
 
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_text()`).
+
+![](README_files/figure-gfm/forest-2-1.png)<!-- -->
+
+``` r
 fit3 <- coxph(Surv(time, status) ~ sex + rx + adhere,
               data = colon)
 
 forest_plot(fit3, colon)
-
-
-```
- 
-
-
-```{r, include=FALSE}
-set.seed(1)
-n <- 10 * 2 * 3 *100
-dat <- data.frame(
-  y = rnorm(n),
-  sex = gl(2, n / 2, labels = c("male", "female")) ,
-  rx = gl(3, n / 3, labels = c("Obs",  "Tev", "Tev+5FU"))[sample.int(n)],
-  age = 1:n,
-  bmi = rnorm(n )
-)
-dat <- transform(dat,
-                 y = y +
-                   as.numeric(sex) / 2 +
-                   as.numeric(rx)
-)
-
-
-
 ```
 
-```{r}
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_text()`).
+
+![](README_files/figure-gfm/forest-3-1.png)<!-- -->
+
+``` r
 fit1 <- lm(y ~ sex + rx + age + bmi,  dat)
 tab<-forest_plot(fit1, plot=FALSE)
 
 tab
-
 ```
 
+    ##                    term         var   level    N      estimate    std.error
+    ## (Intercept) (Intercept) (Intercept)           NA  1.509113e+00 3.496073e-02
+    ## NA            sex: male         sex    male 3000            NA           NA
+    ## sexfemale]  sex: female         sex  female 3000  5.138877e-01 5.263392e-02
+    ## NA.1            rx: Obs          rx     Obs 2000            NA           NA
+    ## NA.2            rx: Tev          rx     Tev 2000            NA           NA
+    ## rxTev+5FU]  rx: Tev+5FU          rx Tev+5FU 2000  1.981428e+00 3.224119e-02
+    ## age                 age         age         6000 -4.975787e-06 1.519368e-05
+    ## bmi                 bmi         bmi         6000 -1.410221e-03 1.329780e-02
+    ##                  conf.low    conf.high  statistic      p.value
+    ## (Intercept)  1.440578e+00 1.5776488463 43.1659484 0.000000e+00
+    ## NA                     NA           NA         NA           NA
+    ## sexfemale]   4.107063e-01 0.6170691346  9.7634320 2.369740e-22
+    ## NA.1                   NA           NA         NA           NA
+    ## NA.2                   NA           NA         NA           NA
+    ## rxTev+5FU]   1.918223e+00 2.0446319556 61.4564135 0.000000e+00
+    ## age         -3.476088e-05 0.0000248093 -0.3274905 7.433084e-01
+    ## bmi         -2.747870e-02 0.0246582586 -0.1060492 9.155469e-01
 
-```{r forest-41, fig.height=4, fig.width=7}
+``` r
 ggplot_forest(tab)
 ```
 
+![](README_files/figure-gfm/forest-41-1.png)<!-- -->
 
-```{r forest-42, fig.height=4, fig.width=7}
-
+``` r
 ggplot_table(
 data.frame(
   var = c("Intercept", "Sex", "Sex", "Alter"),
@@ -771,14 +542,19 @@ data.frame(
   p.value = c(0.046, NA, 0.1407, 0.0021)
 )
 )
-
-
 ```
- 
+
+    ## Warning: Removed 2 rows containing missing values or values outside the scale range
+    ## (`geom_text()`).
+
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_text()`).
+
+![](README_files/figure-gfm/forest-42-1.png)<!-- -->
+
 ### Balken mít Errorbars
 
-```{r}
-
+``` r
 mycol <- c("#0433FF",
                     "#00F801",
                     "#FF2600",
@@ -787,9 +563,9 @@ mycol <- c("#0433FF",
                     
 data <- data.frame(
   name = c("0h", "1h", "24h"),
-  value = c(1.4,	2.6,	2) / 100,
-  sd1 =   c(1.2,	2.8,	1.9) / 100,
-  sd2 =   c(2,  	0.75,	2.4) / 100
+  value = c(1.4,    2.6,    2) / 100,
+  sd1 =   c(1.2,    2.8,    1.9) / 100,
+  sd2 =   c(2,      0.75,   2.4) / 100
 )
 
 # Most basic error bar
@@ -818,17 +594,17 @@ data <- data.frame(
   theme_classic()
 ```
 
- 
- 
+    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+    ## ℹ Please use `linewidth` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
+
+![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+
 ### Balken mit Zahlen
 
-
-
-
-
-```{r balken-1, fig.height=4, fig.width=7}
- 
-
+``` r
 set.seed(2)
 
 DF_balk <-
@@ -860,13 +636,13 @@ barchart(
     panel.barchart.text(..., digits = 1, suffix = " %")
   }
 )
-
 ```
 
- 
+![](README_files/figure-gfm/balken-1-1.png)<!-- -->
+
 ### Tortendiagramme
 
-```{r}
+``` r
 # Create test data.
 data <- data.frame(
   category=c("Granulocytes", "CD3+", "CD56+",  "CD19+", "Monocytes"),
@@ -909,67 +685,72 @@ ggplot(data,
         )  
 ```
 
- 
-``` 
-#  Geht nicht problemlos in Markdown
-print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
+    ## Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+    ## 3.5.0.
+    ## ℹ Please use the `legend.position.inside` argument of `theme()` instead.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
-```
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
+    #  Geht nicht problemlos in Markdown
+    print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
 
-```{r g-torte, fig.height=3, fig.width=5}
+``` r
  gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
-
 ```
 
+    ## Warning: The `facets` argument of `facet_grid()` is deprecated as of ggplot2 2.2.0.
+    ## ℹ Please use the `rows` argument instead.
+    ## ℹ The deprecated feature was likely used in the stp25plot package.
+    ##   Please report the issue to the authors.
+    ## This warning is displayed once every 8 hours.
+    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+    ## generated.
 
-```
-#  Geht nicht problemlos in Markdown
-tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
-# par(new = TRUE)
+![](README_files/figure-gfm/g-torte-1.png)<!-- -->
 
-  stp25plot::piechart(~Freq|sex, 
-  tab, groups= treatment,
-  auto.key=list(columns=3))
-  
-```
+    #  Geht nicht problemlos in Markdown
+    tab <- as.data.frame(xtabs( ~ treatment + sex, DF))
+    # par(new = TRUE)
 
+      stp25plot::piechart(~Freq|sex, 
+      tab, groups= treatment,
+      auto.key=list(columns=3))
+      
 
 ### MetComp_BAP
 
 Tukey Mean Difference oder auch Bland Altman Metode
 
-
-```{r}
+``` r
 require(stp25metcomp)
 ```
 
+    ## Loading required package: stp25metcomp
 
-
-```{r metcop_prepare, include=FALSE}
- 
-DF2<- data.frame(
-  A=c(1, 5,10,20,50,40,50,60,70,80, 90,100,
-      150,200,250,300,350,400,450,500,550,
-      600,650,700,750,800,850,900, 950,1000),
-  B=c(8,16,30,14,39,54,40,68,72,62,122, 80,
-      181,259,275,380,320,434,479,587,626,
-      648,738,766,793,851,871,957,1001,980),
-  group= sample(gl(2, 15, labels = c("Control", "Treat")))
-)
-
-```
-
-
-
-```{r ba-plot, fig.height=3, fig.width=7}
+``` r
 require(stp25metcomp)
 x<- MetComp_BAP(~A+B, DF2)
 plot(x)
-
-x
-
 ```
+
+![](README_files/figure-gfm/ba-plot-1.png)<!-- -->
+
+``` r
+x
+```
+
+    ## 
+    ##  
+    ##                Parameter   Unit                 CI    SE Percent
+    ## 1               df (n-1)     29               <NA>              
+    ## 2    difference mean (d) -27.50  [-40.17,  -14.83]  6.20   <0.1%
+    ## 3 standard deviation (s)  33.94               <NA>         39.8%
+    ## 4  critical.diff (1.96s)  66.52               <NA>         78.0%
+    ## 5                d-1.96s -94.02 [-115.97,  -72.07] 10.73   <0.1%
+    ## 6                d+1.96s  39.02    [17.07,  60.97] 10.73  117.8%
 
 ## cowplot
 
@@ -978,14 +759,9 @@ gridExtra::grid.arrange( )
 Zusammen mixen von unterschiedlichen Grafik-Typen.
 
 The cowplot package is a simple add-on to ggplot.
-https://wilkelab.org/cowplot/articles/index.html
+<https://wilkelab.org/cowplot/articles/index.html>
 
-
-
-```{r cowplot-0, fig.height=8, fig.width= 8, message=FALSE}
-
-
-
+``` r
 library(ggplot2)
 
 library(grid)
@@ -1031,8 +807,12 @@ p1 <- p1 +
 
 
 legend <- get_legend(p1)
+```
 
+    ## Warning in get_plot_component(plot, "guide-box"): Multiple components found;
+    ## returning the first one. To return all, use `return_all = TRUE`.
 
+``` r
 p1 <- p1 +
   theme(legend.position = "none")
 
@@ -1058,11 +838,9 @@ plot_grid(
 )
 ```
 
+![](README_files/figure-gfm/cowplot-0-1.png)<!-- -->
 
-
-
-
-```{r cowplot-1, fig.height=4, fig.width= 7,message=FALSE}
+``` r
 #require(ggplot2)
 #require(cowplot)
 #require(lattice)
@@ -1076,16 +854,20 @@ plot_grid(p1, p2,  rel_widths = c(1, 1.5)
            , labels = c('A', 'B'))
 ```
 
-
+![](README_files/figure-gfm/cowplot-1-1.png)<!-- -->
 
 ### Mixing different plotting frameworks
 
-
-```{r cowplot-2, fig.height=3, fig.width=3 }
+``` r
 # require(ggplot2)
 # require(cowplot)
 # require(lattice)
  require(gridGraphics)
+```
+
+    ## Loading required package: gridGraphics
+
+``` r
 p1 <- function() {
   par(
     mar = c(3, 3, 1, 1),
@@ -1096,21 +878,21 @@ p1 <- function() {
 
 ggdraw(p1) +
   theme(plot.background = element_rect(fill = "cornsilk"))
-
-
 ```
 
-
+![](README_files/figure-gfm/cowplot-2-1.png)<!-- -->
 
 ## ggformula
 
-Quelle https://rpruim.github.io/Statistical-Rethinking/Examples/ggformula.html
+Quelle
+<https://rpruim.github.io/Statistical-Rethinking/Examples/ggformula.html>
 
 *gf_point()* for scatter plots
 
 *gf_line()* for line plots (connecting dots in a scatter plot)
 
-*gf_density()* or *gf_dens()* or *gf_histogram()* or *gf_freqpoly()* to display distributions of a quantitative variable
+*gf_density()* or *gf_dens()* or *gf_histogram()* or *gf_freqpoly()* to
+display distributions of a quantitative variable
 
 *gf_boxplot()* or *gf_violin()* for comparing distributions side-by-side
 
@@ -1118,11 +900,23 @@ Quelle https://rpruim.github.io/Statistical-Rethinking/Examples/ggformula.html
 
 *gf_bar()* for more general bar-graph style graphics
 
-
-
-```{r ggformula-1, fig.height=7, fig.width=7.5}
+``` r
 #require(ggplot2)
 require(ggformula)
+```
+
+    ## Loading required package: ggformula
+
+    ## Loading required package: scales
+
+    ## Loading required package: ggridges
+
+    ## 
+    ## New to ggformula?  Try the tutorials: 
+    ##  learnr::run_tutorial("introduction", package = "ggformula")
+    ##  learnr::run_tutorial("refining", package = "ggformula")
+
+``` r
 #require(lattice)
  
 
@@ -1176,59 +970,27 @@ p3 <-
   )
 
 cowplot::plot_grid(p1, p2, p3, ncol=2)
-
 ```
+
+![](README_files/figure-gfm/ggformula-1-1.png)<!-- -->
 
 ## Effectplot
 
-
-```{r, include=FALSE}
-require(ggplot2)
-mtcars2 <- within(mtcars, {
-  vs <- factor(vs, labels = c("V", "S"))
-  am <- factor(am, labels = c("automatic", "manual"))
-  cyl  <-  (cyl)
-  cyl_ord  <-  ordered(cyl)
-  gear <- ordered(gear)
-  carb <- ordered(carb)
-})
-
-mtcars2$mpg[mtcars2$cyl_ord==6]  <- mtcars2$mpg[mtcars2$cyl_ord==6] *.5
-
-mtcars2 <- mtcars2 |> 
-  Label(
-  mpg	= "Miles/(US) gallon",
-  cyl_ord	= "Number of cylinders",
-  disp	= "Displacement (cu.in.)",
-  hp	= "Gross horsepower",
-  drat =	"Rear axle ratio",
-  wt =	"Weight (1000 lbs)",
-  qsec =	"1/4 mile time",
-  vs =	"Engine (0 = V-shaped, 1 = straight)",
-  am	= "Transmission (0 = automatic, 1 = manual)",
-  gear	= "Number of forward gears",
-  carb =	"Number of carburetors"
-)
-
-fit <- lm(mpg ~ hp * wt + am +cyl  , data = mtcars2)
-fit2 <- lm(mpg ~ hp * wt + am +cyl_ord  , data = mtcars2)
-```
-
-
 ### Meine Version vs plot.efflist
 
-```{r}
+``` r
 plot( effects::allEffects(fit2) )
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
-
-```{r}
+``` r
 plot2( effects::allEffects(fit2) )
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
-```{r}
+``` r
 e2 <- effects::allEffects(fit2)
 p1 <- plot2(e2,
             axes =  list(
@@ -1242,12 +1004,9 @@ p1 <- plot2(e2,
               y = list(lab = "Miles/(US) gallon")
             )
 )
-
-
 ```
 
-
-```{r}
+``` r
 p2<-plot2(e2,
   labels = stp25tools::get_label(mtcars2),
   plot=FALSE)
@@ -1258,18 +1017,21 @@ cowplot::plot_grid(plotlist =p2,
                    rel_heights = c(3,4))
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
+Konfidenz-Band mit *geom_ribbon()*
 
-
-Konfidenz-Band mit  *geom_ribbon()*
-
-```{r}
+``` r
 ef1 <-
   as.data.frame(
     effects::effect(term = "hp", fit,
                     xlevels = list(
                       hp = seq(50, 350, by =10))))
+```
 
+    ## NOTE: hp is not a high-order term in the model
+
+``` r
 p1 <- ggplot(ef1, aes(hp, fit)) +
   geom_line() +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.3) +
@@ -1281,7 +1043,7 @@ p1 <- ggplot(ef1, aes(hp, fit)) +
 
 Interaction mit *geom_line()*
 
-```{r}
+``` r
 ef2 <- as.data.frame(effects::effect("hp:wt", fit))
 
 ef2$Weight <- factor(ef2$wt)
@@ -1294,9 +1056,9 @@ p2 <- ggplot(ef2, aes(hp, fit, col = Weight)) +
   theme_classic()
 ```
 
-Fehlerbalken mit **
+Fehlerbalken mit \*\*
 
-```{r}
+``` r
 #ef3<-  as.data.frame(effects::effect("am", fit))
  
 ef4 <-  as.data.frame(effects::effect("cyl_ord", fit2))
@@ -1337,103 +1099,183 @@ p4 <- ggplot(ef4, aes(cyl, fit, group=1 )) +
   theme_classic()
 ```
 
-
-```{r effect-ggplot, fig.cap='Effect ggplot',fig.height=7, fig.width= 8}
-
+``` r
 library(patchwork)
+```
+
+    ## 
+    ## Attaching package: 'patchwork'
+
+    ## The following object is masked from 'package:cowplot':
+    ## 
+    ##     align_plots
+
+``` r
 p1 + p2 + p3 + p4 +
   plot_layout(ncol=2)
 ```
 
+<figure>
+<img src="README_files/figure-gfm/effect-ggplot-1.png"
+alt="Effect ggplot" />
+<figcaption aria-hidden="true">Effect ggplot</figcaption>
+</figure>
+
 ### ggeffects
 
-```{r, include=FALSE}
-require(ggeffects)
-```
+    require(ggeffects)
 
-```
-require(ggeffects)
+    ggeffect() 
+    # computes marginal effects by internally calling  effects::Effect()
 
-ggeffect() 
-# computes marginal effects by internally calling  effects::Effect()
+    ggemmeans() 
+    # uses emmeans::emmeans()
 
-ggemmeans() 
-# uses emmeans::emmeans()
+    ggpredict() 
+    # uses predict() 
 
-ggpredict() 
-# uses predict() 
+    ggpredict(fit, term = "hp") |> plot() +
+    ggeffect(fit, term = "hp")  |> plot( add.data = TRUE) +
+    ggemmeans(fit,term = "hp") |> plot(log.y = TRUE) 
 
-ggpredict(fit, term = "hp") |> plot() +
-ggeffect(fit, term = "hp")  |> plot( add.data = TRUE) +
-ggemmeans(fit,term = "hp") |> plot(log.y = TRUE) 
+    ## S3 method for class 'ggeffects'
+    plot(
+      x,
+      ci = TRUE,
+      ci.style = c("ribbon", "errorbar", "dash", "dot"),
+      facets,
+      add.data = FALSE,
+      limit.range = FALSE,
+      residuals = FALSE,
+      residuals.line = FALSE,
+      collapse.group = FALSE,
+      colors = "Set1",
+      alpha = 0.15,
+      dodge = 0.25,
+      use.theme = TRUE,
+      dot.alpha = 0.35,
+      jitter = 0.2,
+      log.y = FALSE,
+      case = NULL,
+      show.legend = TRUE,
+      show.title = TRUE,
+      show.x.title = TRUE,
+      show.y.title = TRUE,
+      dot.size = NULL,
+      line.size = NULL,
+      connect.lines = FALSE,
+      grid,
+      one.plot = TRUE,
+      rawdata,
+      ...
+    )
 
-```
+Quelle: <https://strengejacke.github.io/ggeffects/>
 
-```
-## S3 method for class 'ggeffects'
-plot(
-  x,
-  ci = TRUE,
-  ci.style = c("ribbon", "errorbar", "dash", "dot"),
-  facets,
-  add.data = FALSE,
-  limit.range = FALSE,
-  residuals = FALSE,
-  residuals.line = FALSE,
-  collapse.group = FALSE,
-  colors = "Set1",
-  alpha = 0.15,
-  dodge = 0.25,
-  use.theme = TRUE,
-  dot.alpha = 0.35,
-  jitter = 0.2,
-  log.y = FALSE,
-  case = NULL,
-  show.legend = TRUE,
-  show.title = TRUE,
-  show.x.title = TRUE,
-  show.y.title = TRUE,
-  dot.size = NULL,
-  line.size = NULL,
-  connect.lines = FALSE,
-  grid,
-  one.plot = TRUE,
-  rawdata,
-  ...
-)
-```
+Die lib *ggeffects()* berechnet die Marginalen Effecte bei Interactionen
+anderst als *effect()*, daher aufpassen!!
 
-
-
-Quelle: https://strengejacke.github.io/ggeffects/
-
-Die lib *ggeffects()*  berechnet die Marginalen Effecte bei Interactionen anderst als *effect()*, daher aufpassen!!
-
-```{r}
+``` r
 ef1 <-
   as.data.frame(effects::effect(term = "hp", fit,
                                 xlevels = list(hp = c(
                                   50, 85, 120, 155, 195, 230, 265, 335
                                 ))))
+```
 
+    ## NOTE: hp is not a high-order term in the model
 
+``` r
  effects::effect(term = "hp", 
                  fit,
                  xlevels = 
                    list(hp = 
                           c(50, 85, 120, 155, 195, 230, 265, 335)))
+```
 
+    ## NOTE: hp is not a high-order term in the model
+
+    ## 
+    ##  hp effect
+    ## hp
+    ##       50       85      120      155      195      230      265      335 
+    ## 13.62688 14.07651 14.52613 14.97576 15.48962 15.93925 16.38888 17.28814
+
+``` r
 ggpredict(fit, term = "hp") 
+```
+
+    ## # Predicted values of Miles/(US) gallon
+    ## 
+    ##  hp | Predicted |       95% CI
+    ## ------------------------------
+    ##  50 |     15.56 | 10.99, 20.13
+    ##  85 |     16.01 | 12.73, 19.28
+    ## 120 |     16.46 | 13.87, 19.04
+    ## 155 |     16.91 | 13.94, 19.87
+    ## 195 |     17.42 | 13.09, 21.75
+    ## 230 |     17.87 | 12.04, 23.70
+    ## 265 |     18.32 | 10.88, 25.77
+    ## 335 |     19.22 |  8.42, 30.02
+    ## 
+    ## Adjusted for:
+    ## *  wt =      3.22
+    ## *  am = automatic
+    ## * cyl =      6.19
+
+    ## 
+    ## Not all rows are shown in the output. Use `print(..., n = Inf)` to show
+    ##   all rows.
+
+``` r
 ggeffect(fit,term = "hp")
+```
+
+    ## # Predicted values of Miles/(US) gallon
+    ## 
+    ##  hp | Predicted |       95% CI
+    ## ------------------------------
+    ##  50 |     13.63 |  8.28, 18.97
+    ##  85 |     14.08 | 10.25, 17.90
+    ## 120 |     14.53 | 11.90, 17.15
+    ## 155 |     14.98 | 12.68, 17.28
+    ## 195 |     15.49 | 12.18, 18.80
+    ## 230 |     15.94 | 11.19, 20.69
+    ## 265 |     16.39 | 10.05, 22.73
+    ## 335 |     17.29 |  7.59, 26.99
+
+    ## 
+    ## Not all rows are shown in the output. Use `print(..., n = Inf)` to show
+    ##   all rows.
+
+``` r
 ggemmeans(fit,term = "hp")
 ```
 
+    ## NOTE: Results may be misleading due to involvement in interactions
 
+    ## # Predicted values of Miles/(US) gallon
+    ## 
+    ##  hp | Predicted |       95% CI
+    ## ------------------------------
+    ##  50 |     13.18 |  7.54, 18.82
+    ##  85 |     13.63 |  9.50, 17.76
+    ## 120 |     14.08 | 11.17, 16.99
+    ## 155 |     14.53 | 12.08, 16.98
+    ## 195 |     15.04 | 11.77, 18.32
+    ## 230 |     15.49 | 10.86, 20.12
+    ## 265 |     15.94 |  9.76, 22.13
+    ## 335 |     16.84 |  7.33, 26.35
+    ## 
+    ## Adjusted for:
+    ## *  wt = 3.22
+    ## * cyl = 6.19
 
+    ## 
+    ## Not all rows are shown in the output. Use `print(..., n = Inf)` to show
+    ##   all rows.
 
-
-
-```{r }
+``` r
 mydf <- ggpredict(fit, terms = "hp")
 p2 <- ggplot(mydf, aes(x, predicted)) +
   geom_line() +
@@ -1451,40 +1293,87 @@ p4 <- ggplot(mydf,
              aes(x = x, y = predicted)) +
                geom_line() +
                facet_wrap( ~ group)
-
-
-
 ```
 
-```{r, fig.height=8, fig.width= 6}
+``` r
 library(patchwork)
 p1 + p2 + p3 + p4 + plot(mydf) +
     plot_layout(ncol=2)
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
-
-
-
-
-```{r}
+``` r
 require(ggeffects)
 
 mod <- lm(prestige ~ type*(education + income) + women, Prestige)
 mydf<-ggpredict(mod, terms =c( "education", "type"))
 mydf
+```
 
+    ## # Predicted values of prestige
+    ## 
+    ## type: bc
+    ## 
+    ## education | Predicted |       95% CI
+    ## ------------------------------------
+    ##         6 |     34.90 | 29.62, 40.18
+    ##         8 |     38.24 | 35.80, 40.69
+    ##         9 |     39.92 | 37.57, 42.26
+    ##        11 |     43.26 | 38.20, 48.33
+    ##        13 |     46.61 | 38.01, 55.20
+    ##        16 |     51.62 | 37.52, 65.72
+    ## 
+    ## type: prof
+    ## 
+    ## education | Predicted |       95% CI
+    ## ------------------------------------
+    ##         6 |     40.10 | 26.70, 53.51
+    ##         8 |     46.13 | 35.99, 56.27
+    ##         9 |     49.15 | 40.61, 57.68
+    ##        11 |     55.18 | 49.68, 60.67
+    ##        13 |     61.21 | 57.99, 64.42
+    ##        16 |     70.25 | 65.41, 75.08
+    ## 
+    ## type: wc
+    ## 
+    ## education | Predicted |       95% CI
+    ## ------------------------------------
+    ##         6 |     17.31 |  1.88, 32.74
+    ##         8 |     27.59 | 18.00, 37.18
+    ##         9 |     32.73 | 25.94, 39.52
+    ##        11 |     43.00 | 40.04, 45.96
+    ##        13 |     53.28 | 46.64, 59.92
+    ##        16 |     68.69 | 53.43, 83.96
+    ## 
+    ## Adjusted for:
+    ## * income = 6035.50
+    ## *  women =   28.99
+
+    ## 
+    ## Not all rows are shown in the output. Use `print(..., n = Inf)` to show
+    ##   all rows.
+
+``` r
 # ggplot(mydf, aes(x, predicted)) +
 #   geom_line() +
 #   geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1)
 
 p1 <-plot(mydf)
 p1
+```
 
+![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+``` r
 p1 +
   facet_wrap(~group)  +
   theme(legend.position = "none")
+```
 
+![](README_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+
+``` r
 #plot(allEffects(mod))
 
 ggplot(mydf, aes(x = x, y = predicted, group =group)) +
@@ -1493,67 +1382,86 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
   facet_wrap(~group)
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
 
-```
-theme_set(theme_ggeffects())
-p1<-ggpredict(fit, "am") |>
-  plot(
-    connect.lines = TRUE,
-    ci=FALSE,
-    dot.size = 5)+ geom_errorbar(
-    aes_string(ymin = "conf.low",
-                        ymax = "conf.high"),
-    width = 0.099#,
-    #size = line.size
-  ) +
-  theme_classic() 
+    theme_set(theme_ggeffects())
+    p1<-ggpredict(fit, "am") |>
+      plot(
+        connect.lines = TRUE,
+        ci=FALSE,
+        dot.size = 5)+ geom_errorbar(
+        aes_string(ymin = "conf.low",
+                            ymax = "conf.high"),
+        width = 0.099#,
+        #size = line.size
+      ) +
+      theme_classic() 
 
-p1
-```
-
-
+    p1
 
 ### Effectplot mit emmeans
 
-
-```{r effect-4, fig.height=2.5, fig.width=5}
+``` r
 require(emmeans)
 head(pigs)
-pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
-ref_grid(pigs.lm1)
-
-pigs.lm2 <- lm(log(conc) ~ source + percent, data = pigs)
-ref_grid(pigs.lm2)
-
-
 ```
 
- 
+    ##   source percent conc
+    ## 1   fish       9 27.8
+    ## 2   fish       9 23.7
+    ## 3   fish      12 31.5
+    ## 4   fish      12 28.5
+    ## 5   fish      12 32.8
+    ## 6   fish      15 34.0
+
+``` r
+pigs.lm1 <- lm(log(conc) ~ source + factor(percent), data = pigs)
+ref_grid(pigs.lm1)
+```
+
+    ## 'emmGrid' object with variables:
+    ##     source = fish, soy, skim
+    ##     percent =  9, 12, 15, 18
+    ## Transformation: "log"
+
+``` r
+pigs.lm2 <- lm(log(conc) ~ source + percent, data = pigs)
+ref_grid(pigs.lm2)
+```
+
+    ## 'emmGrid' object with variables:
+    ##     source = fish, soy, skim
+    ##     percent = 12.931
+    ## Transformation: "log"
 
 #### emmeans default
 
-
-```{r fit1-emean, fig.height=3, fig.width=4}
+``` r
 plot(emmeans(pigs.lm1,  
              ~ percent | source))
 ```
 
+![](README_files/figure-gfm/fit1-emean-1.png)<!-- -->
+
 #### emmeans ruecktransformiert
 
-```{r fit1-emean-trans, fig.height=3, fig.width=4}
+``` r
 plot(emmeans(pigs.lm1,  
              ~ percent | source),
              xlab= "plasma leucine [mcg/ml]" , 
              type = "response")
 ```
 
+![](README_files/figure-gfm/fit1-emean-trans-1.png)<!-- -->
 
-```{r, fig.height=2.5, fig.width=4}
+``` r
 emmip(pigs.lm1, 
       source ~ percent)
 ```
 
-```{r, fig.height=3, fig.width=4}
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+``` r
 plot(emmeans(pigs.lm2,  
              ~ percent | source, 
              at = list(percent = c(10, 15, 20))
@@ -1561,15 +1469,17 @@ plot(emmeans(pigs.lm2,
      )
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
-```{r, fig.height=2.5, fig.width=4}
+``` r
 emmip(
   ref_grid(pigs.lm2, cov.reduce = FALSE), 
   source ~ percent)
 ```
 
-```{r, fig.height=2.5, fig.width=4}
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
+``` r
 emmip(ref_grid(pigs.lm2, 
                at= list(percent = c(10, 15, 20))), 
       source ~ percent,
@@ -1578,7 +1488,7 @@ emmip(ref_grid(pigs.lm2,
       )
 ```
 
-
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ### Klassiker mit Effect()
 
@@ -1586,45 +1496,32 @@ emmip(ref_grid(pigs.lm2,
 
 Von mir lang ignorierte Variante von Effect mit Formeln!
 
-```{r effect-1, fig.height=3, fig.width=7}
+``` r
 mod <- lm(prestige ~ type*(education + income) + women, Prestige)
 plot(predictorEffect("income", mod), main="", rug=FALSE)
+```
+
+![](README_files/figure-gfm/effect-1-1.png)<!-- -->
+
+``` r
 plot(predictorEffects(mod, ~ education + women), main="", rug=FALSE)
+```
+
+![](README_files/figure-gfm/effect-1-2.png)<!-- -->
+
+``` r
 plot(predictorEffects(mod, ~ women+ education),
      axes= list(x=list( women=list(lab="Anteil Frauen"),
                         education=list(lab="Bildung"))), main="", rug=FALSE)
 ```
 
+![](README_files/figure-gfm/effect-1-3.png)<!-- -->
+
 #### Modifizier plot.efflist
-
-
-```{r effect-2, include=FALSE}
-#require(stpvers)
-A = rnorm(100)
-B = rnorm(100, 53, 10)
-C = factor(rep(c("This", "That"), 50))
-A <- A + log(B / 50) + as.numeric(C)
-#log(B)
-Logit <- function(x)
-  car::logit(x, adjust = 0)
-
-invLogit <- function(x)
-  exp(x) / (1 + exp(x))
-
-
-
-prop <- function(odds)
-  odds / c(1 + odds)
-odds <- function(p)
-  p / (1 - p)
-
-```
-
 
 #### allEffects
 
-```{r effect-3, fig.height=2.5, fig.width=5}
-
+``` r
 ef <- allEffects(lm(A ~ B + C))
 plot(ef,
      axes = list(
@@ -1644,13 +1541,11 @@ plot(ef,
               #   
        )),
      main = "")
-
 ```
 
+![](README_files/figure-gfm/effect-3-1.png)<!-- -->
 
-
-
-```{r effect-6, fig.height=2.5, fig.width=5}
+``` r
  lattice::trellis.par.set(bw_theme(farbe()))
 plot(Effect(c("source", "percent"), 
             pigs.lm2,
@@ -1659,13 +1554,11 @@ plot(Effect(c("source", "percent"),
      key.args = list(space="right" ),
      main="", 
      ylab="plasma leucine [mcg/ml]") 
-
 ```
 
+![](README_files/figure-gfm/effect-6-1.png)<!-- -->
 
-
-```{r effect-9, fig.height=2.5, fig.width=5}
-
+``` r
 pigs.lm3 <- lm(log(conc) ~ source * percent, data = pigs)
 
 plot(
@@ -1679,20 +1572,32 @@ plot(
     cex.title = .80,  cex = 0.75
   )
 )
+```
 
+![](README_files/figure-gfm/effect-9-1.png)<!-- -->
+
+``` r
 emmip(
   ref_grid(pigs.lm3, cov.reduce = TRUE), 
   source ~ percent)
+```
 
+    ## Suggestion: Add 'at = list(percent = ...)' to call to see > 1 value per group.
+
+    ## `geom_line()`: Each group consists of only one observation.
+    ## ℹ Do you need to adjust the group aesthetic?
+
+![](README_files/figure-gfm/effect-9-2.png)<!-- -->
+
+``` r
 emmip(
   ref_grid(pigs.lm3, cov.reduce = FALSE), 
   source ~ percent)
-
 ```
 
+![](README_files/figure-gfm/effect-9-3.png)<!-- -->
 
-```{r effect-10, , fig.height=5, fig.width=5}
-
+``` r
 raw_data <-
   data.frame(
     subject_id = rep(1:6, 4),
@@ -1703,7 +1608,17 @@ raw_data <-
 
 
 head(raw_data)
+```
 
+    ##   subject_id time   group value
+    ## 1          1   t0 Control     2
+    ## 2          2   t0 Control     3
+    ## 3          3   t0 Control     4
+    ## 4          4   t0 Control     5
+    ## 5          5   t0 Control     6
+    ## 6          6   t0 Control     7
+
+``` r
 stripplot(
   value ~ time | group,
   groups = subject_id,
@@ -1722,58 +1637,46 @@ stripplot(
    
   }
 )
-
 ```
 
+    ## Warning in wilcox.test.default(x = DATA[[1L]], y = DATA[[2L]], ...): cannot
+    ## compute exact p-value with ties
+    ## Warning in wilcox.test.default(x = DATA[[1L]], y = DATA[[2L]], ...): cannot
+    ## compute exact p-value with ties
 
-
+![](README_files/figure-gfm/effect-10,%20-1.png)<!-- -->
 
 #### transformation
 
-require(effects)
- John Fox URL http://www.jstatsoft.org/v32/i01/
+require(effects) John Fox URL <http://www.jstatsoft.org/v32/i01/>
 
-```{r transfom-prepare, include=FALSE}
-set.seed(2)
-
-ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
-trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
-edu <- cut(c(ctl, trt),3)
-ctl2<- ctl + rnorm(10,0,.5)
-trt2 <-trt + rnorm(10,1.2,.5)
-group <- gl(2, 10, 40, labels = c("Ctl_gt", "Trt"))
-serum <-round(rnorm(length(group)),2)
-time <- factor(rep(1:2, each=20))
-
-
-DF<- data.frame(id= factor(c(1:20, 1:20)),
-                time,
-                y = round(c(ctl, trt, ctl2, trt2) + serum +  as.numeric(group),2),
-                y1 = round(c(ctl, trt, ctl2, trt2)*10,2),
-                y2 = round(c(ctl, trt, ctl2, trt2)+2,2),
-                group,
-                edu= factor(c(edu,edu), labels=Cs(low, med, high)),
-                serum )
-
-
-```
-
-
-```{r}
+``` r
 fit <- lm(y ~ group * time * serum, DF)
 ```
 
-
-
-```{r effect-default, fig.height=5, fig.width= 5}
+``` r
 plot(effects::allEffects(fit)) 
 ```
- 
- 
 
-```{r effect-log, fig.height=3, fig.width= 5}
+![](README_files/figure-gfm/effect-default-1.png)<!-- -->
+
+``` r
 Tbll_desc( ~ log(prestige) + income + type + education,
       data = Prestige)
+```
+
+    ## # A tibble: 7 × 3
+    ##   Item               n     m             
+    ## * <chr>              <chr> <chr>         
+    ## 1 "prestige (mean)"  "102" "3.77 (0.39)" 
+    ## 2 "income (mean)"    "102" "6798 (4246)" 
+    ## 3 "type "            "98"  ""            
+    ## 4 "    bc"           ""    "45% (44)"    
+    ## 5 "    prof"         ""    "32% (31)"    
+    ## 6 "    wc"           ""    "23% (23)"    
+    ## 7 "education (mean)" "102" "10.74 (2.73)"
+
+``` r
 mod <- lm(log(prestige) ~ income:type + education, data = Prestige)
 
 # does not work: effect("income:type", mod, transformation=list(link=log, inverse=exp))
@@ -1781,92 +1684,114 @@ mod <- lm(log(prestige) ~ income:type + education, data = Prestige)
 plot(Effect(c("income", "type"), mod,
             transformation=list(link=log, inverse=exp)),
      main="", ylab="prestige") 
-
 ```
- 
- 
- 
 
-
-
- 
+![](README_files/figure-gfm/effect-log-1.png)<!-- -->
 
 ## GOF-Plots
 
-
-
-```{r gof-1, fig.cap='residualPlots', fig.height=5, fig.width= 5}
+``` r
 require(car)
+```
 
+    ## Loading required package: car
+
+``` r
 car::residualPlots(fit) 
 ```
- 
-```{r gof-2, fig.cap='marginalModelPlots',  fig.height=3, fig.width= 5}
+
+<figure>
+<img src="README_files/figure-gfm/gof-1-1.png" alt="residualPlots" />
+<figcaption aria-hidden="true">residualPlots</figcaption>
+</figure>
+
+    ##            Test stat Pr(>|Test stat|)
+    ## group                                
+    ## time                                 
+    ## serum        -0.3948           0.6957
+    ## Tukey test   -0.6940           0.4877
+
+``` r
 car::marginalModelPlots(fit) 
 ```
-  
-```{r gof-3, fig.cap='avPlots',  fig.height=5, fig.width= 5}
+
+    ## Warning in mmps(...): Interactions and/or factors skipped
+
+<figure>
+<img src="README_files/figure-gfm/gof-2-1.png"
+alt="marginalModelPlots" />
+<figcaption aria-hidden="true">marginalModelPlots</figcaption>
+</figure>
+
+``` r
 car::avPlots(fit) 
 ```
- 
 
+<figure>
+<img src="README_files/figure-gfm/gof-3-1.png" alt="avPlots" />
+<figcaption aria-hidden="true">avPlots</figcaption>
+</figure>
 
-
- 
 ### library(visreg)
 
- Patrick Breheny and Woodrow Burchett 
- URL: https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html
- 
- 
- Limitation: plot kann nicht einfach in cowplot::plot_grid integriert werdrn.
+Patrick Breheny and Woodrow Burchett URL:
+<https://cran.r-project.org/web/packages/visreg/vignettes/quick-start.html>
 
+Limitation: plot kann nicht einfach in cowplot::plot_grid integriert
+werdrn.
 
-```{r visreg-1, fig.cap='visreg', fig.height=3, fig.width= 7, warning=FALSE }
+``` r
 par(mfrow=c(1,3))
 visreg::visreg(fit)
-
 ```
- 
+
+    ## Conditions used in construction of plot
+    ## time: 1
+    ## serum: -0.215
+
+    ## Conditions used in construction of plot
+    ## group: Ctl_gt
+    ## serum: -0.215
+
+    ## Conditions used in construction of plot
+    ## group: Ctl_gt
+    ## time: 1
+
+<figure>
+<img src="README_files/figure-gfm/visreg-1-1.png" alt="visreg" />
+<figcaption aria-hidden="true">visreg</figcaption>
+</figure>
+
 ### library(stats) termplot
 
-
-```{r visreg-2, fig.cap='termplot',fig.height=3, fig.width= 7, warning=FALSE}
+``` r
 par(mfrow=c(1,3))
 stats::termplot(fit, 
                 se = TRUE, 
                 resid = TRUE, 
                 plot=TRUE, ask=FALSE)
-
-
 ```
 
-library(rockchalk)
-Paul E. Johnson
-URL https://github.com/pauljohn32/rockchalk
+<figure>
+<img src="README_files/figure-gfm/visreg-2-1.png" alt="termplot" />
+<figcaption aria-hidden="true">termplot</figcaption>
+</figure>
+
+library(rockchalk) Paul E. Johnson URL
+<https://github.com/pauljohn32/rockchalk>
 
 Hier gibt es keine Updates mehr???
 
-```
-rockchalk::plotSlopes(fit, 
-                      plotx = "group", 
-                      interval = "confidence")
-```
+    rockchalk::plotSlopes(fit, 
+                          plotx = "group", 
+                          interval = "confidence")
 
+    rockchalk::plotSlopes(fit, 
+                          plotx = "group", 
+                          modx = "time", 
+                          interval = "confidence")
 
-
-```
-rockchalk::plotSlopes(fit, 
-                      plotx = "group", 
-                      modx = "time", 
-                      interval = "confidence")
-```
-
-
-
-
-
-```{r stripplot, fig.height=4, fig.width= 7}
+``` r
 raw_data <-
   data.frame(
     subject_id = rep(1:6, 4),
@@ -1875,7 +1800,17 @@ raw_data <-
     value = c(2:7, 6:11, 3:8, 7:12)
   )
 head(raw_data)
+```
 
+    ##   subject_id time   group value
+    ## 1          1   t0 Control     2
+    ## 2          2   t0 Control     3
+    ## 3          3   t0 Control     4
+    ## 4          4   t0 Control     5
+    ## 5          5   t0 Control     6
+    ## 6          6   t0 Control     7
+
+``` r
 stripplot(
   value ~ time | group,
   groups = subject_id,
@@ -1899,45 +1834,18 @@ stripplot(
   
   }
 )
-
 ```
 
+    ## Warning in wilcox.test.default(x = DATA[[1L]], y = DATA[[2L]], ...): cannot
+    ## compute exact p-value with ties
+    ## Warning in wilcox.test.default(x = DATA[[1L]], y = DATA[[2L]], ...): cannot
+    ## compute exact p-value with ties
 
+![](README_files/figure-gfm/stripplot-1.png)<!-- -->
 
+## Altman and Bland (Tukey Mean-Difference Plot)
 
-
-##  Altman and Bland (Tukey Mean-Difference Plot)
-
-
-```{r, include=FALSE}
-set.seed(0815)
-Giavarina <- data.frame(
-  A=c(1,5,10,20,50,
-      40,50,60,70,80,
-      90,100,150,200,250,
-      300,350,400,450,500,
-      550,600,650,700,750,
-      800,850,900,950,1000),
-  B=c(8,16,30,14,39,
-      54,40,68,72,62,
-      122,80,181,259,275,
-      380,320,434,479,587,
-      626,648,738,766,793,
-      851,871,957,1001,980),
-  group= sample(gl(2, 15, labels = c("Control", "Treat")))
-)
-
-Giavarina <- transform(Giavarina, C = round( A + rnorm(30,0,20)),
-                       D = round( A + rnorm(30,0,10) + A/10 ),
-                       E = round( A + rnorm(30,5,10) + (100-A/10) ))
-
- 
-
-
-
-```
-
-```{r fig-BlandAltman3, fig.cap = "Bland Altman", fig.width=8, fig.height=3 }
+``` r
  # A - Goldstandart
 
 x <- MetComp_BAP(~A+B, Giavarina)
@@ -1946,18 +1854,27 @@ x <- MetComp_BAP(~A+B, Giavarina)
 plot(x)
 ```
 
-```{r fig-BlandAltman-lattice, fig.cap = "Bland Altman", fig.width=3.1, fig.height=3}
- 
+<figure>
+<img src="README_files/figure-gfm/fig-BlandAltman3-1.png"
+alt="Bland Altman" />
+<figcaption aria-hidden="true">Bland Altman</figcaption>
+</figure>
+
+``` r
 lattice::tmd( A ~ B, Giavarina)
 ```
+
+<figure>
+<img src="README_files/figure-gfm/fig-BlandAltman-lattice-1.png"
+alt="Bland Altman" />
+<figcaption aria-hidden="true">Bland Altman</figcaption>
+</figure>
 
 ## Survival Analysis
 
 Add number-at-risk annotations to a plot
 
-
-```{r}
-
+``` r
 require("survival")
 
 s <- Surv(colon$time / 365, colon$status)
@@ -1991,18 +1908,15 @@ legend(
   bty = 'n'
 )
 Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
-
 ```
 
-
-
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ## ECDF-Plot
 
-
 ecdfplot {latticeExtra}
 
-```{r, ecdf, fig.height=4, fig.width= 5}
+``` r
  # data(Chem97, package = "mlmRev")
  # 
  # ecdfplot(~gcsescore | factor(score), data = Chem97,
@@ -2015,17 +1929,15 @@ data(singer, package = "lattice")
 ecdfplot(~height | voice.part, data = singer)
 ```
 
+![](README_files/figure-gfm/ecdf-1.png)<!-- -->
 
-
-data(singer, package = "lattice")
- 
+data(singer, package = “lattice”)
 
 ## Interessante Grafik Beispiele
 
-
 Lattice xyplot mit Pfeilen und verlaufende Farben.
 
-```{r , fig.cap='Lattice xyplot mit Pfeilen und verlaufende Farben.',  fig.height=4, fig.width= 5}
+``` r
 dat <- stp25tools::get_data("
   variable        value change leverage
      happiness   4.62  -0.42    0.01
@@ -2071,10 +1983,14 @@ xyplot(
 )
 ```
 
+<figure>
+<img src="README_files/figure-gfm/unnamed-chunk-35-1.png"
+alt="Lattice xyplot mit Pfeilen und verlaufende Farben." />
+<figcaption aria-hidden="true">Lattice xyplot mit Pfeilen und
+verlaufende Farben.</figcaption>
+</figure>
 
-
-```{r , fig.height=4, fig.width= 5}
-
+``` r
 # siehe panel.segplot
 panel.arrows2 <- function(x0, y0 , x1, y1,
                           col, alpha, lty, lwd, ...) {
@@ -2115,50 +2031,61 @@ segplot(
   col.regions = rbPal# hcl.colors #terrain.colors
   
 )
-
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
+### Spine Plots and Spinograms
 
-
-
-
-### Spine Plots and Spinograms 
-
-
-```{r , fig.height=4, fig.width= 5}
+``` r
 require("colorspace")
+```
 
+    ## Loading required package: colorspace
 
+``` r
 ttnc <- margin.table(Titanic, c(1, 4))
  
 spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
 ```
 
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
-
-
-
-
-```{r segplot, fig.height=4, fig.width= 7}
+``` r
 # require(latticeExtra)
  segplot(factor(1:10) ~ rnorm(10) + rnorm(10), level = runif(10))
- 
+```
+
+![](README_files/figure-gfm/segplot-1.png)<!-- -->
+
+``` r
  data(USCancerRates)
  
  segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
          data = subset(USCancerRates, state == "Washington"))
- 
+```
+
+![](README_files/figure-gfm/segplot-2.png)<!-- -->
+
+``` r
  segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
          data = subset(USCancerRates, state == "Washington"),
          draw.bands = FALSE, 
          centers = rate.male)
- 
+```
+
+![](README_files/figure-gfm/segplot-3.png)<!-- -->
+
+``` r
  segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
          data = subset(USCancerRates, state == "Washington"),
          level = rate.female,
          col.regions = terrain.colors)
- 
+```
+
+![](README_files/figure-gfm/segplot-4.png)<!-- -->
+
+``` r
  segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male,
          data = subset(USCancerRates, state == "Washington"),
          draw.bands = FALSE, 
@@ -2168,38 +2095,36 @@ spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
          angle = 90, 
          length = 1, 
          unit = "mm")
- 
+```
+
+![](README_files/figure-gfm/segplot-5.png)<!-- -->
+
+``` r
  segplot(reorder(factor(county), rate.male) ~ LCL95.male + UCL95.male, 
          data = subset(USCancerRates, state ==  "Washington"), 
          draw.bands = FALSE, centers = rate.male)
 ```
 
-
+![](README_files/figure-gfm/segplot-6.png)<!-- -->
 
 ## Misc
 
-Speichern von Grafiken als PDF scheitert wen Unicode verwendet wird abhilfe bietet CairoPDF.
+Speichern von Grafiken als PDF scheitert wen Unicode verwendet wird
+abhilfe bietet CairoPDF.
 
-```
-require(Cairo)
+    require(Cairo)
 
-CairoPDF( paste0(Abb()[3],"-cell-count.pdf"),  width = 7, height =  0.66*8 +.4)
-  plot_grid(p_all, p_cit, p_trns, p_dbd)
-  
-  invisible(dev.off())
-```
-
-
-
+    CairoPDF( paste0(Abb()[3],"-cell-count.pdf"),  width = 7, height =  0.66*8 +.4)
+      plot_grid(p_all, p_cit, p_trns, p_dbd)
+      
+      invisible(dev.off())
 
 ## Links
 
+<https://ggobi.github.io/ggally/index.html>
 
-https://ggobi.github.io/ggally/index.html
+<http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/>
 
+ggpubr
 
-http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/
-
- ggpubr
-
-http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/
+<http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/78-perfect-scatter-plots-with-correlation-and-marginal-histograms/>
