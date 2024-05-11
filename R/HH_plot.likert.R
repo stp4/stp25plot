@@ -382,6 +382,8 @@ HH_plot.likert.formula <-
       )
     if (is.null(list(...)$border))
       barchart.args$border <- barchart.args$col
+    
+    return(barchart.args)
     result <- do.call("barchart", barchart.args)
     if (length(h.resizePanels) > 0) {
       if (is.character(h.resizePanels) && h.resizePanels ==

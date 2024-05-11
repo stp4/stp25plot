@@ -1,7 +1,7 @@
 #' Barcharts for Likert
 #'
 #' Constructs and plots diverging stacked barcharts for Likert (copie from HH:::plot.likert.formula)
-#' 
+#'
 #' Die orginale Funktion hat bei der Sortierung (positive.order) einen Fehler.
 #'
 #' @param x formula
@@ -15,14 +15,14 @@
 #' @param include.order,decreasing Sortieren der Items
 #' @param positive.order das nicht verwenden!! - wird ueber Tbll_likert oder include.order = TRUE gesteuert.
 #' @param auto.key,columns,space  columns = 2,
-#' @param ... HH:::plot.likert.formula  
+#' @param ... HH:::plot.likert.formula
 #'    between=list(x=0))
 #'
 #' @return lattice Plot
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' #require(stp25plot)
 #' require(stp25stat2)
 #' set.seed(1)
@@ -34,37 +34,101 @@
 #'   Fiction = gl(length(lvs), 3, n, lvs),
 #'   Newspapers = gl(length(lvs), 5, n, lvs)
 #' )
-#' 
-#' 
-#' 
+#'
+#'
+#'
 #' DF2$Comic.books[sample.int(n / 2)] <- lvs[length(lvs)]
 #' DF2$Newspapers[sample.int(n / 2)] <- lvs[1]
 #' DF2$Magazines[sample.int(n / 2)] <- lvs[2]
-#' 
+#'
 #' DF2 <- transform(DF2, Geschlecht = cut(rnorm(n), 2, Hmisc::Cs(m, f)))
 #' Res1 <- Tbll_likert( ~ ., DF2[, -5])
 #' Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
-#' 
+#'
 #' # require(HH)  # ?likertplot
 #' # class(Res2)
 #' # windows(7, 3)
-#' # attr(Res2, "plot")$results 
-#' 
+#' # attr(Res2, "plot")$results
+#'
 #' likertplot(Item ~ . | Geschlecht,
-#'            data = Res2,    
+#'            data = Res2,
 #'             between=list(x=0))
-#' 
+#'
 #' # col = likert_col(attr(data, "plot")$nlevels, middle = ReferenceZero)
-#'   
+#'
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers,
 #'                     relevel = letters[1:5],
 #'                     ReferenceZero = 1.5,
 #'                     columns=5)
-#' 
-#' # DF2 %>% 
-#' #   Likert(Magazines, Comic.books, Fiction, Newspapers) %>% 
+#'
+#' # DF2 %>%
+#' #   Likert(Magazines, Comic.books, Fiction, Newspapers) %>%
 #' #   likertplot()
-#' 
+#'
+#' sim_factor <-
+#' function(n = 10,
+#'          labels = c("--", "-", "o", "+", "++"),
+#'          levels = seq_along(labels)) {
+#'   factor(sample(levels, n, replace = TRUE), levels, labels)
+#' }
+#'
+#'
+#' DF <- data.frame(
+#'   Employment.sector =
+#'     sim_factor(
+#'       n,
+#'       c(
+#'         "Academic (nonstudent)",
+#'         "Business and industry",
+#'         "Federal, state, and local government",
+#'         "Private consultant/self-employed",
+#'         "Other (including retired, students, not employed, etc.)")),
+#'   Race = sim_factor(n, c("White","Asian","Black or African American","Other")),
+#'   Education = sim_factor(n, c("Associate's and Bachelor's","Master's and Above")),
+#'   Gender = sim_factor(n, c("Male","Female")),
+#'   Prof.Recog = sim_factor(n, c("Not Important", "Important")),
+#'   Question = sim_factor(n,
+#'                         c(
+#'                           "Strongly Disagree",
+#'                           "Disagree" ,
+#'                           "No Opinion",
+#'                           "Agree Strongly", "Agree"
+#'                         ))
+#'
+#' )
+#' All <- DF |> Summarise(Question, fun =table)
+#' Employment.sector <- DF |> Summarise(Question~ Employment.sector, fun =table)
+#' Race <- DF |> Summarise(Question~ Race, fun =table)
+#' Gender <- DF |> Summarise(Question~ Gender, fun =table)
+#' Education <- DF |> Summarise(Question~ Education, fun =table)
+#' Prof.Recog <- DF |> Summarise(Question~ Prof.Recog, fun =table)
+#'
+#'
+#'
+#' DF2 <-
+#'   Rbind2(All, Employment.sector, Race, Gender, Education, Prof.Recog,
+#'          .id = "Subtable") |>
+#'   mutate(
+#'     Question = dplyr::coalesce(Employment.sector, Race, Gender, Education, Prof.Recog ),
+#'     Question = as.character(Question),
+#'     Subtable = as.character(Subtable)
+#'   ) |>
+#'   select(Subtable, Question, `Strongly Disagree`, Disagree, `No Opinion`, `Agree Strongly`, Agree)
+#'
+#'
+#' DF2$Question[1] <- " All Survey Responses"
+#' # DF2$Question = factor(DF2$Question)
+#' # DF2$Subtable = factor(DF2$Subtable)
+#' stp25plot::likertplot(Question ~ . | Subtable, DF2,
+#'                       scales=list(y=list(relation="free")), layout=c(1,6),
+#'                       #  positive.order=TRUE,
+#'                       between=list(y=0),
+#'                       strip=FALSE, strip.left=strip.custom(bg="gray97"),
+#'                       par.strip.text=list(cex=.6, lines=5),
+#'                       main="Is your job professionally challenging?",
+#'                       ylab=NULL,
+#'                       wrap =FALSE,
+#'                       sub="This looks better in a 10inx7in window")
 likertplot <-
   function(x = Item   ~ . ,
            data = NULL,
@@ -81,6 +145,7 @@ likertplot <-
            as.percent = TRUE,
            auto.key = list(space = space, columns = columns, between = 1),
            ReferenceZero = NULL,
+         #  include.neutral = TRUE,
            reference.line.col = "gray65",
            col.strip.background = "gray97",
            wrap = TRUE,
@@ -91,21 +156,26 @@ likertplot <-
            par.settings  = NULL,
            ...) {
 
-  if(!is.null(positive.order)) 
+  if(!is.null(positive.order))
     stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
-  
+
   name_item <- "Item"
   x_mean    <- NULL
-  
+#cat("\nReferenceZero:", ReferenceZero )
+
+
   if(is.null(data)){
     if(is.data.frame(x) & ("plot" %in% names(attributes(x))) ){
-      # Tbll_likert() 
       formula <- attr(x, "plot")$formula
       nlevels <- attr(x, "plot")$nlevels
+      x_mean  <- attr(x, "plot")$m
+      if(!is.null( attr(x, "plot")$ReferenceZero) )
+        ReferenceZero <- attr(x, "plot")$ReferenceZero
       data    <- attr(x, "plot")$results
-      x_mean  <- attr(data, "plot")$m
+
     }
     else if(inherits(x, "likert")){
+    #  cat ("\n 1 in likert")
       formula <- x$formula
       nlevels <- x$nlevels
       data    <- x$results
@@ -116,15 +186,21 @@ likertplot <-
   else if (plyr::is.formula(x)) {
    if (is.data.frame(data) ) {
      if("plot" %in% names(attributes(data))){
-       # Tbll_likert()
+
+       if(!is.null( attr(data, "plot")$ReferenceZero) )
+         ReferenceZero <- attr(data, "plot")$ReferenceZero
        formula <- x
        nlevels <- attr(data, "plot")$nlevels
-       data    <- attr(data, "plot")$results
        x_mean  <- attr(data, "plot")$m
+
+       data    <- attr(data, "plot")$results
+
+
      }
      else{
-       formula   <- x
+       formula <- x
        name_item <- all.vars(x)[1]
+       nlevels<- length(names(data)) - length(all.vars(x)) + 1
      }
    }
     else if( inherits(x, "likert") ){
@@ -134,31 +210,30 @@ likertplot <-
        x_mean  <- x$m
       }
   }
-  
+
+
   if (is.null(col)) {
     col <- if (is.null(ReferenceZero)) likert_col(nlevels)
            else likert_col(nlevels, middle = ReferenceZero)
   }
 
+
   if (is.logical(wrap)) {
     if (wrap) {
-     # if (!is.character(data[[name_item]]))
-     #   stop("Hier kann ein fehler vorliegen!! wrap_string")
       data[[name_item]] <-
         stp25tools::wrap_factor(data[[name_item]], 35)
     }
   }
   else if (is.numeric(wrap)) {
-   # if (!is.character(data[[name_item]]))
-   #   stop("Hier kann ein fehler vorliegen!! wrap_string")
     data[[name_item]] <-
       stp25tools::wrap_factor(data[[name_item]], wrap)
   }
-  
+
   if (!is.null(include.order)) {
    data <- re_order_mean(data, x_mean, decreasing, include.order)
   }
-  
+
+
   lattice_plot <-
     HH:::plot.likert.formula(
       x = formula,
@@ -180,7 +255,7 @@ likertplot <-
       par.settings.in = par.settings,
       ...
     )
-  
+
   if (horizontal) {
     if (!is.null(xlim))
       lattice_plot <-
@@ -188,7 +263,7 @@ likertplot <-
     if (!is.null(ylim))
       lattice_plot <-
         lattice:::update.trellis(lattice_plot, ylim = ylim)
-    
+
   }
   else  {
     if (!is.null(xlim))
@@ -198,7 +273,7 @@ likertplot <-
       lattice_plot <-
         lattice:::update.trellis(lattice_plot, xlim = ylim)
   }
-  
+
   lattice_plot
  }
 
@@ -217,9 +292,9 @@ likertplot <-
 #' @export
 #'
 #' @examples
-#' 
+#'
 #' DF2 %>% likert_plot(Magazines, Comic.books, Fiction, Newspapers)
-#' 
+#'
 likert_plot <-
   function(...,
            main = '',
@@ -250,25 +325,25 @@ likert_plot <-
            relevel = NULL,
            include.order = NULL,
            decreasing =  TRUE,
-           
+
            caption = "",
            include.table = FALSE,
            include.mean = TRUE,
            include.n = FALSE,
            include.na = FALSE,
            include.percent = TRUE,
-           include.count = TRUE) 
+           include.count = TRUE)
 {
 
-  if(!is.null(positive.order)) 
+  if(!is.null(positive.order))
     stop("positive.order geht nicht mehr\n\n Neu ist include.order aber die Ergebnisse im plot sind anderst!!\n")
-  
+
   if (is.null(relevel)){
     X <- stp25stat2:::Likert(..., include.total=include.total)
    }
   else{
     X_old <-  stp25tools::prepare_data2(...)
-    
+
     X_old$data[X_old$measure.vars] <-
       stp25tools::dapply2(
         X_old$data[X_old$measure.vars],
@@ -282,12 +357,12 @@ likert_plot <-
       )
     X <- stp25stat2:::Likert(X_old$formula,  X_old$data, include.total=include.total)
   }
-  
-  
+
+
  if (!is.null(include.order)) {
     X$results <-  re_order_mean(X$results, X$m, decreasing, include.order)
   }
-  
+
  if(include.table){
     stp25output2::Output(
       stp25stat2::Tbll_likert(X,
@@ -300,11 +375,11 @@ likert_plot <-
                               ),
       caption = caption
     )}
-  
+
  if( type !=1 ){
   fm <- X$formula
   x_in <- all.names(fm)
-  
+
   if (length(x_in) == 5) {
     X$formula <-  formula(paste(x_in[5], x_in[1], x_in[4], x_in[3], x_in[2]))
   } else if (length(x_in) == 7) {
@@ -335,10 +410,10 @@ likert_plot <-
     between = between,
     par.strip.text = par.strip.text,
   par.settings =par.settings
- 
- 
+
+
   )
- 
+
 }
 
 re_order_mean <-
@@ -351,7 +426,7 @@ re_order_mean <-
           FUN = function(x)
             mean(x, na.rm = TRUE)
         )
-      
+
       data$Item <-
         factor(data$Item ,
                names(my_order)[order(my_order, decreasing = decreasing)])
@@ -366,9 +441,9 @@ re_order_mean <-
       X$results$Item <-
         factor(X$results$Item, ny_levels[include.order])
     }
-    
-    
-    
+
+
+
     data
   }
 
@@ -410,4 +485,3 @@ likert_col <- function(n = 5,
   )
 }
 
- 

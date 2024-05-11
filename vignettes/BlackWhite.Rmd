@@ -27,7 +27,7 @@ require(effects)
 require(cowplot)
 #require(gridExtra)
 
-
+require(lattice)
 
 ```
 
@@ -35,12 +35,12 @@ require(cowplot)
  
 
 
-```{r}
+```{r model-pigs-1}
 pigs.lm1 <- lm(conc ~ source * percent, data = pigs)
 ```
 
 
-```{r}
+```{r axes_setting}
 axes_setting <-
   list(
     x = list(
@@ -60,7 +60,7 @@ axes_setting <-
  
 
 
-```{r, ohne-lattice, fig.height=3, fig.width=7, fig.cap= 'effectsTheme ohne lattice'}
+```{r ohne-lattice, fig.height=3, fig.width=7, fig.cap= 'effectsTheme ohne lattice'}
 #' Wenn lattice nicht geladen wird wird impliziet
 #' lattice::trellis.par.set(effectsTheme())
 #' aufgerufen
@@ -81,7 +81,7 @@ plot_grid(p1,
 
 ```
 
-```{r, mit-lattice, fig.height=3, fig.width=7, fig.cap= 'lattice'}
+```{r mit-lattice, fig.height=3, fig.width=7, fig.cap= 'lattice'}
 
 #' wenn lattice als erstes aufgerufen wird
 #' library (lattice)
@@ -105,7 +105,7 @@ plot_grid(p3,
 ```
 
  
-```{r, repatur-lattice, fig.height=6, fig.width=7, fig.cap= 'lattice'}
+```{r repatur-lattice, fig.height=6, fig.width=7, fig.cap= 'lattice'}
 lattice::trellis.par.set(standard_theme())
 
 #' und endgueltig bekommt man die Grafik
