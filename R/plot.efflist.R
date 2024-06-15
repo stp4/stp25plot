@@ -23,6 +23,8 @@ plot_allEffects <- function(x,
                             columns = 1,
                         
                             xlevels = NULL,
+                            select = NULL, remove =NULL,
+                            order = NULL,
                             ...) {
 
   if (inherits(x, "efflist"))
@@ -41,6 +43,8 @@ plot_allEffects <- function(x,
       x.var = x.var,
       space = space,
       columns = columns,
+      select = select, remove = remove,
+      order = order,
       ...
     )
   else if( is.null(predictor))
@@ -59,6 +63,8 @@ plot_allEffects <- function(x,
       x.var = x.var,
       space = space,
       columns = columns,
+      select = select, remove = remove,
+      order = order,
       ...
     )
   else if( is.formula(predictor) )
@@ -77,6 +83,8 @@ plot_allEffects <- function(x,
     x.var = x.var,
     space = space,
     columns = columns,
+    select = select, remove = remove,
+    order = order,
     ...
   )
   else return(class(x))
@@ -183,6 +191,8 @@ plot2.default <- function(...) {
 #' @param axes liste wird automatisch aud den labels erstellt specifications for the x and y axes
 #' @param key.args,space,columns a key, or legend, is added to the plot if multiline = TRUE
 #' @param par.settings siehe https://stackoverflow.com/questions/13026196/how-to-nicely-rescale-lattice-figures
+#' @param  select,order Auswahl der Predictor
+#' 
 #' @return list oder plot
 #' @export
 #'
@@ -292,6 +302,8 @@ plot2.efflist <-
               #   axis.text = list(col= "red"),
               #   strip.background =list( col = 'grey80')
             ),
+            select = NULL, remove =NULL,
+            order = NULL,
             ...)
   {
     plotlist <- list()
@@ -325,6 +337,28 @@ plot2.efflist <-
     reset_axis <-
       lattice::lattice.getOption("axis.padding")$numeric
     lattice::lattice.options(axis.padding = list(numeric = axis.padding))
+    
+    
+ 
+    
+    if(!is.null(remove)){
+      if(is.character(remove))
+      effects <- setdiff(effects, remove)
+      else stop( "Bei remove sind nur die Parameter als Character-Namen erlaubt!")
+      
+    }
+    
+    if(!is.null(select)){
+      if(is.character(select))
+        effects <- intersect(effects,select )
+      else stop( "Bei select sind nur die Parameter als Character-Namen erlaubt!")
+    }
+    
+    
+    if(!is.null(order)){
+      if(is.numeric(order))  effects <- effects[order]
+      else stop( "Bei order sind nur die Parameter als Numeric-Position erlaubt!")
+    }
     
     for (i in seq_along(effects)) {
       # was kommt -------------------------------------------
