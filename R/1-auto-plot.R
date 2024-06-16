@@ -29,43 +29,42 @@
 #'     enviro$wind > 10,
 #'     levels = c(TRUE, FALSE),
 #'     labels = c("windy", "calm")
-#'   ))
-#' head(enviro   )
-#' 
-#' 
-#' 
-#' 
-#' 
+#'   )
+#' )
+#' #head(enviro)
 #' # marginal.plot(enviro[,1:5], data = enviro, groups = is.windy,
 #' #               auto.key = list(lines = TRUE))
-#' marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
 #' 
-#' auto_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
+#' marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by =  ~ temperature)
 #' 
-#' auto_plot(ozone ~ radiation + is.windy+ wind+smell, enviro)
+#' auto_plot(enviro, ozone, radiation, is.windy, wind, smell, by =  ~ temperature)
 #' 
-#' auto_plot(enviro, ozone[box], radiation[hist], is.windy[pie], wind, smell, temperature )
+#' auto_plot(ozone ~ radiation + is.windy + wind + smell, enviro)
 #' 
-#' auto_plot(enviro, ozone, radiation, is.windy, wind, by=~smell )
-#'
+#' auto_plot(enviro, ozone[box], radiation[hist], is.windy[pie], wind, smell, temperature)
+#' 
+#' auto_plot(enviro, ozone, radiation, is.windy, wind, by =  ~ smell)
+#' 
+#' # das ist eine Liste mit plots
 #' p1 <-
-#' auto_plot(enviro,
-#'           ozone,
-#'           radiation,
-#'           is.windy,
-#'           wind,
-#'           smell,
-#'           temperature,
-#'           grid.arrange = FALSE)
+#'   auto_plot(enviro,
+#'             ozone,
+#'             radiation,
+#'             is.windy,
+#'             wind,
+#'             smell,
+#'             temperature,
+#'             grid.arrange = FALSE)
 #' 
 #' 
 #' for (i in seq_along(p1)) {
-#'   cat("\n",  names(p1[i]))
+#'   cat("\n", names(p1[i]))
 #'   print(p1[[i]])
 #'   #  SavePlot(  names(p1[i]) , w=3.6, h=2.9)
 #' }
-#'
-auto_plot<- function(...){
+#' 
+#' 
+auto_plot <- function(...) {
   UseMethod("auto_plot")
 }
 
@@ -79,6 +78,7 @@ auto_plot.lm<- function(x, ...){
   auto_plot(formula(terms(x)), x$model, ...)
   
 }
+
 
 #' @rdname auto_plot
 #' @export
@@ -129,11 +129,8 @@ auto_plot.default <- function(...,
                       ) {
   X <- stp25tools::prepare_data2(...)
   
-  
   if (all(sapply(X$data[X$measure.vars], class) == "logical")){
-     
- 
-    
+
     return(
       multi_barplot(
         ...,
@@ -241,10 +238,6 @@ auto_plot.default <- function(...,
 }
 
 
-
-
-
-
 multi_av_plot <- function(data,
                           measure.vars,
                           group.vars,
@@ -268,14 +261,7 @@ multi_av_plot <- function(data,
                           ...) {
   z <-  group.vars[1]
   res <- list()
-  
-  
-
-   
   for (i in seq.int(length(measure.vars))) {
-    
-   
-      
     y <- measure.vars[i]
     if (is.null(z)) {
       
@@ -581,8 +567,7 @@ multi_av_plot <- function(data,
 #' 
 #' Im wesentlichen ist das eine Kopie von oben nur die Formeln sind vertauscht 
 #' und die auswahl an verschiede Plots ist nicht möglich.
-#'  @noRd
-#' 
+#' @noRd
 multi_uv_plot <- function(data,
                           measure.vars,
                           group.vars,
@@ -698,8 +683,9 @@ multi_uv_plot <- function(data,
 }
 
 
-
-#' lattice marginal plot
+#' @rdname auto_plot
+#' @description
+#' marginal_plot: lattice marginal plot
 #'
 #' @param ... an prepare_data2
 #' @param par.settings,auto.key  an lattice sefault ist  
@@ -708,19 +694,6 @@ multi_uv_plot <- function(data,
 #' @return lattice Plot
 #' @export
 #'
-#' @examples
-#' 
-#' enviro <- environmental
-#' ## make an ordered factor (so it will not be reordered)
-#' enviro$smell <- cut(enviro$ozone, breaks = c(0, 30, 50, Inf),
-#'                     labels = c("ok", "hmmm", "yuck"), ordered = TRUE)
-#' enviro$is.windy <- factor(enviro$wind > 10,
-#'                           levels = c(TRUE, FALSE), labels = c("windy", "calm"))
-#' head(enviro)
-#' 
-#' # marginal.plot(enviro[,1:5], data = enviro, groups = is.windy,
-#' #               auto.key = list(lines = TRUE))
-#' marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
 marginal_plot <- function(...,
                            par.settings = bw_theme(farbe()),
                            auto.key = list(lines = TRUE),
@@ -792,7 +765,3 @@ marginal_plot <- function(...,
   )
   
 }
-
-
-
-

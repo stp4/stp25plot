@@ -4,6 +4,7 @@
 \alias{auto_plot}
 \alias{auto_plot.lm}
 \alias{auto_plot.default}
+\alias{marginal_plot}
 \title{Lattice-Matrix-Plot}
 \usage{
 auto_plot(...)
@@ -37,9 +38,31 @@ auto_plot(...)
   include.reorder.last = NULL,
   main = ""
 )
+
+marginal_plot(
+  ...,
+  par.settings = bw_theme(farbe()),
+  auto.key = list(lines = TRUE),
+  plot.points = FALSE,
+  ref = TRUE,
+  cut = 0,
+  origin = 0,
+  xlab = NULL,
+  ylab = NULL,
+  type = NULL,
+  main = "marginal distributions",
+  subset = TRUE,
+  as.table = TRUE,
+  subscripts = TRUE,
+  default.scales = list(relation = "free", abbreviate = TRUE, minlength = 5, rot = 0, cex
+    = 0.75, tick.number = 3),
+  layout = NULL,
+  lattice.options = list(layout.heights = list(axis.xlab.padding = list(x = 0),
+    xlab.key.padding = list(x = 0)))
+)
 }
 \arguments{
-\item{...}{Variablen und Daten}
+\item{...}{an prepare_data2}
 
 \item{ylab, xlab}{default ist ""}
 
@@ -54,12 +77,17 @@ auto_plot(...)
 \item{include.n}{noch nicht implemeniert}
 
 \item{grid.arrange}{logical Arrange multiple grobs on a page}
+
+\item{par.settings, auto.key}{an lattice sefault ist
+par.settings = stp25output::set_lattice()}
 }
 \value{
 lattice Plot
+
+lattice Plot
 }
 \description{
-Lattice-Matrix-Plot
+marginal_plot: lattice marginal plot
 }
 \examples{
 
@@ -77,40 +105,39 @@ enviro <- transform(
     enviro$wind > 10,
     levels = c(TRUE, FALSE),
     labels = c("windy", "calm")
-  ))
-head(enviro   )
-
-
-
-
-
+  )
+)
+#head(enviro)
 # marginal.plot(enviro[,1:5], data = enviro, groups = is.windy,
 #               auto.key = list(lines = TRUE))
-marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
 
-auto_plot(enviro, ozone, radiation, is.windy, wind, smell, by=~temperature)
+marginal_plot(enviro, ozone, radiation, is.windy, wind, smell, by =  ~ temperature)
 
-auto_plot(ozone ~ radiation + is.windy+ wind+smell, enviro)
+auto_plot(enviro, ozone, radiation, is.windy, wind, smell, by =  ~ temperature)
 
-auto_plot(enviro, ozone[box], radiation[hist], is.windy[pie], wind, smell, temperature )
+auto_plot(ozone ~ radiation + is.windy + wind + smell, enviro)
 
-auto_plot(enviro, ozone, radiation, is.windy, wind, by=~smell )
+auto_plot(enviro, ozone[box], radiation[hist], is.windy[pie], wind, smell, temperature)
 
+auto_plot(enviro, ozone, radiation, is.windy, wind, by =  ~ smell)
+
+# das ist eine Liste mit plots
 p1 <-
-auto_plot(enviro,
-          ozone,
-          radiation,
-          is.windy,
-          wind,
-          smell,
-          temperature,
-          grid.arrange = FALSE)
+  auto_plot(enviro,
+            ozone,
+            radiation,
+            is.windy,
+            wind,
+            smell,
+            temperature,
+            grid.arrange = FALSE)
 
 
 for (i in seq_along(p1)) {
-  cat("\n",  names(p1[i]))
+  cat("\n", names(p1[i]))
   print(p1[[i]])
   #  SavePlot(  names(p1[i]) , w=3.6, h=2.9)
 }
+
 
 }
