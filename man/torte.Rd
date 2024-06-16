@@ -81,8 +81,41 @@ Quelle: https://r.789695.n4.nabble.com/Multi-panel-Pie-Charts-td1687026.html
 Das ist eine Kopie aus lattice Seite 253
 }
 \examples{
+require(stp25plot)
+require(lattice)
+set.seed(2)
+n<-20*3*2
 
- # Create test data.
+DF <- data.frame(
+  n = runif(n, min = 1, max = 5),
+  e = runif(n, min = 1, max = 5),
+  o = runif(n, min = 1, max = 5),
+  g = runif(n, min = 1, max = 5),
+  a = runif(n, min = 1, max = 5),
+  treatment = gl(3, n / 3, labels = c("UG1", "UG2", "KG"))[sample.int(n)],
+  sex = gl(2, n / 2, labels = c("male", "female"))
+) |>
+  stp25tools::Label(
+    n = "Neurotizismus",
+    e = "Extraversion",
+    o = "Offenheit fuer Erfahrungen",
+    g = "Gewissenhaftigkeit",
+    a = "Vertraeglichkeit"
+  )
+
+DF[1, 1:3] <- 5
+DF[1, 4:5] <- 1
+DF[2:10, 1] <- 4.5
+DF[n, 4:5] <- 5
+DF[n, 1:5] <- 1
+
+torte( ~ treatment, DF, init.angle = 45, main = "lattice")
+torte( ~ treatment + sex, DF, init.angle = 45, main = "lattice")
+
+
+
+require(ggplot2)
+# Create test data.
 data <- data.frame(
   category=c("Granulocytes", "CD3+", "CD56+",  "CD19+", "Monocytes"),
   count=c(80,10,5,3,2)
@@ -98,18 +131,18 @@ data$ymin <- c(0, head(data$ymax, n=-1))
 data$labelPosition <- (data$ymax + data$ymin) / 2
 # Compute a good label
 #data$label <- paste0(data$category, "\n value: ", data$count)
-
+data
 # Make the plot
-Plot_D <-ggplot(data, 
-                aes(ymax=ymax, ymin=ymin, xmax=4, xmin=2, 
-                    fill=category)) +
+P1<- data |> ggplot(
+  aes(ymax=ymax, ymin=ymin, xmax=4, xmin=2,
+      fill=category)) +
   geom_rect() +
-  # geom_text( x=2, 
-  #            aes(y=labelPosition, 
-  #                label=label, 
+  # geom_text( x=2,
+  #            aes(y=labelPosition,
+  #                label=label,
   #                color=1), size=6) + # x here controls label position (inner / outer)
   scale_fill_manual(
-    values = 
+    values =
       c("#918E00","#00F801","#FF2600","#0433FF","#FE9300")) +
   coord_polar(theta="y") +
   xlim(c(-1, 4)) +
@@ -117,55 +150,25 @@ Plot_D <-ggplot(data,
   theme(legend.position = "top") +
   labs(title = "Leukocyte composition 1h NMP") +
   theme(legend.title = element_blank(),# element_text(size=12, color = "salmon", face="bold"),
-        legend.justification=c(0,1), 
+        legend.justification=c(0,1),
         legend.position=c(0.4, 0.7),
         legend.background = element_blank(),
         legend.key = element_blank()
-  )  
+  )
+P1
 
-
-# require(stpvers)
-
-set.seed(2)
-n<-20*3*2
-require(stpvers)
-require(lattice)
-DF<- Label(data.frame(n=runif(n, min = 1, max = 5),
-                      e=runif(n, min = 1, max = 5),
-                      o=runif(n, min = 1, max = 5),
-                      g=runif(n, min = 1, max = 5),
-                      a=runif(n, min = 1, max = 5),
-                      treatment=gl(3, n/3, labels = c("UG1", "UG2", "KG"))[sample.int(n)],
-                      sex=gl(2, n/2, labels = c("male", "female")
-                      )
-),  n="Neurotizismus",
-e="Extraversion",
-o="Offenheit fuer Erfahrungen",
-g= "Gewissenhaftigkeit",
-a="Vertraeglichkeit")
-DF[1,1:3] <-5;DF[1,4:5] <-1; DF[2:10,1] <-4.5
-DF[n,4:5] <-5;DF[n,1:5] <-1
-
-torte(~treatment, DF, init.angle=45, main="lattice")
-torte(~treatment+sex, DF, init.angle=45, main="lattice")
-
-
-# https://www.r-bloggers.com/2021/08/ggplot-easy-as-pie-charts/
-#' library(ggplot2)
-ggplot(d, aes(x = 1, y = Time_relative, fill = Slices)) +
-  facet_grid(cols = vars(When)) + 
+ggplot(data, aes(x = 1, y = count , fill = category )) +
   # Make pie
   coord_polar(theta = "y") +
   # Add the *stacked* columns
-  geom_col(position = position_stack(reverse = TRUE), 
-           color = "tan3", size = 3, show.legend = FALSE) + 
+  geom_col(position = position_stack(reverse = TRUE),
+           color = "tan3", 
+           size = 3, show.legend = FALSE) +
   # Add labels to the *stacked* position,
   # in the middle of the column (vjust = 0.5)
-  geom_text(aes(label = Slices), 
-            position = position_stack(vjust = 0.5, reverse = TRUE)) + 
-  # Make it a pizza pie!
-  see::scale_fill_pizza_d() + 
-  theme_void() + 
+  geom_text(aes(label = category),
+            position = position_stack(vjust = 0.5, reverse = TRUE)) +
+  theme_void() +
   labs(title = "Relative time spent building piecharts with ggplot2")
 
 tab <- as.data.frame(xtabs( ~ treatment + sex, DF))

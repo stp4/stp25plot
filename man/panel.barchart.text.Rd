@@ -147,23 +147,23 @@ barchart(
 
 
 dat<- stp25tools::get_data("
-id                          value                          variable       Freq
-1             'weniger als heute'                   Telefonauskunft  68.333333
-2  'im gleichen Ausmaß wie heute'                   Telefonauskunft  25.000000
-3                'mehr als heute'                   Telefonauskunft   0.000000
-4                  'es gab keine'                   Telefonauskunft   6.666667
-5             'weniger als heute'                     Elektronische  28.333333
-6  'im gleichen Ausmaß wie heute'                     Elektronische  53.333333
-7                'mehr als heute'                     Elektronische   3.333333
-8                  'es gab keine'                     Elektronische  15.000000
-9             'weniger als heute'                  Videokonferenzen   0.000000
-10 'im gleichen Ausmaß wie heute'                  Videokonferenzen   1.000000
-11               'mehr als heute'                  Videokonferenzen   0.000000
-12                 'es gab keine'                  Videokonferenzen 100.000000
-13            'weniger als heute'                     Kurzmessenger   5.000000
-14 'im gleichen Ausmaß wie heute'                     Kurzmessenger   3.333333
-15               'mehr als heute'                     Kurzmessenger   0.000000
-16                 'es gab keine'                     Kurzmessenger  91.666667                     ")
+id  value  variable  Freq
+1             'weniger als heute'  Telefonauskunft  68.333333
+2  'im gleichen Ausmaß wie heute'  Telefonauskunft  25.000000
+3                'mehr als heute'  Telefonauskunft   0.000000
+4                  'es gab keine'  Telefonauskunft   6.666667
+5             'weniger als heute'  Elektronische  28.333333
+6  'im gleichen Ausmaß wie heute'  Elektronische  53.333333
+7                'mehr als heute'  Elektronische   3.333333
+8                  'es gab keine'  Elektronische  15.000000
+9             'weniger als heute'  Videokonferenzen   0.000000
+10 'im gleichen Ausmaß wie heute'  Videokonferenzen   1.000000
+11               'mehr als heute'  Videokonferenzen   0.000000
+12                 'es gab keine'  Videokonferenzen 100.000000
+13            'weniger als heute'  Kurzmessenger   5.000000
+14 'im gleichen Ausmaß wie heute'  Kurzmessenger   3.333333
+15               'mehr als heute'  Kurzmessenger   0.000000
+16                 'es gab keine'  Kurzmessenger  91.666667")
 
 barchart(value~Freq|variable, dat, 
          par.strip.text = list(lines = 2.5, cex=.75 ),

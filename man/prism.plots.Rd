@@ -43,11 +43,44 @@ this argument will be ignored. The default (when not ignored) is to produce a 95
 \item{...}{other arguments passed to plot}
 }
 \description{
-gestohlen von fifer Dustin Fife
+gestohlen von Dustin Fife
 }
 \examples{
 
+require(lattice)
+require(latticeExtra)
+require(effects)
 
-prism.plots(count ~ spray, data = InsectSprays, fun=mean)
-prism.plots(count ~ spray, data = InsectSprays, fun=median)
+prism.plots(count ~ spray, data = InsectSprays, fun = mean)
+
+Insect <- lm(count ~ spray, data = InsectSprays)
+stripplot(
+  count ~ spray,
+  data = InsectSprays,
+  # ylim=c(-10,70),
+  ylab = "Insect count",
+  xlab = "The type of spray",
+  jitter.data = TRUE,
+  panel = function(x, y, ...) {
+    # panel.conf.int(x, y, ...)
+    panel.stripplot(x, y, pch = 19, col = "gray50", ...)
+    # panel.points(x,y, pch=19,...)
+    # panel.mean(x,y,  ...)
+    panel.median(x, y, ...)
+    panel.sig.bars(Insect, include.stars = FALSE, offset = .4)
+  }
+)
+
+
+p <- stripplot(
+  count ~ spray,
+  data = InsectSprays,
+  jitter.data = TRUE,
+  pch = 20,
+  col = "gray50"
+)
+p + layer(panel.sig.bars(Insect, include.stars = FALSE, offset = .4))
+
+p2 <- plot(effect("spray", Insect), lty = 0 , main = "Effectiveness of Insect Sprays")
+p2 +  layer(panel.sig.bars(Insect, include.stars = FALSE, offset = .4))
 }

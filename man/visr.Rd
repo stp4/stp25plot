@@ -91,7 +91,7 @@ S3 method for creating plots directly from objects using `ggplot2`,
 S3 function to draw a Consort flow diagram chart.
 }
 \examples{
-
+ data("adtte", package = "visR")
 ## Create attrition
 attrition <- visR::get_attrition(adtte,
   criteria_descriptions = c(

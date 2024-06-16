@@ -96,35 +96,22 @@ Function for making a correlation plot starting from a  formula and a data.frame
 }
 \examples{
 
-#' 
 require(stp25plot)
 require(stp25tools)
 require(tidyverse)
-
-set.seed(1)
-
 n <- 50
 
-dat3 <- data.frame(a = rnorm(n)) \%>\%
-  
+dat3 <- data.frame(a = rnorm(n)) |>
   mutate(
-    b = a +  rnorm(n),
-    c = b +  rnorm(n),
-    d = c +  rnorm(n),
-    e = d +  rnorm(n),
+    b = a + rnorm(n),
+    c = b + rnorm(n),
+    d = c + rnorm(n),
+    e = d + rnorm(n),
     f = e + rnorm(n)
-    
   )
 
-
-corr_plot( ~ a + e + f+ b + c + d , dat3,
-            resize=TRUE
-)
-
-#corr_plot( dat3,resize=TRUE)
-
-corr_plot( dat3, a, b, c,
-            resize=TRUE
-)
+corr_plot( ~ a + e + f+ b + c + d, 
+    dat3,
+    resize = TRUE)
 
 }

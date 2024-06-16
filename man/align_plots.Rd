@@ -17,7 +17,7 @@ This function aligns multiple \code{ggplot} graphs by making them the same width
 }
 \examples{
 \donttest{
-
+ data("adtte", package = "visR")
 ## create 2 graphs
 p1 <- ggplot2::ggplot(adtte, ggplot2::aes(x = as.numeric(AGE), fill = "Age")) +
   ggplot2::geom_histogram(bins = 15)
