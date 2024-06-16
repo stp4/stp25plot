@@ -827,7 +827,7 @@ ggplot_forest <-
         )
     }
     
-    #' plot
+  
     g <- ggplot2::ggplot(data,
                          ggplot2::aes(x = !!estimate, y = !!name))
     if (logodds) {
@@ -880,22 +880,6 @@ ggplot_forest <-
     #   
     # 
     #   ) 
-    
-    #'   geom_point(
-    #'     mapping = aes(
-    #'       color = level,
-    #'       shape = level
-    #'     ),
-    #'     position = ggplot2::position_dodge(width =  0.5)
-    #'   ) +
-    #'   geom_errorbar(
-    #'     mapping = aes(
-    #'       ymin = conf.low ,
-    #'       ymax = conf.high,
-    #'       color = level,
-    #'       width = 0.2
-    #'     ),
-    
     
     
     g <- g +

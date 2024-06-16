@@ -90,7 +90,7 @@ visr.default <- function(x, ...) {
 #' S3 function to draw a Consort flow diagram chart.
 #'
 #' @examples
-#'
+#'  data("adtte", package = "visR")
 #' ## Create attrition
 #' attrition <- visR::get_attrition(adtte,
 #'   criteria_descriptions = c(
@@ -298,7 +298,7 @@ visr.attrition <- function(x,
 #'
 #' @examples
 #' \donttest{
-#'
+#'  data("adtte", package = "visR")
 #' ## create 2 graphs
 #' p1 <- ggplot2::ggplot(adtte, ggplot2::aes(x = as.numeric(AGE), fill = "Age")) +
 #'   ggplot2::geom_histogram(bins = 15)

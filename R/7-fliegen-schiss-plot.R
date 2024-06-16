@@ -1,6 +1,6 @@
 #' Plot prism-like Plots
 #'
-#' gestohlen von fifer Dustin Fife
+#' gestohlen von Dustin Fife
 #'
 #'
 #' @param formula a formula object with the quantitative variable as the response variable (e.g., Var~group).
@@ -15,21 +15,51 @@
 #' @param col What color should the dots be painted? Defaults to gray.
 #' @param ... other arguments passed to plot
 ## @author Dustin Fife
-## @seealso \code{\link{boxplot}}, \code{\link{densityPlotR}}, \code{\link{plotSigBars}}
 #' @export
-## @aliases prismPlots prismplots plots.prism
 #' @examples
-#'
-#'
-#' prism.plots(count ~ spray, data = InsectSprays, fun=mean)
-#' prism.plots(count ~ spray, data = InsectSprays, fun=median)
+#' 
+#' require(lattice)
+#' require(latticeExtra)
+#' require(effects)
+#' 
+#' prism.plots(count ~ spray, data = InsectSprays, fun = mean)
+#' 
+#' Insect <- lm(count ~ spray, data = InsectSprays)
+#' stripplot(
+#'   count ~ spray,
+#'   data = InsectSprays,
+#'   # ylim=c(-10,70),
+#'   ylab = "Insect count",
+#'   xlab = "The type of spray",
+#'   jitter.data = TRUE,
+#'   panel = function(x, y, ...) {
+#'     # panel.conf.int(x, y, ...)
+#'     panel.stripplot(x, y, pch = 19, col = "gray50", ...)
+#'     # panel.points(x,y, pch=19,...)
+#'     # panel.mean(x,y,  ...)
+#'     panel.median(x, y, ...)
+#'     panel.sig.bars(Insect, include.stars = FALSE, offset = .4)
+#'   }
+#' )
+#' 
+#' 
+#' p <- stripplot(
+#'   count ~ spray,
+#'   data = InsectSprays,
+#'   jitter.data = TRUE,
+#'   pch = 20,
+#'   col = "gray50"
+#' )
+#' p + layer(panel.sig.bars(Insect, include.stars = FALSE, offset = .4))
+#' 
+#' p2 <- plot(effect("spray", Insect), lty = 0 , main = "Effectiveness of Insect Sprays")
+#' p2 +  layer(panel.sig.bars(Insect, include.stars = FALSE, offset = .4))
+ 
 prism.plots = function(formula,
                        data,
                        fun = median,
                        interquartile = TRUE,
-                       spreadfunc = function(x) {
-                         return(1.96 * sd(x) / sqrt(length(x)))
-                       },
+                       spreadfunc = function(x) { return(1.96 * sd(x) / sqrt(length(x)))},
                        def.axis = TRUE,
                        jitter = TRUE,
                        add = FALSE,
@@ -139,29 +169,6 @@ prism.plots = function(formula,
            ...)
 }
 
-## Add significance bars to a prism plot, corrected for multiple comparisons either using Tukey's HSD (parametric),
-## or Dunn's correction for multiple comparison (non-parametric).
-##
-## @title Add significance bars to a prism plot
-## @param formula a R formula object
-## @param data a dataset containing the variables in formula
-## @param type either "tukey" or "dunn" indicating which multiple comparison should be used
-## @seealso \code{\link{boxplot}}, \code{\link{densityPlotR}}, \code{\link{prism.plots}}
-## @export
-## @author Dustin Fife
-## @examples
-##	prism.plots(Sepal.Length ~ Species, data = iris, fun=mean)
-## plotSigBars(Sepal.Length ~ Species, data = iris, type="tukey")
-## @note This function should probably only be used when the number of groups is less than four, otherwise the number
-## of pairwise comparisons becomes too large to display.
-##
-## When p-values are adjusted using Dunn's multiple comparison, this function calls the \code{kruskalmc} function in the
-## \code{pgirmess} package. To avoid having to load the entire package, the function was directly copied into the fifer package.
-## references Patrick Giraudoux (2013). pgirmess: Data analysis in ecology. R package version 1.5.7.
-##  http://CRAN.R-project.org/package=pgirmess
-
-
-
 
 #' Der Fliegen-Schiss-Plot
 #'
@@ -173,10 +180,6 @@ prism.plots = function(formula,
 #'
 #' @return  plot-text
 #' @export
-#'
-#' @examples
-#'
-#' # kommt noch
 #'
 plotSigBars <- function(x,
                         include.stars = TRUE,
@@ -214,40 +217,6 @@ plotSigBars <- function(x,
 
 #' @rdname plotSigBars
 #' @export
-#' @examples 
-#' 
-#' require(lattice)
-#' require(latticeExtra)
-#' require(effects)
-#' 
-#' 
-#' stripplot(
-#' DC4 ~ time2,
-#' data = dat, ylim=c(-10,70),
-#' ylab = "Difference (Absolute Value) [mm]", jitter.data=TRUE,
-#' panel = function(x, y, ...) {
-#'   # panel.conf.int(x, y, ...)
-#'   panel.stripplot(x,y, pch=19, col="gray50",...)
-#'   #panel.points(x,y, pch=19,...)
-#'   #panel.mean(x,y,  ...)
-#'   
-#'   panel.median(x,y, ...)
-#'   panel.sig.bars(fit1, include.stars = FALSE, offset = .4)
-#' }
-#' )
-#' 
-#' 
-#' 
-#' fit1 <- lm(DC4 ~ time2, data = dat)
-#' 
-#' p <- stripplot(  DC4 ~ time2,  data = dat, jitter.data=TRUE,pch=20, col="gray50")
-#' p + layer(panel.sig.bars(fit1, include.stars = FALSE, offset = .4) )
-#' 
-#' p2<- plot(effect("time2", fit1), ylim=c(0,60))
-#' p2 +  layer(panel.sig.bars(fit1, include.stars = FALSE, offset = .4) )
-#' 
-#' #' 
-#' #' 
 panel.sig.bars <- function(x,
                            include.stars = TRUE,
                            shift = TRUE,
@@ -365,8 +334,7 @@ cordinats <-
     )
   }
 
-#' Title
-#'
+
 #' @param x lm, lmer, emm_list
 #'
 #' @return data.frame
@@ -378,13 +346,11 @@ extract_pvalue <- function(x) {
     csp <- strsplit(rslt[[1]], " - ")
     rslt <-  data.frame(
       contrast = rslt[[1]],
-      
       lhs = sapply(csp, "[", 1),
       rhs = sapply(csp, "[", 2),
       p.value = rslt[[ncol(rslt)]]
     )
     levs <- x[[1]]@levels[[1]]
-    
   }
   else if (inherits(x, "lmerModLmerTest")) {
     rhs <-  all.vars(formula(x))[2L]
@@ -399,8 +365,7 @@ extract_pvalue <- function(x) {
       lhs = c1,
       rhs = gsub(rhs, "", rownames(rslt)),
       p.value = rslt[, ncol(rslt)]
-    )[-1,]
-    
+    )[-1, ]
   }
   else {
     y <-  all.names(formula(x)[3L])[1]
@@ -411,29 +376,23 @@ extract_pvalue <- function(x) {
     
     rhs = gsub(y, "", rslt[[1]])
     
-    if( all(getOption("contrasts") == c( "contr.Treatment","contr.poly" ))){
-        rhs<- substr(rhs, 4, nchar(rhs)-1)
-    } 
- 
+    if (all(getOption("contrasts") == c("contr.Treatment", "contr.poly"))) {
+      rhs <- substr(rhs, 4, nchar(rhs) - 1)
+    }
+    
     rslt <- data.frame(
       contrast =
         paste(c1, "-", gsub(y, "", rslt[[1]])),
       lhs = c1,
       rhs = rhs,
       p.value = rslt[[ncol(rslt)]]
-    )[-1,]
+    )[-1, ]
     
   }
-  
-  
- 
-#getOption("contrasts") == c("contr.treatment", "contr.poly" )
-  
-  
+
   rslt$p <- stp25stat2:::rndr_P(rslt$p.value)
   rslt$stars <- stp25stat2:::rndr_Stars(rslt$p.value)
-  list(p.value = rslt[which(rslt$p.value <= .1), ],
-       levels = levs)
+  list(p.value = rslt[which(rslt$p.value <= .1), ], levels = levs)
 }
 
 
