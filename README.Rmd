@@ -62,6 +62,9 @@ DF <-
 
 ### Likertplot
 
+```{r}
+library(stp25likert)
+```
 
 ```{r, include=FALSE}
 set.seed(1)

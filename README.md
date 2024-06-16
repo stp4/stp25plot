@@ -21,6 +21,21 @@ status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project
 ### Likertplot
 
 ``` r
+library(stp25likert)
+```
+
+    ## Registered S3 method overwritten by 'stp25likert':
+    ##   method       from      
+    ##   print.likert stp25stat2
+
+    ## 
+    ## Attaching package: 'stp25likert'
+
+    ## The following objects are masked from 'package:stp25stat2':
+    ## 
+    ##     Likert, Tbll_likert
+
+``` r
 #Res1 <- Tbll_likert( ~ ., DF2[, -5])
 Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
 
@@ -161,7 +176,7 @@ par(op)
 
 Stolen from <http://www.motioninsocial.com/tufte/#sparklines>
 
-![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ### Auto-Plot auto_plot()
 
@@ -216,7 +231,7 @@ auto_plot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 Mehrfachantworten mit multi_barplot().
 
@@ -335,7 +350,7 @@ p1<- xyplot(y~x1|x2,
  print(p1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 ### bwplot2
 
@@ -600,7 +615,7 @@ data <- data.frame(
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 ### Balken mit Zahlen
 
@@ -692,7 +707,7 @@ ggplot(data,
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
     #  Geht nicht problemlos in Markdown
     print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
@@ -700,14 +715,6 @@ ggplot(data,
 ``` r
  gtorte(~treatment+sex, DF, init.angle=45, main="ggplot")
 ```
-
-    ## Warning: The `facets` argument of `facet_grid()` is deprecated as of ggplot2 2.2.0.
-    ## ℹ Please use the `rows` argument instead.
-    ## ℹ The deprecated feature was likely used in the stp25plot package.
-    ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
 
 ![](README_files/figure-gfm/g-torte-1.png)<!-- -->
 
@@ -982,13 +989,13 @@ cowplot::plot_grid(p1, p2, p3, ncol=2)
 plot( effects::allEffects(fit2) )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 plot2( effects::allEffects(fit2) )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 ``` r
 e2 <- effects::allEffects(fit2)
@@ -1017,7 +1024,7 @@ cowplot::plot_grid(plotlist =p2,
                    rel_heights = c(3,4))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
 
 Konfidenz-Band mit *geom_ribbon()*
 
@@ -1301,7 +1308,7 @@ p1 + p2 + p3 + p4 + plot(mydf) +
     plot_layout(ncol=2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
 
 ``` r
 require(ggeffects)
@@ -1363,7 +1370,7 @@ p1 <-plot(mydf)
 p1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
 
 ``` r
 p1 +
@@ -1371,7 +1378,7 @@ p1 +
   theme(legend.position = "none")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
 
 ``` r
 #plot(allEffects(mod))
@@ -1382,7 +1389,7 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
   facet_wrap(~group)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-28-3.png)<!-- -->
 
     theme_set(theme_ggeffects())
     p1<-ggpredict(fit, "am") |>
@@ -1459,7 +1466,7 @@ emmip(pigs.lm1,
       source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
 plot(emmeans(pigs.lm2,  
@@ -1469,7 +1476,7 @@ plot(emmeans(pigs.lm2,
      )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 emmip(
@@ -1477,7 +1484,7 @@ emmip(
   source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, 
@@ -1488,7 +1495,7 @@ emmip(ref_grid(pigs.lm2,
       )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 ### Klassiker mit Effect()
 
@@ -1910,7 +1917,7 @@ legend(
 Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 ## ECDF-Plot
 
@@ -1984,7 +1991,7 @@ xyplot(
 ```
 
 <figure>
-<img src="README_files/figure-gfm/unnamed-chunk-35-1.png"
+<img src="README_files/figure-gfm/unnamed-chunk-36-1.png"
 alt="Lattice xyplot mit Pfeilen und verlaufende Farben." />
 <figcaption aria-hidden="true">Lattice xyplot mit Pfeilen und
 verlaufende Farben.</figcaption>
@@ -2033,7 +2040,7 @@ segplot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ### Spine Plots and Spinograms
 
@@ -2049,7 +2056,7 @@ ttnc <- margin.table(Titanic, c(1, 4))
 spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ``` r
 # require(latticeExtra)
