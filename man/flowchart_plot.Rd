@@ -2,6 +2,10 @@
 % Please edit documentation in R/5-flowchart_plot.R
 \name{flowchart_plot}
 \alias{flowchart_plot}
+\alias{simple_consort_plot}
+\alias{visr_copy}
+\alias{visr_copy.default}
+\alias{visr_copy.attrition}
 \title{flowchart_plot}
 \usage{
 flowchart_plot(
@@ -11,6 +15,24 @@ flowchart_plot(
   arr.pos = 0.55,
   box.size = c(0.1, 0.15),
   use_str_wrap = TRUE,
+  ...
+)
+
+simple_consort_plot(x, ...)
+
+visr_copy(x, ...)
+
+\method{visr_copy}{default}(x, ...)
+
+\method{visr_copy}{attrition}(
+  x,
+  description_column_name = "Criteria",
+  value_column_name = "Remaining.N",
+  complement_column_name = "",
+  box_width = 50,
+  font_size = 12,
+  fill = "white",
+  border = "black",
   ...
 )
 }
@@ -27,22 +49,75 @@ flowchart_plot(
 
 \item{use_str_wrap}{workaround fuer new-lines = TRUE,}
 
-\item{...}{alles fuer reorder}
+\item{...}{an visr_copy}
+
+\item{x}{data.frame}
+}
+\value{
+plot
 }
 \description{
 Uebernommen aus library(diagram)
+
+simple_consort_plot()  simple consort plot with the help of Filter2().
+
+#'
+S3 function to draw a Consort flow diagram chart.
+Stolen from https://cran.r-project.org/web//packages/visR/index.html
+
+https://cran.r-project.org/web//packages/visR/vignettes/Consort_flow_diagram.html
 }
 \examples{
-#library(stp25)
-#'   windows(7,10)
+
 txt<-"AAA" #LETTERS[sample.int(23,1)]
-windows(8,8)
+
 flowchart_plot(list(
   File=txt,
   Raw.x=c("B","C"),
   Clean.Up = c("D",paste("E",format(Sys.time(), "\%Y-\%m-\%d"))                        ),
   Analyse=c( "F", "G")
-
+  
 ),
 box.size=c(.1,.12) )
+
+
+data(DFdummy, package = "stp25data")
+
+DF1 <- DFdummy |> stp25tools::filter2(study.agreement)
+attr(DF1, "filter")
+
+simple_consort_plot(DF1)
+
+
+DF2 <- DF1 |> stp25tools::filter2(
+st.p.sars.cov2 == "nein",
+!is.na(spike.igg.3.impfung),
+!is.na(MPN)
+
+)
+
+DF3 <- DF2 |> stp25tools::filter2(
+  study.agreement,
+  sero.negativ.after.dose.2,
+  !is.na(spike.igg.3.impfung),
+  !is.na(spike.igg.4.impfung),
+  spike.igg.3.impfung == "<7.1 BAU/ml"
+)
+dat <- prepare_consort(DF1, DF2, DF3)
+
+consort::consort_plot(
+  dat,
+  orders = c(
+    Trial.Nr   = "Population",
+    Condition.1           = "Excluded",
+    Trial.Nr     = "Allocated \nDeskriptive Analyse",
+    Condition.2    =    "Fehlende Daten",
+    Trial.Nr = "Regressionsanalyse",
+    Condition.3    = "Not evaluable for the final analysis",
+    Trial.Nr = "Final Analysis"
+  ),
+  side_box = c("Condition.1", "Condition.2", "Condition.3"),
+  cex = 0.9
+)
+
 }
