@@ -406,7 +406,17 @@ plot2.efflist <-
          if (is.list(xlim))
            for (j in effects_i)
              axes_i$x[[j]]$lim <- xlim[[j]]
-         else stop ("xlim: hier muss eine Liste mit Namen uebergeben werden. list(x = c(1,2)  ")
+         else {
+           
+           print( xlim)
+           for (j in effects_i)
+             axes_i$x[[j]]$lim <- xlim 
+           }
+           
+         #  warning("xlim: Hier sollte eine Liste mit Namen uebergeben werden. list(sex = c(1 ,2) } ")
+           
+           
+           #stop ("xlim: hier muss eine Liste mit Namen uebergeben werden. list(x = c(1,2)  ")
        }
        if (!is.null(x.ticks)) {
          if (is.list(x.ticks))
