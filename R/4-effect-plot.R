@@ -21,7 +21,6 @@ plot_allEffects <- function(x,
                             x.var = 1,
                             space = "right",
                             columns = 1,
-                        
                             xlevels = NULL,
                             select = NULL, remove =NULL,
                             order = NULL,
@@ -186,7 +185,7 @@ plot2.default <- function(...) {
 #' @param plot plot or list cowplot::plot_grid(plotlist)
 #' @param rug  rug
 #' @param ... an effects::plot.eff
-#' @param ylab,xlab,labels x und y Beschriftung labels ist ein Vector mit Namen
+#' @param labels,ylab,xlab  Warnung labels funktionieren am besten!! x und y Beschriftung labels ist ein Vector mit Namen
 #' @param cex,cex.x,cex.y größe der Schrift
 #' @param axes liste wird automatisch aud den labels erstellt specifications for the x and y axes
 #' @param key.args,space,columns a key, or legend, is added to the plot if multiline = TRUE
@@ -247,12 +246,11 @@ plot2.efflist <-
             ncol = NULL,
             rel_widths = 1,
             rel_heights = 1,
-            ylab = NULL,
-            xlab = NULL,
+            ylab = NULL,xlab = NULL,labels = NULL,
             xlim = NULL,
             ticks = NULL, y.ticks = if(is.list(ticks)) ticks else list(at=ticks),
             x.ticks = NULL,
-            labels = NULL,
+            
             cex = 1.1,
             cex.x = cex * .8,
             cex.y = cex * .8,
@@ -306,6 +304,10 @@ plot2.efflist <-
             order = NULL,
             ...)
   {
+    
+
+    
+    
     plotlist <- list()
     param <- purrr::map(x, \(xfit) names(xfit$variables))
     x <- x[!duplicated(param)]
@@ -348,6 +350,7 @@ plot2.efflist <-
     }
     else{
       # ylab und xlab aufdröseln
+      # da ist noch ein hund drinnen!!!!
       labels <- eff_names
       names(labels) <- eff_names
       if (!is.null(ylab)) {
@@ -360,22 +363,42 @@ plot2.efflist <-
       }
     }
     
+    
+    #print(eff_names)
+   
+    
     reset_axis <-
       lattice::lattice.getOption("axis.padding")$numeric
     lattice::lattice.options(axis.padding = list(numeric = axis.padding))
     
     
- 
+#return( grepl("\\(", names(labels) )) 
     
 
+if( any(grepl("\\(", names(labels)) )){  
+ #names(labels) <- gsub(".*\\(","trans(",  names(labels))     
+names(labels) <- gsub(".*\\(","",  names(labels))
+names(labels) <- gsub("\\)","",  names(labels))
+
+}
     
-    
-    
+    # 
+    # cat("\n Labels:\n")
+    # print(labels)
     
     for (i in seq_along(effects)) {
       # was kommt -------------------------------------------
        is_fctr <- unlist(purrr::map(x[[i]]$variables, \(x) x$is.factor))
        effects_i <- unlist(strsplit(effects[i], "\\*"))
+      
+       
+       if( grepl("\\(", effects_i)){ # print(effects_i)
+         #effects_i <- gsub(".*\\(","trans(",effects_i)
+         effects_i <- gsub(".*\\(","",effects_i)
+         effects_i <- gsub("\\)","",effects_i)
+        # print(effects_i)
+         }
+       
       # lty --------------------------------------------------
       if (all(is_fctr))
         lty2 <- lty.factor
@@ -396,28 +419,35 @@ plot2.efflist <-
       axes_i <- list(y = list(lab = labels[1],
                               cex = cex.y),
                      x = list(cex = cex.x))
-      for (j in effects_i)
+       
+       
+      for (j in effects_i){
+        # cat("\n J: ")
+        # print(j)
+        # print( axes_i$x )
+        # 
+        # 
+        # 
         axes_i$x[[j]]$lab <- labels[[j]]
-      
+        }
+       
+
       if (length(effects_i) == 2 & multiline_i) {
         key.args$title <- labels[[effects_i[-x.var]]]
       }
+      
+      
        if (!is.null(xlim)) {
          if (is.list(xlim))
            for (j in effects_i)
              axes_i$x[[j]]$lim <- xlim[[j]]
          else {
-           
-           print( xlim)
            for (j in effects_i)
              axes_i$x[[j]]$lim <- xlim 
+           #  warning("xlim: Hier sollte eine Liste mit Namen uebergeben werden. list(sex = c(1 ,2) } ")
            }
-           
-         #  warning("xlim: Hier sollte eine Liste mit Namen uebergeben werden. list(sex = c(1 ,2) } ")
-           
-           
-           #stop ("xlim: hier muss eine Liste mit Namen uebergeben werden. list(x = c(1,2)  ")
-       }
+          
+      }
        if (!is.null(x.ticks)) {
          if (is.list(x.ticks))
            for (j in effects_i) axes_i$x[[j]]$ticks <- x.ticks[[j]]
@@ -433,7 +463,23 @@ plot2.efflist <-
              effects_i[
                which(is_lay)][1L]]]
        }  
-   
+ # 
+#        # 
+#        if(i == 2){
+#          print(i)
+#        #  print(x[[i]])
+# print(axes_i)
+#        }
+      
+      
+      
+       # if(i == 3){
+       # print(i)
+       #   print(axes_i)
+       #   
+       # # print( x[[i]])
+       # }
+ 
       #----------------------------------------------------
       plotlist[[effects[i]]]  <-
         update(
@@ -445,6 +491,25 @@ plot2.efflist <-
             lty = lty2,
             ticks =y.ticks,
             axes = axes_i,
+           
+            
+           axes2 = list(x = list(cex= .8,
+                       Leberversagen=list(lab ="xxxxx"),
+                       'trans(Beatmung)' =list(lab ="Beatmung"),
+                       'Beatmung' =list(lab ="Beatmung")
+                       
+                       )
+                       ),
+           # $x$cex
+           # [1] 0.88
+           # 
+           # $x$Leberversagen
+           # $x$Leberversagen$lab
+           # [1] "Leberversagen"
+          # xlab ="axis title",
+           
+           #xlab= list(lab="hallo", cex= 1.5),
+          # ylab= "hallo",
             multiline = multiline_i,
             key.args = key.args,
             x.var = x.var,
@@ -564,4 +629,18 @@ plot2.efflist <-
 #   rel_widths = c(3, 4),
 #   rel_heights = c(5, 6),
 #   remove = "vs"
+# )
+
+
+# plot_allEffects(
+#   fit,
+#   label = c(
+# 
+#     Leberversagen = "akutes Leberversagen",AKI = "p Stage 2-3",
+#     Kreatinin = "Baseline Kreatinin",
+#   "log1p(Beatmung)" = "dauer invasive Beatmung",
+#     "log1p(Reinterventionen)" = "Reinterventionen",
+#     Geschlecht = "sex",
+#     "log1p(Alter)" = "Alter [Wochen]"
+#   )
 # )
