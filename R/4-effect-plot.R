@@ -68,7 +68,7 @@ plot_allEffects <- function(x,
     )
   else if( is.formula(predictor) )
   plot2(
-    effects::predictorEffects(x, predictor,  xlevels = xlevels),
+    effects::predictorEffects(x, predictor, xlevels = xlevels),
     main = main,
     factor.names = factor.names,
     rel_widths = rel_widths,
@@ -87,10 +87,8 @@ plot_allEffects <- function(x,
     ...
   )
   else return(class(x))
-  
-  
-  
 }
+
 # # lib effects
 # 
 # is.relative <-   function (term1, term2, factors) {
@@ -173,7 +171,7 @@ plot2.default <- function(...) {
 #'  method for class 'eff'  effects::allEffects
 #'
 #' @param x 	an object of class "efflist"
-#' @param main 	the title for the plot, gows to cowplot
+#' @param main	the title for the plot, gows to cowplot
 #' @param factor.names  lattice factor.names = FALSE
 #' @param multiline,x.var  multiline display a multiline plot in each panel
 #'  x.var = 1,  bei interactionen immer was in der Formel an erster stelle steht description
@@ -304,14 +302,9 @@ plot2.efflist <-
             order = NULL,
             ...)
   {
-    
-
-    
-    
     plotlist <- list()
     param <- purrr::map(x, \(xfit) names(xfit$variables))
     x <- x[!duplicated(param)]
-    
     effects_all <- effects <- gsub(":", "*", names(x))
     
     if(!is.null(remove)){
@@ -337,11 +330,10 @@ plot2.efflist <-
       else stop( "Bei order sind nur die Parameter als Numeric-Position erlaubt!")
     }
  
-    
-    
     eff_names <-
       c(x[[1]]$response, unlist(strsplit(effects, "\\*")))
     
+    # xlab und ylab zum Vektor label zusammenbauen
     if (!is.null(labels)) {
       labels <- labels[eff_names]
       unlabl <- which(is.na(labels))
@@ -350,61 +342,55 @@ plot2.efflist <-
     }
     else{
       # ylab und xlab aufdröseln
-      # da ist noch ein hund drinnen!!!!
       labels <- eff_names
+      if (is.list(xlab))
+        xlab <- unlist(xlab)
+      
       names(labels) <- eff_names
       if (!is.null(ylab)) {
         labels[1] <- ylab
       }
+      
       if (!is.null(xlab)) {
-        for (i in seq_along(xlab))
-          if (!is.na(xlab[i]))
-            labels[i + 1] <- xlab[i]
+        xnames <- names(xlab)
+        if (length(xlab) > 1) {
+          if (is.null(xnames))
+            stop("Die xlabs muessen namen haben!")
+          else if (any(xnames == ""))  {
+            print(xlab)
+            stop("Alle xlabs muessen namen haben!")
+          }
+        }
+        for (i in xnames)
+          labels[i] <- xlab[i]
       }
     }
     
-    
-    #print(eff_names)
-   
-    
+    # print(xlab)
+    # print(labels)
     reset_axis <-
       lattice::lattice.getOption("axis.padding")$numeric
     lattice::lattice.options(axis.padding = list(numeric = axis.padding))
     
-    
-#return( grepl("\\(", names(labels) )) 
-    
-
-if( any(grepl("\\(", names(labels)) )){  
- #names(labels) <- gsub(".*\\(","trans(",  names(labels))     
-names(labels) <- gsub(".*\\(","",  names(labels))
-names(labels) <- gsub("\\)","",  names(labels))
-
-}
-    
-    # 
-    # cat("\n Labels:\n")
-    # print(labels)
+    # bei Modellen mit log-transformierten werten müssen die labels bereinigt werden
+    if(any(grepl("\\(", names(labels)))) {
+      names(labels) <- gsub(".*\\(", "", names(labels))
+      names(labels) <- gsub("\\)", "", names(labels))
+    }
     
     for (i in seq_along(effects)) {
-      # was kommt -------------------------------------------
        is_fctr <- unlist(purrr::map(x[[i]]$variables, \(x) x$is.factor))
        effects_i <- unlist(strsplit(effects[i], "\\*"))
       
-       
-       if( grepl("\\(", effects_i)){ # print(effects_i)
-         #effects_i <- gsub(".*\\(","trans(",effects_i)
+       if(any(grepl("\\(", effects_i))){ 
          effects_i <- gsub(".*\\(","",effects_i)
          effects_i <- gsub("\\)","",effects_i)
-        # print(effects_i)
          }
        
-      # lty --------------------------------------------------
-      if (all(is_fctr))
-        lty2 <- lty.factor
-      else
-        lty2 <- lty
-      # Multiline -------------------------------------------
+      # lty
+      if (all(is_fctr)) lty2 <- lty.factor 
+       else lty2 <- lty
+      # Multiline
       if (is.null(multiline)) {
         if (any(is_fctr))
           multiline_i <- FALSE
@@ -414,30 +400,18 @@ names(labels) <- gsub("\\)","",  names(labels))
       else
         multiline_i <- multiline
       
-      # Axes -----------------------------------------------
-     
+      # Axes: make a list for the axix
       axes_i <- list(y = list(lab = labels[1],
                               cex = cex.y),
                      x = list(cex = cex.x))
        
-       
-      for (j in effects_i){
-        # cat("\n J: ")
-        # print(j)
-        # print( axes_i$x )
-        # 
-        # 
-        # 
+      for (j in effects_i)
         axes_i$x[[j]]$lab <- labels[[j]]
-        }
-       
-
-      if (length(effects_i) == 2 & multiline_i) {
+        
+      if (length(effects_i) == 2 & multiline_i) 
         key.args$title <- labels[[effects_i[-x.var]]]
-      }
       
-      
-       if (!is.null(xlim)) {
+      if (!is.null(xlim)) {
          if (is.list(xlim))
            for (j in effects_i)
              axes_i$x[[j]]$lim <- xlim[[j]]
@@ -453,9 +427,9 @@ names(labels) <- gsub("\\)","",  names(labels))
            for (j in effects_i) axes_i$x[[j]]$ticks <- x.ticks[[j]]
          else stop ("xticks: hier muss eine Liste mit Namen uebergeben werden. list(x = c(1,2)  ")
        }
-         # layout --------------------------------------------
-
-       layout.i <- NULL
+      
+      # layout
+      layout.i <- NULL
        if (!is.null(layout)) {
          is_lay <- effects_i %in% names(layout)
          if (!multiline_i & any(is_lay))
@@ -463,24 +437,8 @@ names(labels) <- gsub("\\)","",  names(labels))
              effects_i[
                which(is_lay)][1L]]]
        }  
- # 
-#        # 
-#        if(i == 2){
-#          print(i)
-#        #  print(x[[i]])
-# print(axes_i)
-#        }
       
-      
-      
-       # if(i == 3){
-       # print(i)
-       #   print(axes_i)
-       #   
-       # # print( x[[i]])
-       # }
- 
-      #----------------------------------------------------
+      # plot der einzelnen Effekte und uebergabe an eine liste
       plotlist[[effects[i]]]  <-
         update(
           effects:::plot.eff(
@@ -491,36 +449,15 @@ names(labels) <- gsub("\\)","",  names(labels))
             lty = lty2,
             ticks =y.ticks,
             axes = axes_i,
-           
-            
-           axes2 = list(x = list(cex= .8,
-                       Leberversagen=list(lab ="xxxxx"),
-                       'trans(Beatmung)' =list(lab ="Beatmung"),
-                       'Beatmung' =list(lab ="Beatmung")
-                       
-                       )
-                       ),
-           # $x$cex
-           # [1] 0.88
-           # 
-           # $x$Leberversagen
-           # $x$Leberversagen$lab
-           # [1] "Leberversagen"
-          # xlab ="axis title",
-           
-           #xlab= list(lab="hallo", cex= 1.5),
-          # ylab= "hallo",
             multiline = multiline_i,
             key.args = key.args,
             x.var = x.var,
             layout =  layout.i,
-          
             ...
           ),
           par.settings = par.settings,
           par.strip.text = par.strip.text
         )
-      
     }
     
     lattice::lattice.options(
@@ -560,87 +497,4 @@ names(labels) <- gsub("\\)","",  names(labels))
 #'
 #' }
 
-
-
-# 
-# 
-# #require(ggplot2)
-# require(stp25tools)
-# #require(stp25stat2)
-# #require(stp25plot)
-# 
-# 
-# mtcars2 <- mtcars |> dplyr::mutate(
-#   vs   = factor(vs, labels = c("V-shaped", "straight")),
-#   am   = factor(am, labels = c("automatic", "manual")),
-#   cyl  = ordered(cyl),
-#   gear = ordered(gear),
-#   carb = ordered(carb)
-# )  |> Label(
-#   mpg	 = "Miles/(US) gallon",
-#   cyl	 = "Number of cylinders",
-#   disp = "Displacement (cu.in.)",
-#   hp	 = "Gross horsepower",
-#   drat = "Rear axle ratio",
-#   wt   = "Weight (1000 lbs)",
-#   qsec = "1/4 mile time",
-#   vs   = "Engine",
-#   am   = "Transmission",
-#   gear = "Number of forward gears",
-#   carb = "Number of carburetors"
-# )
-# 
-# fit <- lm(mpg ~ hp * wt + vs +  am * cyl  , data = mtcars2)
-# 
-# # lattice::trellis.par.set(effectsTheme())
-# #lattice::trellis.par.set(bw_theme(farbe(n=5), lwd =1,  cex.xlab = 2))
-# plot_allEffects(
-#   fit,
-#   # labels = get_label(mtcars2),
-#   labels = c(wt = "HHHHHHHH", vs = "VVVVVVVVV", mpg = "Out"),
-#   cex.x = 1.5,
-#   cex.y = .5,
-#   main = letters[1:3],
-#   #as.roman(1:3),
-#   # cex= 1,
-#   space = "right",
-#   columns = 1,
-#   rel_widths = c(3, 4),
-#   rel_heights = c(5, 6)
-# )
-# plot_allEffects(
-#   fit,
-#   ylim = c(0, 30),
-#   ticks =c(5,10,30),
-#   x.ticks = list(hp = list(at = c(50, 200, 300) )
-#                
-#                 ),
-#   xlevels=list(  wt =c(1,2,3,4,5)),
-#   xlim = list(hp = c(0, 300))
-# )
-
-# plot_allEffects(
-#   fit,
-#   labels = get_label(mtcars2),
-#   main = letters[1:3],  #as.roman(1:3),
-#   # cex= 1,
-#   space = "right",
-#   columns = 1,
-#   rel_widths = c(3, 4),
-#   rel_heights = c(5, 6),
-#   remove = "vs"
-# )
-
-
-# plot_allEffects(
-#   fit,
-#   label = c(
-# 
-#     Leberversagen = "akutes Leberversagen",AKI = "p Stage 2-3",
-#     Kreatinin = "Baseline Kreatinin",
-#   "log1p(Beatmung)" = "dauer invasive Beatmung",
-#     "log1p(Reinterventionen)" = "Reinterventionen",
-#     Geschlecht = "sex",
-#     "log1p(Alter)" = "Alter [Wochen]"
-#   )
-# )
+ 
