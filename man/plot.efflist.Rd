@@ -45,11 +45,11 @@ plot2(...)
   rel_heights = 1,
   ylab = NULL,
   xlab = NULL,
+  labels = NULL,
   xlim = NULL,
   ticks = NULL,
   y.ticks = if (is.list(ticks)) ticks else list(at = ticks),
   x.ticks = NULL,
-  labels = NULL,
   cex = 1.1,
   cex.x = cex * 0.8,
   cex.y = cex * 0.8,
@@ -98,7 +98,7 @@ plot2(...)
 
 \item{rel_widths, rel_heights}{an cowplot::plot_grid}
 
-\item{ylab, xlab, labels}{x und y Beschriftung labels ist ein Vector mit Namen}
+\item{labels, ylab, xlab}{Warnung labels funktionieren am besten!! x und y Beschriftung labels ist ein Vector mit Namen}
 
 \item{cex, cex.x, cex.y}{größe der Schrift}
 
