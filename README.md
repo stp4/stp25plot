@@ -20,20 +20,12 @@ status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project
 
 ### Likertplot
 
+Die Link-Plots habe ich in ein separates Paket ausgelagert. Dort sind
+auch die Funktionen zur Erstellung der Tabellen enthalten.
+
 ``` r
 library(stp25likert)
 ```
-
-    ## Registered S3 method overwritten by 'stp25likert':
-    ##   method       from      
-    ##   print.likert stp25stat2
-
-    ## 
-    ## Attaching package: 'stp25likert'
-
-    ## The following objects are masked from 'package:stp25stat2':
-    ## 
-    ##     Likert, Tbll_likert
 
 ``` r
 #Res1 <- Tbll_likert( ~ ., DF2[, -5])
@@ -770,35 +762,28 @@ The cowplot package is a simple add-on to ggplot.
 
 ``` r
 library(ggplot2)
-
 library(grid)
 library(gridExtra)
 library(cowplot)
 
-
 theme_set(theme_half_open())
-set.seed(0815)                               # Create example data
-
+set.seed(0815)
+# Create example data
 data <-
   data.frame(x = 1:21,
-             # Create example data
              y = rnorm(21),
              group = rep(letters[1:3], 7))
-
+# Create ggplot2 plot
 p1 <-
-  ggplot(data, aes(x, y, color = group)) +    # Create ggplot2 plot
+  ggplot(data, aes(x, y, color = group)) +    
   geom_point(size = 5) +
   geom_line() # Draw default ggplot2 plot
 
-
 p2 <- ggplot(data, aes(x, group , color = group)) + geom_boxplot()
-
-
 
 title <-
   ggdraw() +
   draw_label("Arrange Plots", fontface = 'bold')
-
 
 p1 <- p1 +
   guides(colour = guide_legend(
@@ -811,7 +796,6 @@ p1 <- p1 +
       )
   )) +
   theme(legend.position  = c(.2, .5))
-
 
 legend <- get_legend(p1)
 ```
@@ -832,14 +816,10 @@ p2 <-
             ncol = 1,
             rel_heights = c(1, .5))
 
-
 plot_grid(
-  title,
-  NULL,
-  p1,
-  p2,
+  title, NULL,
+  p1,      p2,
   nrow = 2,
-  
   rel_widths =  c(1, .6),
   rel_heights = c(0.2, 1)
 )
@@ -908,7 +888,6 @@ display distributions of a quantitative variable
 *gf_bar()* for more general bar-graph style graphics
 
 ``` r
-#require(ggplot2)
 require(ggformula)
 ```
 
@@ -925,8 +904,7 @@ require(ggformula)
 
 ``` r
 #require(lattice)
- 
-
+#require(ggplot2) 
 theme_set(theme_bw())
 
 mtcars2 <- within(mtcars, {
@@ -935,6 +913,7 @@ mtcars2 <- within(mtcars, {
   cyl  <- factor(cyl)
   gear <- factor(gear)
 })
+
 #' ggplot
 p1 <- 
   ggplot(mtcars2) +
@@ -948,6 +927,7 @@ p1 <-
     y = "Fuel economy (mpg)",
     colour = "Gears"
   )
+
 #' ggformula
 p2 <-  
   gf_point(mpg ~ wt , data = mtcars2, color = ~ gear) +
@@ -955,11 +935,12 @@ p2 <-
     title = "Fuel economy declines as weight increases",
     subtitle = "(1973-74)",
     caption = "Data from the 1974 Motor Trend US magazine.",
-    tag = "gf_point",
+    tag = "ggformula::gf_point",
     x = "Weight (1000 lbs)",
     y = "Fuel economy (mpg)",
     colour = "Gears"
   )
+
 #' lattice 
 p3 <- 
   xyplot(
@@ -985,13 +966,19 @@ cowplot::plot_grid(p1, p2, p3, ncol=2)
 
 ### Meine Version vs plot.efflist
 
+Die Effectplots habe ich aus dem Package ‘effects’ übernommen, jedoch
+die Übergabe der Attribute angepasst, um die Formatierung zu
+vereinfachen.
+
 ``` r
+# Klassiker
 plot( effects::allEffects(fit2) )
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
+# neue Version
 plot2( effects::allEffects(fit2) )
 ```
 
@@ -1014,17 +1001,52 @@ p1 <- plot2(e2,
 ```
 
 ``` r
-p2<-plot2(e2,
-  labels = stp25tools::get_label(mtcars2),
-  plot=FALSE)
+p2 <- plot2(e2, 
+            labels = stp25tools::get_label(mtcars2), 
+            plot = FALSE)
 
-cowplot::plot_grid(plotlist =p2, 
-                   labels = c('A', 'B', 'C'),
-                  # scale = c(1, .9, .8),
-                   rel_heights = c(3,4))
+cowplot::plot_grid(
+  plotlist = p2,
+  labels = c('A', 'B', 'C'),
+  # scale = c(1, .9, .8),
+  rel_heights = c(3, 4)
+)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+top_row <- cowplot::plot_grid(p2[[1]], p2[[2]], labels = c('B', 'C'), label_size = 12)
+cowplot::plot_grid(top_row, p2[[3]], labels = c('', 'A'), label_size = 12, ncol = 1)
+```
+
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+library(multipanelfigure)
+
+figure1 <- multi_panel_figure(columns = 4, rows = 2, panel_label_type = "none")
+# show the layout
+figure1
+```
+
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+``` r
+figure1 %<>%
+  fill_panel(p2[[1]], column = 1:2, row = 1) %<>%
+  fill_panel(p2[[2]], column = 3:4, row = 1) %<>%
+  fill_panel(p2[[3]], column = 1:3, row = 2)  
+```
+
+    ## Warning in grabDL(warn, wrap, wrap.grobs, ...): one or more grobs overwritten
+    ## (grab WILL not be faithful; try 'wrap.grobs = TRUE')
+
+``` r
+figure1
+```
+
+![](README_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
 
 Konfidenz-Band mit *geom_ribbon()*
 
@@ -1308,7 +1330,7 @@ p1 + p2 + p3 + p4 + plot(mydf) +
     plot_layout(ncol=2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
 
 ``` r
 require(ggeffects)
@@ -1370,7 +1392,7 @@ p1 <-plot(mydf)
 p1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 
 ``` r
 p1 +
@@ -1378,7 +1400,7 @@ p1 +
   theme(legend.position = "none")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
 
 ``` r
 #plot(allEffects(mod))
@@ -1389,7 +1411,7 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
   facet_wrap(~group)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-28-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-30-3.png)<!-- -->
 
     theme_set(theme_ggeffects())
     p1<-ggpredict(fit, "am") |>
@@ -1466,7 +1488,7 @@ emmip(pigs.lm1,
       source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 ``` r
 plot(emmeans(pigs.lm2,  
@@ -1476,7 +1498,7 @@ plot(emmeans(pigs.lm2,
      )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
 
 ``` r
 emmip(
@@ -1484,7 +1506,7 @@ emmip(
   source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, 
@@ -1495,7 +1517,7 @@ emmip(ref_grid(pigs.lm2,
       )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ### Klassiker mit Effect()
 
@@ -1917,7 +1939,7 @@ legend(
 Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ## ECDF-Plot
 
@@ -1991,7 +2013,7 @@ xyplot(
 ```
 
 <figure>
-<img src="README_files/figure-gfm/unnamed-chunk-36-1.png"
+<img src="README_files/figure-gfm/unnamed-chunk-38-1.png"
 alt="Lattice xyplot mit Pfeilen und verlaufende Farben." />
 <figcaption aria-hidden="true">Lattice xyplot mit Pfeilen und
 verlaufende Farben.</figcaption>
@@ -2040,7 +2062,7 @@ segplot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
 
 ### Spine Plots and Spinograms
 
@@ -2056,7 +2078,7 @@ ttnc <- margin.table(Titanic, c(1, 4))
 spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
 
 ``` r
 # require(latticeExtra)
