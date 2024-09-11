@@ -977,7 +977,18 @@ x
 
 ```
 
-## cowplot
+
+## Combine Multiple Plots
+
+
+### patchwork
+https://patchwork.data-imaginist.com/articles/guides/layout.html
+
+
+### cowplot
+
+
+
 
 gridExtra::grid.arrange( )
 

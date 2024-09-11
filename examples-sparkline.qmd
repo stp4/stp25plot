@@ -1,0 +1,79 @@
+---
+title: "sparkline"
+format: html
+---
+
+
+
+Die Sparklines können nur im HTML-Format ausgegeben werden, die Tabellen hingegen können auch als Bild (pdf, png, jpg) ausgegeben und gespeichert und so in das Dokument eingebunden werden.
+
+
+
+
+```{r}
+library(htmlwidgets)
+library(sparkline)
+set.seed(1234)
+x = rnorm(10)
+y = rnorm(10)
+```
+
+Inline line graphs `r sparkline(x)` Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+
+Bar charts `r sparkline(abs(x), type = 'bar')` negative values: `r sparkline(x, type = 'bar')` Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+
+
+Hier eine händische Tabelle mit markdown.
+
+| Stock | Sparkline        | Boxplot                       |
+|-------|------------------|-------------------------------|
+| x     | `r sparkline(x)` | `r sparkline(x, type ='box')` |
+| y     | `r sparkline(y)` | `r sparkline(y, type ='box')` |
+
+
+
+
+```{r}
+#' https://gt.rstudio.com/reference/cols_nanoplot.html
+require(gt)
+
+# illness |>
+# dplyr::slice_head(n = 10)
+
+tab <-
+illness |>
+  dplyr::slice_head(n = 10) |>
+  gt(rowname_col = "test") |>
+  tab_header("Partial summary of daily tests performed on YF patient") |>
+  tab_stubhead(label = md("**Test**")) |>
+  cols_hide(columns = starts_with("norm")) |>
+  fmt_units(columns = units) |>
+  cols_nanoplot(
+    columns = starts_with("day"),
+    new_col_name = "nanoplots",
+    new_col_label = md("*Progression*")
+  ) |>
+  cols_align(align = "center", columns = nanoplots) |>
+  cols_merge(columns = c(test, units), pattern = "{1} ({2})") |>
+  tab_footnote(
+    footnote = "Measurements from Day 3 through to Day 8.",
+    locations = cells_column_labels(columns = nanoplots)
+  )
+
+```
+
+```{r}
+tab
+```
+
+Und hier als Bild eingebunden.
+
+```{r}
+# install.packages("webshot2")
+tab |>
+  gtsave('fancy-tabel.PNG')
+# either an HTML, PDF, PNG, LaTeX, or RTF file
+```
+
+![](fancy-tabel.PNG)
+
