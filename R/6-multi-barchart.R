@@ -1,4 +1,7 @@
 #' multi_barplot
+#' 
+#' Adaption von `lattice::barchart()` und Feineinstellung können 
+#' mit `lattice::update.trellis` erstellt werden.
 #'
 #' @param ... an Summarise
 #' @param reorder,last  an reorder2
@@ -73,9 +76,6 @@ multi_barplot<-
                            dat_sum,
                            origin = origin,
                            xlab = xlab,
-                    
-                          # xlim,
-                          # ylim,
                            main = main)
     } else     if(!is.null(xlim) & is.null(ylim)){
       p <- lattice::barchart(formula(fm),
