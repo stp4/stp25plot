@@ -32,7 +32,8 @@ multi_barplot(
 lattice plot
 }
 \description{
-multi_barplot
+Adaption von `lattice::barchart()` und Feineinstellung können 
+mit `lattice::update.trellis` erstellt werden.
 }
 \examples{
 
