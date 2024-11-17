@@ -1,9 +1,9 @@
 #' Workaround for effects::plot.eff
 #'
-#' @name plot.efflist
+#' @name plot_effect
 #' @param ... alles an plot
 #' @param xlevels effects::effect the number of levels for any focal numeric predicto  xlevels=list(x1=c(2, 4.5, 7), x2=4)
-#' @param predictor   ~ ., a predictor
+#' @param predictor  formula.  ~ ., a predictor effects::predictorEffects
 #' @return standard plot
 #' @export
 plot_allEffects <- function(x,
@@ -89,6 +89,49 @@ plot_allEffects <- function(x,
   else return(class(x))
 }
 
+
+
+#' @rdname plot_effect
+#' @export
+plot_effect <-
+  function(x,
+           formula = NULL,
+           ...
+  ) {
+    rslt<- list()
+    term <- list()
+    if (is.null(formula)) {
+      rslt <- effects::allEffects(x)
+    }
+    else {
+      if (inherits(formula, "formula")) {
+        trm <- gsub(" ", "", strsplit(as.character(formula), "\\+")[[2L]])
+        for (i in trm) {
+          term[i] <- strsplit(i, "\\*")
+        }
+      } else if (!is.character(formula)) {
+        stop("Nur Formulas oder Character sind erlaubt!")
+      }
+      if (length(term) == 1) {
+        
+        rslt <- list( 
+          term =
+            effects::effect(term = term[[1]],  mod = x)
+        )
+        
+      } else{
+        rslt <- list()
+        for (i in seq_along(term)) {
+          rslt[[names(term)[i]]] <-
+            effects::effect(term = term[[i]], mod = x)
+        }
+        rslt
+      }
+    }
+    
+    plot2.efflist(rslt, ...)
+  }
+
 # # lib effects
 # 
 # is.relative <-   function (term1, term2, factors) {
@@ -151,7 +194,7 @@ plot_allEffects <- function(x,
 #   result
 # }
 
-#' @rdname plot.efflist
+#' @rdname plot_effect
 #' @export
 plot2 <- function(...) {
   UseMethod("plot2")
@@ -159,13 +202,13 @@ plot2 <- function(...) {
 
 
 #' @export
-#' @rdname plot.efflist
+#' @rdname plot_effect
 plot2.default <- function(...) {
   plot(...)
 }
 
 
-#' @rdname plot.efflist
+#' @rdname plot_effect
 #'
 #' @description
 #'  method for class 'eff'  effects::allEffects
@@ -191,7 +234,6 @@ plot2.default <- function(...) {
 #' @param  select,order Auswahl der Predictor
 #' 
 #' @return list oder plot
-#' @export
 #'
 #' @examples
 #'
