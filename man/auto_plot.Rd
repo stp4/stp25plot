@@ -46,6 +46,8 @@ marginal_plot(
   plot.points = FALSE,
   ref = TRUE,
   cut = 0,
+  cut.groups = 3,
+  labels.groups = NULL,
   origin = 0,
   xlab = NULL,
   ylab = NULL,

@@ -108,7 +108,7 @@ auto_plot.default <- function(...,
                       col.bar = "gray50",
                       
                       par.settings =  bw_theme(col=col, col.bar =col.bar),
-                      
+                    #  stack = FALSE,
                       include.n = TRUE,
                       par.strip.text = NULL,
                       wrap.main=NULL,
@@ -119,7 +119,7 @@ auto_plot.default <- function(...,
                       levels.logical = c(TRUE, FALSE),
                       labels.logical = levels.logical,
                       
-                      include.percent =FALSE,
+                      include.percent = FALSE,
                       # multi_barplot
                       include.reorder = FALSE,
                       include.reorder.last = NULL,
@@ -150,6 +150,7 @@ auto_plot.default <- function(...,
   
   if (length(xlab) == 1)
     xlab <- rep(xlab, length(X$measure.vars))
+  
   if (length(ylab) == 1)
     ylab <- rep(ylab, length(X$measure.vars))
   
@@ -157,9 +158,7 @@ auto_plot.default <- function(...,
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
       (length(X$measure.vars) > length(X$group.vars))) {
-    
-    
-     
+    #  cat("\nmulti_av_plot\n")
     res <- multi_av_plot(
       X$data,
       X$measure.vars,
@@ -183,15 +182,14 @@ auto_plot.default <- function(...,
       par.strip.text,
       include.percent,
       levels.logical,
-      labels.logical
+      labels.logical#,
+     # stack = stack
     )
   }
   else{
-    
+    #  cat("\nmulti_uv_plot\n")
     if (is.null(xlab))
       xlab <-  rep(X$col_name[1], length(X$measure.vars))
-    
- 
     res <- multi_uv_plot(
       X$data,
       X$group.vars,
@@ -251,7 +249,6 @@ multi_av_plot <- function(data,
                           type,
                           default.scales,
                           lattice.options,
-                          
                           par.settings,
                           include.n, cex.main,layout,
                           par.strip.text,
@@ -261,11 +258,15 @@ multi_av_plot <- function(data,
                           ...) {
   z <-  group.vars[1]
   res <- list()
+  stack <- FALSE
+  
   for (i in seq.int(length(measure.vars))) {
     y <- measure.vars[i]
+   
+ 
     if (is.null(z)) {
       
-      if (measure[i] == "numeric" | measure[i] == "hist" ) {
+      if (measure[i] %in% c("numeric", "hist") ) {
         res[[i]] <-
           lattice::histogram(
             formula(paste("~", y)),
@@ -279,23 +280,24 @@ multi_av_plot <- function(data,
             ylab = ylab[i]
           )
       }
-      else if (measure[i] == "factor" | measure[i] == "bar" | measure[i] == "logical") {
+      else if (measure[i] %in% c("factor", "bar", "logical")) {
         
-        if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
+        if( measure[i] == "logical" ) {
+          data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
+          stack <- TRUE # not used  !
+          }
+        
         tab <-  xtabs(formula(paste("~", y)), data)
         
         if (include.percent) {
-          tab <- as.data.frame(prop.table(tab,2)*100)
-          if(is.null(ylab)) ylab<- "percent"
-          
+          tab <- as.data.frame(prop.table(tab)*100)
           }
         else tab <- as.data.frame(tab)
-        
+       
         res[[i]] <-
           lattice::barchart(
             formula(paste("Freq~", y)),
             data = tab,
-            
             main = list(label=row_name[i], cex=cex.main),
             stack = FALSE,
             origin = origin,
@@ -309,7 +311,7 @@ multi_av_plot <- function(data,
             ylab = ylab[i]
           )
       }
-      else if ( measure[i] =="box"){
+      else if ( measure[i] == "box"){
         res[[i]] <-    
           lattice::bwplot(
             formula(paste("~", y)),
@@ -323,7 +325,7 @@ multi_av_plot <- function(data,
             ylab = ylab[i]
           )
       }
-      else if ( measure[i] =="pie"){
+      else if ( measure[i] == "pie"){
         tab <- as.data.frame(xtabs(formula(paste("~", y)), data))
         
         res[[i]] <-
@@ -340,16 +342,18 @@ multi_av_plot <- function(data,
             ylab = ylab[i]
           )
       }
-      else if ( measure[i] =="dot"){
+      else if ( measure[i] == "dot"){
         tab <- as.data.frame(xtabs(formula(paste("~", y)), data))
         
+        
+        if(stack)  stop( "Die Funktion stack habe ich hier noch nicht fertig!!!!")
         res[[i]] <-
           lattice::dotplot(
             formula(paste("Freq~", y)),
             data = tab,
             
             main = list(label=row_name[i], cex=cex.main),
-            stack = FALSE,
+            stack = stack,
             origin = origin,
             horizontal = FALSE,
             par.settings = par.settings,
@@ -364,7 +368,7 @@ multi_av_plot <- function(data,
     else{
       if (group.class[1] == "factor") {
         
-        if (measure[i] == "numeric" | measure[i] == "box") {
+        if (measure[i] %in% c("numeric", "box")) {
           
           res[[i]] <-
             lattice::bwplot(
@@ -390,34 +394,60 @@ multi_av_plot <- function(data,
               par.settings = par.settings
             )
         }
-        else if ( measure[i]=="factor"  | measure[i] == "bar" | measure[i] == "logical" ) {
-          if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
-          tab <- xtabs(formula(paste("~", y, "+", z)), data)
-          if (include.percent) {
-            tab <- as.data.frame(prop.table(tab,2)*100)
-            if(is.null(ylab)) ylab <- "percent"
+        else if ( measure[i] %in% c("factor", "bar","logical")) {
+          if( measure[i] == "logical" ){ 
+            data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
+            stack <- TRUE
           }
-          else tab <- as.data.frame(tab)
           
-        #  print(tab)
-          res[[i]] <-
-            lattice::barchart(
-              formula(paste("Freq~", y, "|", z)),
-              data = tab,
-              
-              main = list(label=row_name[i], cex=cex.main),
-              stack = FALSE,
-              origin = origin,
-              horizontal = FALSE,
-              par.settings = par.settings,
-              default.scales = default.scales,
-              lattice.options = lattice.options,
-              layout=layout,   par.strip.text=par.strip.text,
-              xlab = xlab[i],
-              ylab = ylab[i]
-            )
+          tab <- xtabs(formula(paste("~", y, "+", z)), data)
+          
+          if (include.percent)
+            tab <- as.data.frame(prop.table(tab, 2) * 100)
+          else
+            tab <- as.data.frame(tab)
+         # Logical
+          if (stack) {
+            names(tab)[1] <- "my_group"
+            res[[i]] <-
+              lattice::barchart(
+                formula(paste("Freq ~ ", z)),
+                data = tab,
+                groups = my_group,
+                col = c("gray40", "gray90"),
+                main = list(label = row_name[i], cex = cex.main),
+                stack = stack,
+                origin = origin,
+                horizontal = FALSE,
+                par.settings = par.settings,
+                default.scales = default.scales,
+                lattice.options = lattice.options,
+                layout = layout,
+                par.strip.text = par.strip.text,
+                xlab = xlab[i],
+                ylab = ylab[i]
+              )
+          }
+          else {
+            res[[i]] <-
+              lattice::barchart(
+                formula(paste("Freq~", y, "|", z)),
+                data = tab,
+                main = list(label = row_name[i], cex = cex.main),
+                stack = FALSE,
+                origin = origin,
+                horizontal = FALSE,
+                par.settings = par.settings,
+                default.scales = default.scales,
+                lattice.options = lattice.options,
+                layout = layout,
+                par.strip.text = par.strip.text,
+                xlab = xlab[i],
+                ylab = ylab[i]
+              )
+          }
         }
-        else if ( measure[i] =="pie"){
+        else if ( measure[i] == "pie"){
           tab <-
             as.data.frame(xtabs(formula(paste(
               "~", y, "+", z
@@ -436,7 +466,7 @@ multi_av_plot <- function(data,
               ylab = ylab[i]
             )
         }
-        else if ( measure[i] =="dot"){
+        else if ( measure[i] == "dot"){
           
           res[[i]] <-
             lattice::stripplot(
@@ -455,7 +485,7 @@ multi_av_plot <- function(data,
             )
           
         }
-        else if ( measure[i] =="dens" ){
+        else if ( measure[i] == "dens" ){
           # noch nicht implementiert
           res[[i]] <-  densityplot(
             formula(paste("~", y)),
@@ -483,13 +513,12 @@ multi_av_plot <- function(data,
         else {}
       }
       else{
-        if (measure[i] == "numeric" | measure[i] =="dot") {
+        if (measure[i] %in% c("numeric", "dot")) {
         res[[i]] <-
             lattice::xyplot(
               formula(paste(y, "~", z)),
               data,
               type = type,
-              
               main = list(label=row_name[i], cex=cex.main),
               par.settings = par.settings,
               default.scales = default.scales,
@@ -537,7 +566,7 @@ multi_av_plot <- function(data,
               data = tab,
               
               main = list(label=row_name[i], cex=cex.main),
-              stack = FALSE,
+              stack = stack,
               origin = origin,
               horizontal = FALSE,
               par.settings = par.settings,
@@ -614,17 +643,14 @@ multi_uv_plot <- function(data,
           )
         
       }
-      else if (measure[i] == "factor" | measure[i] == "bar"| measure[i] == "logical") {
+      else if (measure[i] %in% c("factor", "bar", "logical")) {
         
-        if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
-        
+        if( measure[i] == "logical" ) 
+          data[[y]] <- factor(data[[y]], levels.logical, labels.logical)
+        # hier fehlt noch logical wie oben
         tab <-
-          as.data.frame(xtabs(formula(paste(
-            "~", z, "+", y
-          )), data))
+          as.data.frame(xtabs(formula(paste("~", z, "+", y)), data))
         
-        
-         
           if (include.percent) tab <- as.data.frame(prop.table(tab,2)*100)
           else tab <- as.data.frame(tab)
         
@@ -661,8 +687,9 @@ multi_uv_plot <- function(data,
             ylab = ylab
           )
       }
-      else if (measure[i] == "factor"| measure[i] == "bar"| measure[i] == "logical") {
-        if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
+      else if (measure[i] %in% c("factor", "bar", "logical")) {
+      
+          if( measure[i] == "logical" ) data[[y]] <- factor(data[[y]], levels.logical, labels.logical )
         
         res[[i]] <-
           lattice::bwplot(
@@ -703,6 +730,8 @@ marginal_plot <- function(...,
                            ref = TRUE, 
                            cut = 0,
                            
+                           cut.groups = 3,
+                           labels.groups = NULL,
                            origin = 0,
                            xlab = NULL,
                            ylab = NULL,
@@ -717,7 +746,7 @@ marginal_plot <- function(...,
                              minlength = 5,
                              rot = 0,
                              cex = 0.75,
-                             tick.number = 3#,
+                            tick.number = 3
                              # y = list(draw = FALSE)
                            ),
                            layout = NULL,
@@ -730,7 +759,7 @@ marginal_plot <- function(...,
   if (!is.null(X$group.vars)) {
     groups = X$data[[X$group.vars]]
     if (!is.factor(groups))
-      groups <- cut(groups, 3)
+      groups <- cut(groups, breaks = cut.groups, labels = labels.groups)
     
     if (is.null(type))
       type <- "p"
@@ -765,3 +794,23 @@ marginal_plot <- function(...,
   )
   
 }
+
+# enviro |>
+#   marginal_plot(
+#     ozone,
+#     radiation,
+#     is.windy,
+#     wind,
+#     smell,
+#     by =  ~ temperature,
+#     auto.key = list(lines = TRUE, title = "Temp")
+#   )
+
+# auto_plot(Patient2,     tmsTCPC,
+#           hmdyn,
+#           prtnl,
+#           clltr,
+#           by = ~ risk.score,
+#           include.percent=TRUE
+# 
+# )
