@@ -1,10 +1,68 @@
 #' Workaround for effects::plot.eff
 #'
 #' @name plot_effect
-#' @param ... alles an plot
+#' @param formula	 a formula  ~ a + b + c*d
+#' @param partial.residuals  addition of partial residuals to the plot.
+#' @param ... alles an plot2.efflist
+#' @return a lattice effect plot   cowplot or a list of plots
+#' @export
+plot_effect <-
+  function(x,
+           formula = NULL,
+           partial.residuals = FALSE,
+           predictor =NULL,
+           ...
+  ) {
+    rslt<- list()
+    term <- list()
+    
+    if (!is.null(predictor))
+      return(plot_allEffects(x, 
+                             predictor, 
+                             ..., 
+                             partial.residuals = partial.residuals))
+    
+    if (is.null(formula)) {
+      rslt <- effects::allEffects(x,
+                                  partial.residuals = partial.residuals)
+    }
+    else {
+      if (inherits(formula, "formula")) {
+        trm <- gsub(" ", "", strsplit(as.character(formula), "\\+")[[2L]])
+        for (i in trm) {
+          term[i] <- strsplit(i, "\\*")
+        }
+      } else if (!is.character(formula)) {
+        stop("Nur Formulas oder Character sind erlaubt!")
+      }
+      if (length(term) == 1) {
+        
+        rslt <- list( 
+          term =
+            effects::effect(term = term[[1]],  
+                            mod = x,
+                            partial.residuals = partial.residuals)
+        )
+        
+      } else{
+        rslt <- list()
+        for (i in seq_along(term)) {
+          rslt[[names(term)[i]]] <-
+            effects::effect(term = term[[i]], 
+                            mod = x,
+                            partial.residuals = partial.residuals)
+        }
+        rslt
+      }
+    }
+    
+    plot2.efflist(rslt, ...)
+  }
+
+#' @rdname plot_effect
+#' 
 #' @param xlevels effects::effect the number of levels for any focal numeric predicto  xlevels=list(x1=c(2, 4.5, 7), x2=4)
 #' @param predictor  formula.  ~ ., a predictor effects::predictorEffects
-#' @return standard plot
 #' @export
 plot_allEffects <- function(x,
                             predictor = NULL,
@@ -91,46 +149,7 @@ plot_allEffects <- function(x,
 
 
 
-#' @rdname plot_effect
-#' @export
-plot_effect <-
-  function(x,
-           formula = NULL,
-           ...
-  ) {
-    rslt<- list()
-    term <- list()
-    if (is.null(formula)) {
-      rslt <- effects::allEffects(x)
-    }
-    else {
-      if (inherits(formula, "formula")) {
-        trm <- gsub(" ", "", strsplit(as.character(formula), "\\+")[[2L]])
-        for (i in trm) {
-          term[i] <- strsplit(i, "\\*")
-        }
-      } else if (!is.character(formula)) {
-        stop("Nur Formulas oder Character sind erlaubt!")
-      }
-      if (length(term) == 1) {
-        
-        rslt <- list( 
-          term =
-            effects::effect(term = term[[1]],  mod = x)
-        )
-        
-      } else{
-        rslt <- list()
-        for (i in seq_along(term)) {
-          rslt[[names(term)[i]]] <-
-            effects::effect(term = term[[i]], mod = x)
-        }
-        rslt
-      }
-    }
-    
-    plot2.efflist(rslt, ...)
-  }
+
 
 # # lib effects
 # 
@@ -195,13 +214,12 @@ plot_effect <-
 # }
 
 #' @rdname plot_effect
-#' @export
 plot2 <- function(...) {
   UseMethod("plot2")
 }
 
 
-#' @export
+
 #' @rdname plot_effect
 plot2.default <- function(...) {
   plot(...)
@@ -213,7 +231,7 @@ plot2.default <- function(...) {
 #' @description
 #'  method for class 'eff'  effects::allEffects
 #'
-#' @param x 	an object of class "efflist"
+#' @param x a model or	an object of class "efflist"
 #' @param main	the title for the plot, gows to cowplot
 #' @param factor.names  lattice factor.names = FALSE
 #' @param multiline,x.var  multiline display a multiline plot in each panel
@@ -233,42 +251,44 @@ plot2.default <- function(...) {
 #' @param par.settings siehe https://stackoverflow.com/questions/13026196/how-to-nicely-rescale-lattice-figures
 #' @param  select,order Auswahl der Predictor
 #' 
-#' @return list oder plot
 #'
 #' @examples
-#'
-#' # require(stp25plot)
-#' # require(stp25tools)
-#' # require(stp25stat2)
-#'
-#'
+#' 
+#' #' require(stp25plot)
+#' require(stp25tools)
+#' require(stp25stat2)
+#' require(emmeans)
+#' require(flexplot)
+#' require(flextable)
+#' 
 #' mtcars2 <- mtcars |>
-#' dplyr::mutate(
-#'   vs   = factor(vs, labels = c("V-shaped", "straight")),
-#'   am   = factor(am, labels = c("automatic", "manual")),
-#'   cyl  = ordered(cyl),
-#'   gear = ordered(gear),
-#'   carb = ordered(carb)
-#' ) |> Label(
-#'   mpg	 = "Miles/(US) gallon",
-#'   cyl	 = "Number of cylinders",
-#'   disp = "Displacement (cu.in.)",
-#'   hp	 = "Gross horsepower",
-#'   drat = "Rear axle ratio",
-#'   wt   = "Weight (1000 lbs)",
-#'   qsec = "1/4 mile time",
-#'   vs   = "Engine",
-#'   am   = "Transmission",
-#'   gear = "Number of forward gears",
-#'   carb = "Number of carburetors"
-#' )
-#'
+#'   dplyr::mutate(
+#'     vs   = factor(vs, labels = c("V-shaped", "straight")),
+#'     am   = factor(am, labels = c("automatic", "manual")),
+#'     cyl  = ordered(cyl),
+#'     gear = ordered(gear),
+#'     carb = ordered(carb)
+#'   ) |> Label(
+#'     mpg	 = "Miles/(US) gallon",
+#'     cyl	 = "Number of cylinders",
+#'     disp = "Displacement (cu.in.)",
+#'     hp	 = "Gross horsepower",
+#'     drat = "Rear axle ratio",
+#'     wt   = "Weight (1000 lbs)",
+#'     qsec = "1/4 mile time",
+#'     vs   = "Engine",
+#'     am   = "Transmission",
+#'     gear = "Number of forward gears",
+#'     carb = "Number of carburetors"
+#'   )
+#' 
 #' fit <- lm(mpg ~ hp * wt + vs +  am * cyl  , data = mtcars2)
-#'
+#' 
 #' # lattice::trellis.par.set(effectsTheme())
 #' lattice::trellis.par.set(bw_theme(farbe(n=5), lwd = 1))
-#'
-#' plot_allEffects(
+#' 
+#' # effects::allEffects
+#' plot_effect(
 #'   fit,
 #'   labels = get_label(mtcars2),
 #'   main = letters[1:3],  #as.roman(1:3),
@@ -278,6 +298,15 @@ plot2.default <- function(...) {
 #'   rel_widths = c(3, 4),
 #'   rel_heights = c(5, 6)
 #' )
+#' 
+#' # effects::effect()
+#' plot_effect(fit,  ~cyl * am  )
+#' 
+#' #effects::predictorEffect
+#' plot_effect(fit, predictor = ~ am * cyl)
+#' 
+#' visualize( fit, "model",mpg ~ cyl |  am)
+ 
 plot2.efflist <-
   function (x,
             main = NULL,
