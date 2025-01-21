@@ -15,7 +15,7 @@
 #'
 #' @param x 	a roc object from the roc function, or a list of roc objects.
 #' @param col,colour character. Farbe colour ist für singel 
-#' @param size numeric.  lwd
+#' @param lwd,size numeric.  lwd
 #' @param legend.position character. position 
 #' @param legacy.axes,ann.segment logical.  x-achse 0 bis 1 oder 1 bis 0,  ann.segment = annotate("segment")
 #' @param include.facet_wrap logical. facet
@@ -40,7 +40,8 @@ plotROC2 <- function(x,...,
                      ylab = "Sensitivity (TPR)",
                      xlab = if( legacy.axes) "1-Specificity (FPR)" else "Specificity (FPR)",
                      main = NULL,
-                     size = 1.2, 
+                     lwd = 1.1,
+                     size = lwd, 
                      col = NULL,
                      colour  = if (is.null(col)) "gray50" else col,
                      include.facet_wrap = FALSE,
@@ -71,7 +72,6 @@ plotROC2 <- function(x,...,
                   legacy.axes = legacy.axes) 
   }
   else{
-    
     roc_plot <-  
     pROC::ggroc(x, 
                 size = size, colour = colour,
