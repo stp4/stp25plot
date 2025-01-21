@@ -60,6 +60,74 @@ DF <-
 [![CRAN status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project.org/package=stp25stat2)
 <!-- badges: end -->
 
+
+
+
+### ROC
+
+```{r}
+require(pROC)
+```
+
+```{r, include=FALSE}
+n <- 200
+set.seed(n)
+D.ex <- rbinom(n, size = 1, prob = .5)
+
+re_scale <- function(x, min=0, max=2){
+  x <- x - min(x)
+  x <- x/max(x)
+  x <- x*(max - min)
+  
+  round(x + min, 2)
+}
+DF_roc <- data.frame(
+  Group = factor(c("Control", "Ill")[D.ex + 1]),
+  Cys = re_scale(rnorm(n, mean = D.ex, sd = .65), 18,84),
+  Glu = re_scale(exp(2 - (D.ex) - rnorm(n, mean = 0, sd = .5)), 23, 537),
+  Arg = re_scale(rnorm(n, mean = D.ex, sd = 2), 41,216),
+  Gln = re_scale(rnorm(n, mean = D.ex, sd = 1.5) + D.ex, 163,1129)
+) |> stp25tools::Label(
+  
+  Arg  = "Arginine",
+  Orn = "Ornithine",
+  Cit = "Citrulline",
+  ADMA  = "ADMA",
+  SDMA  = "SDMA",
+  Cys = "Cysteine",
+  HCys  = "Homocysteine",
+  Met.Oxi = "Met/Met-SO",
+  #Met,Met.SO
+  Glu = "Glutamate",
+  Gln = "Glutamine",
+  His = "Histidine",
+  Kyn = "Kynurenine"
+  
+)
+```
+
+
+ 
+
+```{r, fig.width=4, fig.height=4}
+# roc1 <- pROC::roc(Group ~ Glu, data = DF_roc)
+# Tbll_roc(roc1)
+# plotROC2(roc1)
+# plotROC2(Group ~ Glu, data = DF_roc, col = "red") 
+roc.list <- pROC::roc(Group ~ Glu+Gln+Arg+Cys, data = DF_roc) 
+#Tbll_roc(roc.list)
+plotROC2(roc.list)  
+
+# Oder 
+# plotROC2(Group ~ Glu + Gln + Arg + Cys, data = DF_roc) 
+
+```
+
+ 
+ 
+
+
+
 ### Likertplot
 
 Die Link-Plots habe ich in ein separates Paket ausgelagert. Dort sind auch die Funktionen zur Erstellung der Tabellen enthalten.
@@ -257,81 +325,6 @@ par(op)
 ```
 
 
-###  Sparkplot
-
-
-Stolen from http://www.motioninsocial.com/tufte/#sparklines
-
-```{r, echo=FALSE}
-set.seed(1)
-
-DF_sprk <- data.frame(
-  Laborwert = gl(7, 8,
-                 labels = c(
-                   "Albumin", "Amylase", "Lipase",
-                   "AST", "ALT","Bilirubin","C-Peptid")),
-  Treat = gl(2, 4, labels = c("Control", "Treat")),
-  Time = gl(4, 1, labels = c("t0", "t1", "t2", "t4")),
-  x = rnorm(7 * 8)
-)
-DF_sprk <- transform(DF_sprk,
-                x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
-DF_sprk1 <-  Summarise(DF_sprk, x ~ Laborwert + Time, fun=mean )
-names(DF_sprk1)[4]<- "x"
-#DF_sprk<- DF_sprk[-3]
-```
-
-
-```{r, echo=FALSE, warning=FALSE}
-#head(DF_sprk)
-#: "p", "l", "h", "b", "o", "s", "S", "r", "a", "g"
-p1 <- sparkplot(x ~ Time | Laborwert, DF_sprk1, between=1.5
-                #,char.arrows= c(down= '-', updown='', up= "+" )
-  )
- 
-col<- c("purple", "darkgreen")
-
-p2<- sparkplot(
-  x ~ Time | Laborwert,
-  DF_sprk,
-  groups = Treat,
-  between=1.5,
-  include.labels = FALSE,
-  left.padding=-5,  right.padding=3,
-  col = col ,
-  key = list(
-    corner = c(1, 1.1),
-    lines = list(col = col, lwd = 2),
-    cex = .75,
-    columns = 2,
-    text = list(levels(DF_sprk$Treat))
-  )
-  #,  char.arrows= c(down= '-', updown='', up= "+" )
-)
-
-p3 <- sparkplot(
-  x ~ Time | Laborwert,
-  DF_sprk,
-  groups = Treat,
-  type="barchart",
-  between=1.5,
-  include.labels = FALSE,
-  left.padding=-5,  right.padding=3,
-  col =  col
-  #,  char.arrows= c(down= '-', updown='', up= "+" )
-)
-#windows(8,4)
-#require(cowplot)
-plot_grid(p1,  p2,  p3,
-          nrow=1,
-          rel_widths = c(.7, .5, .5)
-)
-
-
-```
-
-
-
 ### Auto-Plot auto_plot()
 
 Die Funktion klebt lattice- plots zu einer matrix zusammen.
@@ -347,6 +340,11 @@ $y \sim a+b+c$
 
 
 https://www.zahlen-kern.de/editor/
+
+
+```{r}
+head(DF)
+```
 
 ```{r lattice-matrix-1, fig.height=5, fig.width=8}
 
@@ -587,7 +585,7 @@ p1<- xyplot(y~x1|x2,
 
 
       
-###  bwplot2
+### bwplot2
 
 Lattice bwplot mit groups. Ist eine erweiterung von lattice::bwplot. Die Funktion arbeitet mit panel.superpose.
   
@@ -978,9 +976,85 @@ x
 ```
 
 
+### Sparkplot
+
+
+Stolen from http://www.motioninsocial.com/tufte/#sparklines
+
+```{r, echo=FALSE}
+set.seed(1)
+
+DF_sprk <- data.frame(
+  Laborwert = gl(7, 8,
+                 labels = c(
+                   "Albumin", "Amylase", "Lipase",
+                   "AST", "ALT","Bilirubin","C-Peptid")),
+  Treat = gl(2, 4, labels = c("Control", "Treat")),
+  Time = gl(4, 1, labels = c("t0", "t1", "t2", "t4")),
+  x = rnorm(7 * 8)
+)
+DF_sprk <- transform(DF_sprk,
+                x = scale(x + as.numeric(Treat)*2 + as.numeric(Time) / 2))
+DF_sprk1 <-  Summarise(DF_sprk, x ~ Laborwert + Time, fun=mean )
+names(DF_sprk1)[4]<- "x"
+#DF_sprk<- DF_sprk[-3]
+```
+
+
+```{r, echo=FALSE, warning=FALSE}
+#head(DF_sprk)
+#: "p", "l", "h", "b", "o", "s", "S", "r", "a", "g"
+p1 <- sparkplot(x ~ Time | Laborwert, DF_sprk1, between=1.5
+                #,char.arrows= c(down= '-', updown='', up= "+" )
+  )
+ 
+col<- c("purple", "darkgreen")
+
+p2<- sparkplot(
+  x ~ Time | Laborwert,
+  DF_sprk,
+  groups = Treat,
+  between=1.5,
+  include.labels = FALSE,
+  left.padding=-5,  right.padding=3,
+  col = col ,
+  key = list(
+    corner = c(1, 1.1),
+    lines = list(col = col, lwd = 2),
+    cex = .75,
+    columns = 2,
+    text = list(levels(DF_sprk$Treat))
+  )
+  #,  char.arrows= c(down= '-', updown='', up= "+" )
+)
+
+p3 <- sparkplot(
+  x ~ Time | Laborwert,
+  DF_sprk,
+  groups = Treat,
+  type="barchart",
+  between=1.5,
+  include.labels = FALSE,
+  left.padding=-5,  right.padding=3,
+  col =  col
+  #,  char.arrows= c(down= '-', updown='', up= "+" )
+)
+#windows(8,4)
+#require(cowplot)
+plot_grid(p1,  p2,  p3,
+          nrow=1,
+          rel_widths = c(.7, .5, .5)
+)
+
+
+```
+
+
+
+
+
+
 ## Combine Multiple Plots
-
-
 ### patchwork
 https://patchwork.data-imaginist.com/articles/guides/layout.html
 
@@ -1935,7 +2009,7 @@ stripplot(
 
 
 
-##  Altman and Bland (Tukey Mean-Difference Plot)
+## Altman and Bland (Tukey Mean-Difference Plot)
 
 
 ```{r, include=FALSE}
@@ -2217,8 +2291,6 @@ CairoPDF( paste0(Abb()[3],"-cell-count.pdf"),  width = 7, height =  0.66*8 +.4)
   
   invisible(dev.off())
 ```
-
-
 
 
 ## Links

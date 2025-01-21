@@ -18,6 +18,59 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 status](https://www.r-pkg.org/badges/version/stp25stat2)](https://CRAN.R-project.org/package=stp25stat2)
 <!-- badges: end -->
 
+### ROC
+
+``` r
+require(pROC)
+```
+
+    ## Loading required package: pROC
+
+    ## Type 'citation("pROC")' for a citation.
+
+    ## 
+    ## Attaching package: 'pROC'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     cov, smooth, var
+
+``` r
+# roc1 <- pROC::roc(Group ~ Glu, data = DF_roc)
+# Tbll_roc(roc1)
+# plotROC2(roc1)
+# plotROC2(Group ~ Glu, data = DF_roc, col = "red") 
+roc.list <- pROC::roc(Group ~ Glu+Gln+Arg+Cys, data = DF_roc) 
+```
+
+    ## Setting levels: control = Control, case = Ill
+
+    ## Setting direction: controls > cases
+
+    ## Setting levels: control = Control, case = Ill
+
+    ## Setting direction: controls < cases
+
+    ## Setting levels: control = Control, case = Ill
+
+    ## Setting direction: controls < cases
+
+    ## Setting levels: control = Control, case = Ill
+
+    ## Setting direction: controls < cases
+
+``` r
+#Tbll_roc(roc.list)
+plotROC2(roc.list)  
+```
+
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+
+``` r
+# Oder 
+# plotROC2(Group ~ Glu + Gln + Arg + Cys, data = DF_roc) 
+```
+
 ### Likertplot
 
 Die Link-Plots habe ich in ein separates Paket ausgelagert. Dort sind
@@ -30,7 +83,13 @@ library(stp25likert)
 ``` r
 #Res1 <- Tbll_likert( ~ ., DF2[, -5])
 Res2 <- Tbll_likert(. ~ Geschlecht, DF2)
+```
 
+    ## New names:
+    ## New names:
+    ## • `` -> `...8`
+
+``` r
 likertplot(Item ~ . | Geschlecht,
            data = Res2,
             between=list(x=0), columns=5)
@@ -50,6 +109,10 @@ DF2 |> likert_plot(Magazines, Comic.books, Fiction, Newspapers,
                     horizontal=FALSE,
                     ReferenceZero = 1.5)
 ```
+
+    ## New names:
+    ## New names:
+    ## • `` -> `...7`
 
 ![](README_files/figure-gfm/likert-plot-2-1.png)<!-- -->
 
@@ -164,12 +227,6 @@ fit1 |>
 par(op)
 ```
 
-### Sparkplot
-
-Stolen from <http://www.motioninsocial.com/tufte/#sparklines>
-
-![](README_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
-
 ### Auto-Plot auto_plot()
 
 Die Funktion klebt lattice- plots zu einer matrix zusammen.
@@ -184,6 +241,18 @@ $log(a) +b +c \sim g$
 $y \sim a+b+c$
 
 <https://www.zahlen-kern.de/editor/>
+
+``` r
+head(DF)
+```
+
+    ##          n        e        o        g a treatment  sex
+    ## 1 1.739529 1.147474 4.570936 1.605641 2       UG1 male
+    ## 2 3.809496 1.981164 2.206868 1.802296 3       UG2 male
+    ## 3 3.293305 4.915539 3.220876 1.413948 3       UG2 male
+    ## 4 1.672208 4.542949 4.020865 1.050647 3       UG1 male
+    ## 5 4.775357 1.963932 4.825702 3.610156 3        KG male
+    ## 6 4.773900 4.028846 4.817246 1.968159 2       UG2 male
 
 ``` r
 DF |> auto_plot(
@@ -223,7 +292,7 @@ auto_plot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 Mehrfachantworten mit multi_barplot().
 
@@ -342,7 +411,7 @@ p1<- xyplot(y~x1|x2,
  print(p1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### bwplot2
 
@@ -456,11 +525,11 @@ moeglich - stolen from
 ```
 
     ##                     term         var level  N  estimate std.error  conf.low
-    ## (Intercept)  (Intercept) (Intercept)       NA 37.285126 1.8776273 33.450500
+    ## (Intercept)          cyl (Intercept)       NA 37.285126 1.8776273 33.450500
     ## wt                    wt          wt       32 -5.344472 0.5591010 -6.486308
     ## (Intercept)1 (Intercept) (Intercept)       NA 39.686261 1.7149840 36.178725
     ## wt1                   wt          wt       32 -3.190972 0.7569065 -4.739020
-    ## cyl                  cyl         cyl       32 -1.507795 0.4146883 -2.355928
+    ## cyl          (Intercept)         cyl       32 -1.507795 0.4146883 -2.355928
     ##               conf.high statistic      p.value  group
     ## (Intercept)  41.1197528 19.857575 8.241799e-19 model1
     ## wt           -4.2026349 -9.559044 1.293959e-10 model1
@@ -607,7 +676,7 @@ data <- data.frame(
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ### Balken mit Zahlen
 
@@ -699,7 +768,7 @@ ggplot(data,
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
     #  Geht nicht problemlos in Markdown
     print(torte(~treatment+sex, DF, init.angle=45, main="lattice"))
@@ -751,7 +820,19 @@ x
     ## 5                d-1.96s -94.02 [-115.97,  -72.07] 10.73   <0.1%
     ## 6                d+1.96s  39.02    [17.07,  60.97] 10.73  117.8%
 
-## cowplot
+### Sparkplot
+
+Stolen from <http://www.motioninsocial.com/tufte/#sparklines>
+
+![](README_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+## Combine Multiple Plots
+
+### patchwork
+
+<https://patchwork.data-imaginist.com/articles/guides/layout.html>
+
+### cowplot
 
 gridExtra::grid.arrange( )
 
@@ -975,14 +1056,14 @@ vereinfachen.
 plot( effects::allEffects(fit2) )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 ``` r
 # neue Version
 plot2( effects::allEffects(fit2) )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
 
 ``` r
 e2 <- effects::allEffects(fit2)
@@ -1013,14 +1094,14 @@ cowplot::plot_grid(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 top_row <- cowplot::plot_grid(p2[[1]], p2[[2]], labels = c('B', 'C'), label_size = 12)
 cowplot::plot_grid(top_row, p2[[3]], labels = c('', 'A'), label_size = 12, ncol = 1)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 library(multipanelfigure)
@@ -1030,7 +1111,7 @@ figure1 <- multi_panel_figure(columns = 4, rows = 2, panel_label_type = "none")
 figure1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
 
 ``` r
 figure1 %<>%
@@ -1046,7 +1127,7 @@ figure1 %<>%
 figure1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-22-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-26-2.png)<!-- -->
 
 Konfidenz-Band mit *geom_ribbon()*
 
@@ -1330,7 +1411,7 @@ p1 + p2 + p3 + p4 + plot(mydf) +
     plot_layout(ncol=2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
 
 ``` r
 require(ggeffects)
@@ -1392,7 +1473,7 @@ p1 <-plot(mydf)
 p1
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
 
 ``` r
 p1 +
@@ -1400,7 +1481,7 @@ p1 +
   theme(legend.position = "none")
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-2.png)<!-- -->
 
 ``` r
 #plot(allEffects(mod))
@@ -1411,7 +1492,7 @@ ggplot(mydf, aes(x = x, y = predicted, group =group)) +
   facet_wrap(~group)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-30-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-34-3.png)<!-- -->
 
     theme_set(theme_ggeffects())
     p1<-ggpredict(fit, "am") |>
@@ -1488,7 +1569,7 @@ emmip(pigs.lm1,
       source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
 
 ``` r
 plot(emmeans(pigs.lm2,  
@@ -1498,7 +1579,7 @@ plot(emmeans(pigs.lm2,
      )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 emmip(
@@ -1506,7 +1587,7 @@ emmip(
   source ~ percent)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
 
 ``` r
 emmip(ref_grid(pigs.lm2, 
@@ -1517,7 +1598,7 @@ emmip(ref_grid(pigs.lm2,
       )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-38-1.png)<!-- -->
 
 ### Klassiker mit Effect()
 
@@ -1744,13 +1825,13 @@ car::residualPlots(fit)
 car::marginalModelPlots(fit) 
 ```
 
-    ## Warning in mmps(...): Interactions and/or factors skipped
-
 <figure>
 <img src="README_files/figure-gfm/gof-2-1.png"
 alt="marginalModelPlots" />
 <figcaption aria-hidden="true">marginalModelPlots</figcaption>
 </figure>
+
+    ## Warning in mmps(...): Interactions and/or factors skipped
 
 ``` r
 car::avPlots(fit) 
@@ -1939,7 +2020,7 @@ legend(
 Hmisc::minor.tick(nx = 4, tick.ratio = 1 / 2)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-41-1.png)<!-- -->
 
 ## ECDF-Plot
 
@@ -2013,7 +2094,7 @@ xyplot(
 ```
 
 <figure>
-<img src="README_files/figure-gfm/unnamed-chunk-38-1.png"
+<img src="README_files/figure-gfm/unnamed-chunk-42-1.png"
 alt="Lattice xyplot mit Pfeilen und verlaufende Farben." />
 <figcaption aria-hidden="true">Lattice xyplot mit Pfeilen und
 verlaufende Farben.</figcaption>
@@ -2062,7 +2143,7 @@ segplot(
 )
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-39-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-43-1.png)<!-- -->
 
 ### Spine Plots and Spinograms
 
@@ -2072,13 +2153,20 @@ require("colorspace")
 
     ## Loading required package: colorspace
 
+    ## 
+    ## Attaching package: 'colorspace'
+
+    ## The following object is masked from 'package:pROC':
+    ## 
+    ##     coords
+
 ``` r
 ttnc <- margin.table(Titanic, c(1, 4))
  
 spineplot(ttnc, col = sequential_hcl(2, palette = "Purples 3"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-40-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-44-1.png)<!-- -->
 
 ``` r
 # require(latticeExtra)

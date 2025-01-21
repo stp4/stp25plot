@@ -10,7 +10,8 @@ plotROC2(
   ylab = "Sensitivity (TPR)",
   xlab = if (legacy.axes) "1-Specificity (FPR)" else "Specificity (FPR)",
   main = NULL,
-  size = 1.2,
+  lwd = 1.1,
+  size = lwd,
   col = NULL,
   colour = if (is.null(col)) "gray50" else col,
   include.facet_wrap = FALSE,
@@ -30,7 +31,7 @@ plotROC2(
 
 \item{ylab, xlab, main}{character.   false positive fraction = FPF}
 
-\item{size}{numeric.  lwd}
+\item{lwd, size}{numeric.  lwd}
 
 \item{col, colour}{character. Farbe colour ist für singel}
 
