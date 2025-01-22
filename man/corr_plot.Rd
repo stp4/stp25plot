@@ -5,6 +5,7 @@
 \alias{corr_plot.formula}
 \alias{corr_plot.data.frame}
 \alias{corr_pairs}
+\alias{corr_plot2}
 \title{Correlation Plot}
 \usage{
 corr_plot(x, ...)
@@ -54,6 +55,16 @@ corr_pairs(
   col.smooth = col.line,
   ...
 )
+
+corr_plot2(
+  ...,
+  main = "",
+  method = "color",
+  order = c("original", "AOE", "FPC", "hclust", "alphabet"),
+  type = c("full", "lower", "upper"),
+  diag = FALSE,
+  sig.level = 0.2
+)
 }
 \arguments{
 \item{x}{formula oder data.frame}
@@ -74,13 +85,23 @@ corr_pairs(
 
 \item{cex.cor, resize}{Fixe groese mit cex.cor, resize abhaengig von r-Wert}
 
-\item{method}{c("pearson", "kendall", "spearman")}
+\item{method}{c("circle", "square", "ellipse", "number", "shade", "color", "pie"),}
 
 \item{stars, resize, cex.cor}{correlation formatierung}
 
 \item{hist}{Histogram TRUE/FLASE}
 
 \item{col.bar, col.bar.border, col.line, col.smooth}{Farben}
+
+\item{main}{titel}
+
+\item{order}{c("original", "AOE", "FPC", "hclust", "alphabet"),}
+
+\item{type}{c("full", "lower", "upper"),}
+
+\item{diag}{FALSE,}
+
+\item{sig.level}{signifikanz}
 
 \item{smooth}{Gezeichnete Lineie}
 
@@ -114,4 +135,17 @@ corr_plot( ~ a + e + f+ b + c + d,
     dat3,
     resize = TRUE)
 
+# example code
+n <- 500
+set.seed(1)
+
+dat3 <- data.frame(a = rnorm(n)) |>
+  mutate(
+    b = a + rnorm(n),
+    c = b / 2 + rnorm(n),
+    d = c / 3 + rnorm(n),
+    e = 2 - a + rnorm(n),
+    fhshdeztrdfkjsk = e / 5  + rnorm(n)
+  )
+corr_plot2(dat3)
 }

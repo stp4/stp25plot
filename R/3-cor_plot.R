@@ -247,3 +247,93 @@ corr_pairs <- function(data,
     cex.labels=cex.labels,
     ...)
 }
+
+
+
+#' @param data  a data matrix
+#' @param main  titel
+#' @param method  c("circle", "square", "ellipse", "number", "shade", "color", "pie"),
+#' @param order   c("original", "AOE", "FPC", "hclust", "alphabet"),
+#' @param type   c("full", "lower", "upper"),
+#' @param diag  FALSE,
+#' @param sig.level signifikanz
+#' @rdname corr_plot
+#' 
+#' @export
+#' 
+#' @examples
+#' # example code
+#' n <- 500
+#' set.seed(1)
+#' 
+#' dat3 <- data.frame(a = rnorm(n)) |>
+#'   mutate(
+#'     b = a + rnorm(n),
+#'     c = b / 2 + rnorm(n),
+#'     d = c / 3 + rnorm(n),
+#'     e = 2 - a + rnorm(n),
+#'     fhshdeztrdfkjsk = e / 5  + rnorm(n)
+#'   )
+#' corr_plot2(dat3)
+corr_plot2 <- function(...,
+                       main = "",
+                       method = "color",
+                       order = c("original", "AOE", "FPC", "hclust", "alphabet"),
+                       type = c("full", "lower", "upper"),
+                       diag = FALSE,
+                       mar = c(1, 1, 1, 1),
+                       sig.level = 0.2) {
+  X <- stp25tools::prepare_data2(...)
+  data <- stp25tools::dapply2(X$data) |> as.matrix()
+  cor_matrix <- Hmisc::rcorr(data)
+  
+  
+  if (length(method) == 1)
+    corrplot::corrplot(
+      cor_matrix$r,
+      order = order,
+      method =  method,
+      type = type,
+      diag = diag,
+      tl.col = "black",
+      
+      number.digits = 2,
+      # tl.cex=0.7,tl.srt=45,
+      p.mat = cor_matrix$P,
+      insig = "blank",
+      sig.level = sig.level,
+      mar = mar,
+      title = main
+    )
+  else
+    corrplot::corrplot.mixed(
+      cor_matrix$r,
+      diag = 'n',
+      upper =  "color",
+      lower = "number",
+      
+      #  tl.pos = c("d", "lt", "n"),
+      #  diag = c("n", "l", "u"),
+      bg = "white",
+      #  addgrid.col = "grey",
+      lower.col = 1,
+      
+      #plotCI = c("n", "square", "circle", "rect"),
+      
+      # order = order,
+      #  method = method,
+      #   type=type,
+      # diag=diag,
+      tl.col = "black",
+      # tl.cex=0.7,tl.srt=45,
+      #   p.mat = cor_matrix$P,
+      #   insig = "blank",
+      #  sig.level = sig.level,
+     mar =mar,
+      title = main
+      
+    )
+  
+  
+}
+
