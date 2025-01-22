@@ -257,9 +257,14 @@ multi_av_plot <- function(data,
                           labels.logical,
                           ...) {
   z <-  group.vars[1]
+  if (group.class[1] == "logical") {
+    data[[z]] <- factor(data[[z]], levels.logical, labels.logical)
+    group.class[1] <- "factor"
+  }
   res <- list()
   stack <- FALSE
   
+ # print(z)
   for (i in seq.int(length(measure.vars))) {
     y <- measure.vars[i]
    
@@ -366,6 +371,7 @@ multi_av_plot <- function(data,
       else{}
     }
     else{
+   
       if (group.class[1] == "factor") {
         
         if (measure[i] %in% c("numeric", "box")) {
@@ -795,22 +801,7 @@ marginal_plot <- function(...,
   
 }
 
-# enviro |>
-#   marginal_plot(
-#     ozone,
-#     radiation,
-#     is.windy,
-#     wind,
-#     smell,
-#     by =  ~ temperature,
-#     auto.key = list(lines = TRUE, title = "Temp")
-#   )
 
-# auto_plot(Patient2,     tmsTCPC,
-#           hmdyn,
-#           prtnl,
-#           clltr,
-#           by = ~ risk.score,
-#           include.percent=TRUE
-# 
-# )
+
+
+
