@@ -158,7 +158,8 @@ auto_plot.default <- function(...,
   if (is.null(X$group.vars) |
       (length(X$group.vars) == 1) |
       (length(X$measure.vars) > length(X$group.vars))) {
-    #  cat("\nmulti_av_plot\n")
+   # print("hallo")
+ 
     res <- multi_av_plot(
       X$data,
       X$measure.vars,
@@ -256,8 +257,10 @@ multi_av_plot <- function(data,
                           levels.logical,
                           labels.logical,
                           ...) {
+ # cat("\n  multi_av_plot\n")
+ # print(group.vars)
   z <-  group.vars[1]
-  if (group.class[1] == "logical") {
+  if ( !is.null(group.vars)) if(group.class[1] == "logical") {
     data[[z]] <- factor(data[[z]], levels.logical, labels.logical)
     group.class[1] <- "factor"
   }
