@@ -59,11 +59,13 @@ corr_pairs(
 corr_plot2(
   ...,
   main = "",
+  type = "pearson",
+  sig.level = NULL,
+  r.level = 0.1,
+  mar = c(1, 1, 1, 1),
+  include.order = FALSE,
   method = "color",
-  order = c("original", "AOE", "FPC", "hclust", "alphabet"),
-  type = c("full", "lower", "upper"),
-  diag = FALSE,
-  sig.level = 0.2
+  col = RColorBrewer::brewer.pal(100, "RdBu")
 )
 }
 \arguments{
@@ -95,19 +97,21 @@ corr_plot2(
 
 \item{main}{titel}
 
-\item{order}{c("original", "AOE", "FPC", "hclust", "alphabet"),}
-
 \item{type}{c("full", "lower", "upper"),}
 
-\item{diag}{FALSE,}
-
 \item{sig.level}{signifikanz}
+
+\item{col}{RColorBrewer::brewer.pal(100, 'RdBu')}
 
 \item{smooth}{Gezeichnete Lineie}
 
 \item{digits}{Nachkommastellen in plot}
 
 \item{stars}{Sternchen}
+
+\item{order}{c("original", "AOE", "FPC", "hclust", "alphabet"),}
+
+\item{diag}{FALSE,}
 }
 \value{
 nix
@@ -116,36 +120,38 @@ nix
 Function for making a correlation plot starting from a  formula and a data.frame
 }
 \examples{
-
-require(stp25plot)
-require(stp25tools)
+#' 
+# require(stp25plot)
+# require(stp25tools)
 require(tidyverse)
-n <- 50
-
-dat3 <- data.frame(a = rnorm(n)) |>
-  mutate(
-    b = a + rnorm(n),
-    c = b + rnorm(n),
-    d = c + rnorm(n),
-    e = d + rnorm(n),
-    f = e + rnorm(n)
-  )
-
-corr_plot( ~ a + e + f+ b + c + d, 
-    dat3,
-    resize = TRUE)
-
-# example code
 n <- 500
 set.seed(1)
 
-dat3 <- data.frame(a = rnorm(n)) |>
+dat<- 
+  data.frame(
+    a = rnorm(n)) |>
   mutate(
     b = a + rnorm(n),
     c = b / 2 + rnorm(n),
     d = c / 3 + rnorm(n),
     e = 2 - a + rnorm(n),
-    fhshdeztrdfkjsk = e / 5  + rnorm(n)
+    f = e / 5  + rnorm(n)
   )
-corr_plot2(dat3)
+
+# cor(dat)
+# cor_matrix <- Hmisc::rcorr(dat)
+corr_plot( ~ a + e + f+ b + c + d,
+           dat,
+           resize=FALSE)
+
+corr_plot2(dat)
+
+#par(mfrow= c(1,2))
+corr_plot2(dat, main = "patient", sig.level = .2)
+corr_plot2(dat, main = "patient", 
+           r.level = .2, 
+           type="spearman",
+           order = TRUE
+) 
+
 }

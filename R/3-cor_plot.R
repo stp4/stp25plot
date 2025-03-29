@@ -9,24 +9,39 @@
 #' @export
 #'
 #' @examples
-#' 
-#' require(stp25plot)
-#' require(stp25tools)
+#' #' 
+#' # require(stp25plot)
+#' # require(stp25tools)
 #' require(tidyverse)
-#' n <- 50
+#' n <- 500
+#' set.seed(1)
 #' 
-#' dat3 <- data.frame(a = rnorm(n)) |>
+#' dat<- 
+#'   data.frame(
+#'     a = rnorm(n)) |>
 #'   mutate(
 #'     b = a + rnorm(n),
-#'     c = b + rnorm(n),
-#'     d = c + rnorm(n),
-#'     e = d + rnorm(n),
-#'     f = e + rnorm(n)
+#'     c = b / 2 + rnorm(n),
+#'     d = c / 3 + rnorm(n),
+#'     e = 2 - a + rnorm(n),
+#'     f = e / 5  + rnorm(n)
 #'   )
 #' 
-#' corr_plot( ~ a + e + f+ b + c + d, 
-#'     dat3,
-#'     resize = TRUE)
+#' # cor(dat)
+#' # cor_matrix <- Hmisc::rcorr(dat)
+#' corr_plot( ~ a + e + f+ b + c + d,
+#'            dat,
+#'            resize=FALSE)
+#' 
+#' corr_plot2(dat)
+#' 
+#' #par(mfrow= c(1,2))
+#' corr_plot2(dat, main = "patient", sig.level = .2)
+#' corr_plot2(dat, main = "patient", 
+#'            r.level = .2, 
+#'            type="spearman",
+#'            order = TRUE
+#' ) 
 #' 
 corr_plot <- function(x, ...){
   UseMethod("corr_plot")
@@ -257,53 +272,78 @@ corr_pairs <- function(data,
 #' @param type   c("full", "lower", "upper"),
 #' @param diag  FALSE,
 #' @param sig.level signifikanz
+#' @param col  RColorBrewer::brewer.pal(100, 'RdBu')
+#' 
 #' @rdname corr_plot
 #' 
 #' @export
 #' 
-#' @examples
-#' # example code
-#' n <- 500
-#' set.seed(1)
-#' 
-#' dat3 <- data.frame(a = rnorm(n)) |>
-#'   mutate(
-#'     b = a + rnorm(n),
-#'     c = b / 2 + rnorm(n),
-#'     d = c / 3 + rnorm(n),
-#'     e = 2 - a + rnorm(n),
-#'     fhshdeztrdfkjsk = e / 5  + rnorm(n)
-#'   )
-#' corr_plot2(dat3)
 corr_plot2 <- function(...,
                        main = "",
-                       method = "color",
-                       order = c("original", "AOE", "FPC", "hclust", "alphabet"),
-                       type = c("full", "lower", "upper"),
-                       diag = FALSE,
+                       type = "pearson",
+                       sig.level = NULL,
+                       r.level = 0.10,
                        mar = c(1, 1, 1, 1),
-                       sig.level = 0.2) {
+                       include.order =  FALSE,
+                       method = "color",
+                       col = RColorBrewer::brewer.pal(100, 'RdBu')
+                       ) {
   X <- stp25tools::prepare_data2(...)
-  data <- stp25tools::dapply2(X$data) |> as.matrix()
-  cor_matrix <- Hmisc::rcorr(data)
+ # data <- stp25tools::dapply2(X$data) |> as.matrix()
+  
+  data <-
+    as.matrix(data.frame(plyr::llply(X$data, as.numeric)))
+  
+  cor_matrix <- Hmisc::rcorr(data, type = type)
   
   
+  if(is.logical(include.order)){
+  if(include.order){
+   ordr <- order(colSums(abs(cor_matrix$r)), decreasing = TRUE)
+ #  print(ordr)
+   cor_matrix$r <- cor_matrix$r[ordr, ordr]
+   cor_matrix$P <- cor_matrix$P[ordr, ordr]
+   X$row_name <- X$row_name[ordr]
+  }
+    
+  }else if (is.numeric(include.order)){
+    ordr <-  include.order
+    cor_matrix$r <- cor_matrix$r[ordr, ordr]
+    cor_matrix$P <- cor_matrix$P[ordr, ordr]
+    X$row_name <- X$row_name[ordr]
+    
+    }
+  
+  
+  if (is.null(sig.level)) {
+    pmat <-  1 - abs(cor_matrix$r)
+    sig.level <- 1 - r.level
+  }
+  else{
+    pmat <- cor_matrix$P
+  }
+  
+ if(! all( colnames(cor_matrix$r) ==names(X$row_name))) stop("Schwerer fehler bei den Labels!")
+
+  colnames(pmat) <- colnames(cor_matrix$r) <- as.character(X$row_name)
+  rownames(pmat) <- rownames(cor_matrix$r) <- as.character(X$row_name)
+  
+  
+  # https://github.com/taiyun/corrplot
+  #
   if (length(method) == 1)
     corrplot::corrplot(
       cor_matrix$r,
-      order = order,
-      method =  method,
-      type = type,
-      diag = diag,
+          order = "original",
+          method = "color",
+          type = "full",
+          diag = FALSE,
       tl.col = "black",
-      
-      number.digits = 2,
-      # tl.cex=0.7,tl.srt=45,
-      p.mat = cor_matrix$P,
+      p.mat = pmat,
       insig = "blank",
       sig.level = sig.level,
       mar = mar,
-      title = main
+      title = main, col=col
     )
   else
     corrplot::corrplot.mixed(
@@ -311,7 +351,10 @@ corr_plot2 <- function(...,
       diag = 'n',
       upper =  "color",
       lower = "number",
-      
+      col =col,
+      p.mat = pmat,
+      insig = "blank",
+      sig.level = sig.level,
       #  tl.pos = c("d", "lt", "n"),
       #  diag = c("n", "l", "u"),
       bg = "white",
@@ -329,7 +372,7 @@ corr_plot2 <- function(...,
       #   p.mat = cor_matrix$P,
       #   insig = "blank",
       #  sig.level = sig.level,
-     mar =mar,
+      mar = mar,
       title = main
       
     )
