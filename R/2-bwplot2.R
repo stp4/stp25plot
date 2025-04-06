@@ -55,26 +55,36 @@
 #'     lattice::panel.abline(v = 0, lty = 3, col = "gray80")
 #'   }
 #'   )
+bwplot2 <- function (x, data, ...)
+    UseMethod("bwplot2")
 
-bwplot2 <- function(...,
-                    xlab = NULL,
-                    ylab = NULL,
-                    auto.key = list(),
-                    box.width = 1 / 4,
-                    space_between = 1.2,
-                    par.settings = list(
-                      superpose.symbol = list(
-                        fill = 
-                          lattice::trellis.par.get()$superpose.symbol$col)),
-                    panel = function(...) {
-                      dots <- list(...)
-                      lattice::panel.superpose(
-                        ...,
-                        space_between = space_between,
-                        nlevels = nlevels(dots$groups))
-                    },
-                    panel.groups = panel.bwplot.groups) {
-  
+#' @rdname bwplot2
+#' @method bwplot2 data.frame
+#' @export
+bwplot2.data.frame <- function (data, x , ...) {
+    bwplot2.formula(x, data, ...)
+  }
+
+
+#' @rdname bwplot2
+#' @method bwplot2 formula
+#' @export
+bwplot2.formula <- function(...,
+                            xlab = NULL,
+                            ylab = NULL,
+                            auto.key = list(),
+                            box.width = 1 / 4,
+                            space_between = 1.2,
+                            par.settings = list(
+                              superpose.symbol = 
+                                list(fill =lattice::trellis.par.get()$superpose.symbol$col)),
+                            panel = function(...) {
+                              dots <- list(...)
+                              lattice::panel.superpose(...,
+                                                       space_between = space_between,
+                                                       nlevels = nlevels(dots$groups))
+                            },
+                            panel.groups = panel.bwplot.groups) {
   lattice::bwplot(
     ...,
     xlab = xlab,
@@ -87,6 +97,8 @@ bwplot2 <- function(...,
   )
   
 }
+ 
+
 #' @rdname bwplot2
 #' @details Die Funktion kann nicht mit den 
 #' funktionen von lattice kombiniert werden.

@@ -2,6 +2,8 @@
 
 S3method(auto_plot,default)
 S3method(auto_plot,lm)
+S3method(bwplot2,data.frame)
+S3method(bwplot2,formula)
 S3method(corr_plot,data.frame)
 S3method(corr_plot,formula)
 S3method(forest_plot,data.frame)

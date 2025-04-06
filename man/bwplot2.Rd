@@ -2,10 +2,16 @@
 % Please edit documentation in R/2-bwplot2.R
 \name{bwplot2}
 \alias{bwplot2}
+\alias{bwplot2.data.frame}
+\alias{bwplot2.formula}
 \alias{panel.bwplot.groups}
 \title{bwplot2}
 \usage{
-bwplot2(
+bwplot2(x, data, ...)
+
+\method{bwplot2}{data.frame}(data, x, ...)
+
+\method{bwplot2}{formula}(
   ...,
   xlab = NULL,
   ylab = NULL,
